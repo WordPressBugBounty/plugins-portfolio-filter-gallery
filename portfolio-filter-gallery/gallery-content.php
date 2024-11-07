@@ -265,70 +265,92 @@ while ( $loop->have_posts() ) : $loop->the_post();
 endwhile;
 wp_reset_query(); ?>
 <script>
-
-setTimeout(function () {
-	jQuery(".thumbnail_<?php echo $pf_gallery_id; ?>").each(function(){
-		// console.log(jQuery(this).width() + "x" + jQuery(this).height())
-		var h = jQuery(this).height();
-		var w = jQuery(this).width();
-		jQuery(this).height(h);
-		jQuery(this).width(w);
-		jQuery(this).resize();
-	});
-}, 2500);
-
 jQuery(document).ready(function (jQuery) {
-	jQuery('.filtr-item').addClass('animateonload');
-	jQuery('#filter_gallery_<?php echo esc_js($pf_gallery_id); ?>').show();
-	jQuery('.loading-wrapper').hide();
-	jQuery(".loader_img").hide();
-	jQuery(".lg_load_more").show();
-	jQuery(".filtr-container").css("opacity", 1);
-	//Filterizd Default options
-	options = {
-		animationDuration: 0.5,
-		callbacks: {
-			onFilteringStart: function() { },
-			onFilteringEnd: function() { },
-			onShufflingStart: function() { },
-			onShufflingEnd: function() { },
-			onSortingStart: function() { },
-			onSortingEnd: function() { }
-		},
-		controlsSelector: '.filtr-controls-<?php echo esc_js($pf_gallery_id); ?>',
-		filter: 'all',
-		 filterOutCss: {
-		  top:'0px',
-			left:'0px',
-			opacity: 0.001,
-			transform: ''
-		  },
-		  filterInCss: {
-			  top:'0px',
-			left:'0px',
-			opacity: 1,
-			transform: ''
-		  },
-		layout: 'sameWidth',
-		selector: '.filtr-item',
-		setupControls: false
-	}
-	var filterizd = jQuery('.filter_gallery_<?php echo esc_js($pf_gallery_id); ?>').filterizr(options);
-	//filterizd.filterizr('sort', 'domIndex', 'desc');
-	jQuery('.filter_gallery_<?php echo $pf_gallery_id; ?>').imagesLoaded( function() {
-		// images have already loaded, instantiate Filterizr
-		jQuery('.filter_gallery_<?php echo $pf_gallery_id; ?>').filterizr(options);
-	}); 
-	<?php 
-	if ( $sort_by_title == "asc" ) { ?>
-		// Sort by title
-		filterizd.filterizr('sort', 'sortData', 'asc');
-		<?php
-	} if ( $sort_by_title == "desc" ) { ?>
-		// Sort by decending order
-		filterizd.filterizr('sort', 'sortData', 'desc');
+    jQuery('.filtr-item').addClass('animateonload');
+    jQuery('#filter_gallery_<?php echo esc_js($pf_gallery_id); ?>').show();
+    jQuery('.loading-wrapper').hide();
+    jQuery(".loader_img").hide();
+    jQuery(".lg_load_more").show();
+    jQuery(".filtr-container").css("opacity", 1);
+
+    // Define Filterizr Default Options
+    const options = {
+        animationDuration: 0.5,
+        callbacks: {
+            onFilteringStart: function() {
+                // Apply sorting shortly after filtering starts
+                setTimeout(function() {
+                    <?php if ($sort_by_title == "asc") { ?>
+                        filterizd.filterizr('sort', 'sortData', 'asc');
+                    <?php } else if ($sort_by_title == "desc") { ?>
+                        filterizd.filterizr('sort', 'sortData', 'desc');
+                    <?php } ?>
+                }, 50);
+            },
+            onFilteringEnd: function() {
+                // Apply sorting shortly after filtering ends
+                setTimeout(function() {
+                    <?php if ($sort_by_title == "asc") { ?>
+                        filterizd.filterizr('sort', 'sortData', 'asc');
+                    <?php } else if ($sort_by_title == "desc") { ?>
+                        filterizd.filterizr('sort', 'sortData', 'desc');
+                    <?php } ?>
+                }, 50);
+            },
+            onShufflingStart: function() { },
+            onShufflingEnd: function() { },
+            onSortingStart: function() { },
+            onSortingEnd: function() { }
+        },
+        controlsSelector: '.filtr-controls-<?php echo esc_js($pf_gallery_id); ?>',
+        filter: 'all',
+        filterOutCss: {
+            top: '0px',
+            left: '0px',
+            opacity: 0.001,
+            transform: ''
+        },
+        filterInCss: {
+            top: '0px',
+            left: '0px',
+            opacity: 1,
+            transform: ''
+        },
+        layout: 'sameWidth',
+        selector: '.filtr-item',
+        setupControls: false
+    };
+
+    // Initialize Filterizr and ensure it is globally accessible
+    window.filterizd = jQuery('.filter_gallery_<?php echo esc_js($pf_gallery_id); ?>').filterizr(options);
+
+    jQuery('.filter_gallery_<?php echo $pf_gallery_id; ?>').imagesLoaded(function() {
+        // Reapply sorting after initial load
+        <?php if ($sort_by_title == "asc") { ?>
+            filterizd.filterizr('sort', 'sortData', 'asc');
+        <?php } else if ($sort_by_title == "desc") { ?>
+            filterizd.filterizr('sort', 'sortData', 'desc');
+        <?php } ?>
+
+        // Resize handling
+        jQuery(window).resize(function() {
+            jQuery(".thumbnail_<?php echo $pf_gallery_id; ?>").each(function() {
+                var h = jQuery(this).height();
+                var w = jQuery(this).width();
+                jQuery(this).height(h);
+                jQuery(this).width(w);
+            });
+
+            // Reapply sorting after resizing
+            <?php if ($sort_by_title == "asc") { ?>
+                filterizd.filterizr('sort', 'sortData', 'asc');
+            <?php } else if ($sort_by_title == "desc") { ?>
+                filterizd.filterizr('sort', 'sortData', 'desc');
+            <?php } ?>
+        });
+    });
+
 	<?php
-	}  
 	if ( $hide_filters == 0 ) {
 		if ( $sort_filter_order == 1 ) { ?>
 			/* Sort li to alphabetically: */
@@ -388,7 +410,6 @@ jQuery(document).ready(function (jQuery) {
 		
 		<?php 
 		} ?>
-	
 
 	// video player
 	jQuery(function(){
