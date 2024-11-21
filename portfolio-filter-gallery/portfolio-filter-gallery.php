@@ -5,7 +5,7 @@ if (!defined('ABSPATH'))
 Plugin Name: Portfolio Filter Gallery
 Plugin URI: http://awplife.com/
 Description: Portfolio Filter Gallery For WordPress.
-Version: 1.6.8
+Version: 1.6.9
 Author: A WP Life
 Author URI: http://awplife.com/
 License: GPLv2 or later
@@ -25,7 +25,7 @@ if (!class_exists('Awl_Portfolio_Filter_Gallery')) {
 
 		protected function _constants() {
 			//Plugin Version
-			define('PFG_PLUGIN_VER', '1.6.8');
+			define('PFG_PLUGIN_VER', '1.6.9');
 
 			//Plugin Name
 			define('PFG_PLUGIN_NAME', __('Portfolio Filter Gallery', 'portfolio-filter-gallery'));
@@ -307,7 +307,6 @@ if (!class_exists('Awl_Portfolio_Filter_Gallery')) {
 						
 					</p>
 				</div>
-
 				
 				<a href="<?php echo esc_url( self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=ultimate-portfolio&TB_iframe=true&width=772&height=878' ) ); ?>"  class="pfg-btn button button-primary thickbox"
 					style="background: #496481; text-shadow: none;"><span class="dashicons dashicons-download"
@@ -366,8 +365,6 @@ if (!class_exists('Awl_Portfolio_Filter_Gallery')) {
 				if ( is_admin() ) {
 					add_thickbox(); // Enqueue Thickbox
 				}
-			
-			
 
 			require_once('filter-gallery-settings.php');
 		}// end of upload multiple image
@@ -450,11 +447,11 @@ if (!class_exists('Awl_Portfolio_Filter_Gallery')) {
 						<?php
 						foreach ($all_category as $key => $value) {
 							if ($key != 0) {
-								?><strong>
+								?>
 									<option value="<?php echo esc_attr($key); ?>">
 										<?php echo stripslashes(esc_html($value)); ?>
 									</option>
-								</strong>
+								
 								<?php
 							}
 						}

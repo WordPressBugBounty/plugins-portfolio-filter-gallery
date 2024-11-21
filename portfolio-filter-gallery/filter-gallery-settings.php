@@ -177,14 +177,14 @@ echo "</pre>";*/
 										<?php
 										foreach ($all_category as $key => $value) {
 											if ($key != 0) {
-												?><strong>
+												?>
 													<option value="<?php echo esc_attr($key); ?>" <?php if (count($selected_filters_array)) {
 														   if (in_array($key, $selected_filters_array))
 															   echo "selected=selected";
 													   } ?>>
 														<?php echo stripslashes(esc_html($value)); ?>
 													</option>
-												</strong>
+												
 												<?php
 											}
 										}

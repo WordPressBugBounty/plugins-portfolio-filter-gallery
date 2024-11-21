@@ -3,9 +3,9 @@ Contributors: awordpresslife, razipathhan, hanif0991, muhammadshahid, fkfaisalkh
 Donate link: https://paypal.me/awplife
 Tags: portfolio, gallery, portfolio gallery, responsive, wordpress portfolio plugin
 Requires at least: 3.2
-Tested up to: 6.6.2
+Tested up to: 6.7
 Requires PHP: 5.4
-Stable tag: 1.6.8
+Stable tag: 1.6.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -180,6 +180,10 @@ After uploading the images choose the image type = (video) from the select box b
 * Open the post/page you want to display the gallery. Paste your gallery shortcode into text editor and press plublish button to show your gallery or Instagram feed. You can also show the gallery in widget like page or post just paste your shortcode into text widget and your gallery is ready to show.
 
 == Changelog ==
+
+= 1.6.9 =
+* Filter selecet box error fix.
+* Tested with WordPress version 6.7
 
 = 1.6.8 =
 * Alphabatic image sorting issue fixed.
