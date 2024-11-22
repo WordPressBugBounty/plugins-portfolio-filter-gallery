@@ -265,6 +265,18 @@ while ( $loop->have_posts() ) : $loop->the_post();
 endwhile;
 wp_reset_query(); ?>
 <script>
+
+setTimeout(function () {
+	jQuery(".thumbnail_<?php echo $pf_gallery_id; ?>").each(function(){
+		// console.log(jQuery(this).width() + "x" + jQuery(this).height())
+		var h = jQuery(this).height();
+		var w = jQuery(this).width();
+		jQuery(this).height(h);
+		jQuery(this).width(w);
+		jQuery(this).resize();
+	});
+}, 2500);
+
 jQuery(document).ready(function (jQuery) {
     jQuery('.filtr-item').addClass('animateonload');
     jQuery('#filter_gallery_<?php echo esc_js($pf_gallery_id); ?>').show();
