@@ -632,6 +632,6 @@ if (isset($_POST['action'])) {
 		class="pfg-btn button-primary button-hero">Buy Premium Version</a>
 	<a href="https://awplife.com/demo/portfolio-filter-gallery-premium/" target="_blank"
 		class="pfg-btn button-primary button-hero">Check Live Demo</a>
-	<a href="https://awplife.com/demo/portfolio-filter-gallery-premium-admin-demo/" target="_blank"
+	<a href="https://awplife.com/demo/portfolio-filter-gallery-premium/how-to-test-the-premium-plugin/" target="_blank"
 		class="pfg-btn button-primary button-hero ">Try Before Buy</a>
 </div>

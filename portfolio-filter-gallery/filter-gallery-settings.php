@@ -1200,10 +1200,10 @@ echo "</pre>";*/
 							class="dashicons dashicons-arrow-right-alt" style="line-height:45px"></span>
 						<?php _e('Check Live Demo', 'portfolio-filter-gallery'); ?>
 					</a>
-					<a href="http://awplife.com/demo/portfolio-filter-gallery-premium-admin-demo" target="_blank"
+					<a href="https://awplife.com/demo/portfolio-filter-gallery-premium/how-to-test-the-premium-plugin/" target="_blank"
 						class="pfg-btn button button-primary button-hero load-customize hide-if-no-customize"> <span
 							class="dashicons dashicons-arrow-right-alt" style="line-height:45px"></span>
-						<?php _e('Try Admin Demo', 'portfolio-filter-gallery'); ?>
+						<?php _e('Try Before Buy', 'portfolio-filter-gallery'); ?>
 					</a>
 				</p>
 				<hr>

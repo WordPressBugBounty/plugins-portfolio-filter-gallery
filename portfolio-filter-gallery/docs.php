@@ -57,7 +57,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				<br>
 				<a href="http://awplife.com/account/signup/portfolio-filter-gallery" target="_blank" class="pfg-btn button-primary button-hero load-customize hide-if-no-customize"> Buy Premium Version </a>
 				<a href="http://awplife.com/demo/portfolio-filter-gallery-premium/" target="_blank" class="pfg-btn button-primary button-hero load-customize hide-if-no-customize"> Check Live Demo </a>
-				<a href="http://awplife.com/demo/portfolio-filter-gallery-premium-admin-demo" target="_blank" class="pfg-btn button-primary button-hero load-customize hide-if-no-customize"> Try Admin Demo </a>
+				<a href="https://awplife.com/demo/portfolio-filter-gallery-premium/how-to-test-the-premium-plugin/" target="_blank" class="pfg-btn button-primary button-hero load-customize hide-if-no-customize"> Try Admin Demo </a>
 			</p>
 	</div>
 </div>
