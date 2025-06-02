@@ -2,10 +2,10 @@
 Contributors: awordpresslife, razipathhan, hanif0991, muhammadshahid, fkfaisalkhan007, sharikkhan007, zishlife, FARAZFRANK
 Donate link: https://paypal.me/awplife
 Tags: portfolio, gallery, portfolio gallery, responsive, wordpress portfolio plugin
-Requires at least: 3.2
-Tested up to: 6.8
-Requires PHP: 5.4
-Stable tag: 1.7.2
+Requires at least: 5
+Tested up to: 6.8.1
+Requires PHP: 7
+Stable tag: 1.7.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
