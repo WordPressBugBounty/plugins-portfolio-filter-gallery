@@ -5,7 +5,7 @@ if (!defined('ABSPATH'))
 Plugin Name: Portfolio Filter Gallery
 Plugin URI: http://awplife.com/
 Description: Portfolio Filter Gallery For WordPress.
-Version: 1.7.3
+Version: 1.7.4
 Author: A WP Life
 Author URI: http://awplife.com/
 License: GPLv2 or later
@@ -25,10 +25,10 @@ if (!class_exists('Awl_Portfolio_Filter_Gallery')) {
 
 		protected function _constants() {
 			//Plugin Version
-			define('PFG_PLUGIN_VER', '1.7.3');
+			define('PFG_PLUGIN_VER', '1.7.4');
 
 			//Plugin Name
-			define('PFG_PLUGIN_NAME', __('Portfolio Filter Gallery', 'portfolio-filter-gallery'));
+			define('PFG_PLUGIN_NAME', 'Portfolio Filter Gallery' );
 
 			//Plugin Slug
 			define('PFG_PLUGIN_SLUG', 'awl_filter_gallery');
