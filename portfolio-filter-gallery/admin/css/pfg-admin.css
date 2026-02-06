@@ -1,0 +1,1228 @@
+/**
+ * Portfolio Filter Gallery - Admin Styles
+ * Modern, clean admin UI
+ * 
+ * @package Portfolio_Filter_Gallery
+ * @version 2.0.0
+ */
+
+/* ==========================================================================
+   CSS Variables
+   ========================================================================== */
+
+:root {
+    --pfg-primary: #3858e9;
+    --pfg-primary-hover: #2945c9;
+    --pfg-primary-light: rgba(56, 88, 233, 0.1);
+    --pfg-success: #10b981;
+    --pfg-warning: #f59e0b;
+    --pfg-error: #ef4444;
+    --pfg-text: #1e293b;
+    --pfg-text-muted: #64748b;
+    --pfg-text-light: #94a3b8;
+    --pfg-bg: #f8fafc;
+    --pfg-card-bg: #ffffff;
+    --pfg-border: #e2e8f0;
+    --pfg-border-light: #f1f5f9;
+    --pfg-radius: 8px;
+    --pfg-radius-lg: 12px;
+    --pfg-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --pfg-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --pfg-transition: 0.2s ease;
+}
+
+/* ==========================================================================
+   General Layout
+   ========================================================================== */
+
+.meta-box-sortables select {
+    max-width: fit-content !important;
+}
+
+.pfg-admin-wrap {
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.pfg-admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--pfg-border);
+}
+
+.pfg-admin-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--pfg-text);
+    margin: 0;
+}
+
+.pfg-admin-subtitle {
+    color: var(--pfg-text-muted);
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* ==========================================================================
+   Cards
+   ========================================================================== */
+
+.pfg-card {
+    background: var(--pfg-card-bg);
+    border-radius: var(--pfg-radius-lg);
+    box-shadow: var(--pfg-shadow);
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.pfg-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--pfg-border-light);
+}
+
+.pfg-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--pfg-text);
+    margin: 0;
+}
+
+.pfg-card-description {
+    color: var(--pfg-text-muted);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   Tabs
+   ========================================================================== */
+
+.pfg-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--pfg-border);
+    margin-bottom: 24px;
+}
+
+.pfg-tab {
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    color: var(--pfg-text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all var(--pfg-transition);
+}
+
+.pfg-tab:hover {
+    color: var(--pfg-text);
+}
+
+.pfg-tab.active,
+.pfg-tab:focus {
+    color: var(--pfg-primary);
+    border-bottom-color: var(--pfg-primary);
+    outline: none;
+}
+
+.pfg-tab-content {
+    display: none;
+}
+
+.pfg-tab-content.active {
+    display: block;
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+
+.pfg-form-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--pfg-border-light);
+}
+
+.pfg-form-row:last-child {
+    border-bottom: none;
+}
+
+.pfg-form-label {
+    font-weight: 500;
+    color: var(--pfg-text);
+    padding-top: 8px;
+}
+
+.pfg-form-label small {
+    display: block;
+    font-weight: 400;
+    color: var(--pfg-text-muted);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.pfg-input,
+.pfg-select,
+.pfg-textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 14px;
+    border: 1px solid var(--pfg-border);
+    border-radius: var(--pfg-radius);
+    font-size: 14px;
+    color: var(--pfg-text);
+    background: var(--pfg-card-bg);
+    transition: border-color var(--pfg-transition), box-shadow var(--pfg-transition);
+}
+
+.pfg-input:focus,
+.pfg-select:focus,
+.pfg-textarea:focus {
+    outline: none;
+    border-color: var(--pfg-primary);
+    box-shadow: 0 0 0 3px var(--pfg-primary-light);
+}
+
+.pfg-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.pfg-select {
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="%2364748b" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Toggle switch */
+.pfg-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+}
+
+.pfg-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.pfg-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--pfg-border);
+    border-radius: 26px;
+    transition: background var(--pfg-transition);
+}
+
+.pfg-toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform var(--pfg-transition);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.pfg-toggle input:checked + .pfg-toggle-slider {
+    background: var(--pfg-primary);
+}
+
+.pfg-toggle input:checked + .pfg-toggle-slider::before {
+    transform: translateX(22px);
+}
+
+.pfg-toggle input:focus + .pfg-toggle-slider {
+    box-shadow: 0 0 0 3px var(--pfg-primary-light);
+}
+
+/* Color picker */
+.pfg-color-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pfg-color-preview {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--pfg-radius);
+    border: 1px solid var(--pfg-border);
+    cursor: pointer;
+}
+
+/* Range slider */
+.pfg-range {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pfg-range input[type="range"] {
+    flex: 1;
+    max-width: 200px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--pfg-border);
+    appearance: none;
+}
+
+.pfg-range input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--pfg-primary);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pfg-range-value {
+    min-width: 40px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--pfg-text-muted);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.pfg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: var(--pfg-radius);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--pfg-transition);
+}
+
+.pfg-btn-primary {
+    background: var(--pfg-primary);
+    color: white;
+}
+
+.pfg-btn-primary:hover {
+    background: var(--pfg-primary-hover);
+}
+
+.pfg-btn-secondary {
+    background: var(--pfg-bg);
+    color: var(--pfg-text);
+    border: 1px solid var(--pfg-border);
+}
+
+.pfg-btn-secondary:hover {
+    background: var(--pfg-border-light);
+}
+
+.pfg-btn-success {
+    background: var(--pfg-success);
+    color: white;
+}
+
+.pfg-btn-danger {
+    background: var(--pfg-error);
+    color: white;
+}
+
+.pfg-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pfg-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ==========================================================================
+   Image Grid (Gallery Editor)
+   ========================================================================== */
+
+.pfg-image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.pfg-image-item {
+    position: relative;
+    background: var(--pfg-bg);
+    border-radius: var(--pfg-radius);
+    overflow: hidden;
+    cursor: move;
+    transition: transform var(--pfg-transition), box-shadow var(--pfg-transition);
+}
+
+.pfg-image-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--pfg-shadow-lg);
+}
+
+.pfg-image-item.ui-sortable-helper {
+    box-shadow: var(--pfg-shadow-lg);
+    transform: rotate(2deg);
+}
+
+.pfg-image-thumb {
+    aspect-ratio: 1;
+    width: 100%;
+    object-fit: cover;
+}
+
+.pfg-image-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity var(--pfg-transition);
+}
+
+.pfg-image-item:hover .pfg-image-actions {
+    opacity: 1;
+}
+
+.pfg-image-action {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--pfg-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--pfg-transition);
+}
+
+.pfg-image-action:hover {
+    background: white;
+}
+
+.pfg-image-action.pfg-image-delete:hover {
+    background: var(--pfg-error);
+    color: white;
+}
+
+.pfg-image-info {
+    padding: 12px;
+}
+
+.pfg-image-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--pfg-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0 0 4px;
+}
+
+.pfg-image-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.pfg-image-filter-tag {
+    padding: 2px 8px;
+    background: var(--pfg-primary-light);
+    color: var(--pfg-primary);
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+/* Upload area */
+.pfg-upload-area {
+    border: 2px dashed var(--pfg-border);
+    border-radius: var(--pfg-radius-lg);
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--pfg-transition), background var(--pfg-transition);
+}
+
+.pfg-upload-area:hover {
+    border-color: var(--pfg-primary);
+    background: var(--pfg-primary-light);
+}
+
+.pfg-upload-area.pfg-dragover {
+    border-color: var(--pfg-primary);
+    background: var(--pfg-primary-light);
+    border-style: solid;
+    box-shadow: 0 0 0 4px rgba(56, 88, 233, 0.2);
+}
+
+.pfg-upload-area.pfg-uploading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.pfg-upload-icon {
+    font-size: 48px;
+    color: var(--pfg-text-light);
+    margin-bottom: 15px;
+}
+
+.pfg-upload-text {
+    font-size: 16px;
+    color: var(--pfg-text);
+    margin-bottom: 5px;
+}
+
+.pfg-upload-hint {
+    font-size: 13px;
+    color: var(--pfg-text-muted);
+}
+
+/* Upload actions button container */
+.pfg-upload-actions {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+    padding: 0 15px;
+}
+
+/* Empty state styling */
+.pfg-no-images {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--pfg-text-muted);
+}
+
+.pfg-no-images .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--pfg-border);
+    display: block;
+    margin: 0 auto 15px;
+}
+
+.pfg-no-images p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--pfg-text-muted);
+}
+
+/* ==========================================================================
+   Shortcode Box
+   ========================================================================== */
+
+.pfg-shortcode-box {
+    background: var(--pfg-bg);
+    border-radius: var(--pfg-radius);
+    padding: 15px;
+}
+
+.pfg-shortcode-wrapper {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.pfg-shortcode-wrapper code {
+    flex: 1;
+    padding: 10px 14px;
+    background: white;
+    border: 1px solid var(--pfg-border);
+    border-radius: var(--pfg-radius);
+    font-size: 13px;
+    color: var(--pfg-primary);
+}
+
+.pfg-copy-shortcode {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.pfg-shortcode-note {
+    font-size: 12px;
+    color: var(--pfg-text-muted);
+    margin: 10px 0 0;
+}
+
+.pfg-shortcode-note code {
+    background: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+/* ==========================================================================
+   Filters Page
+   ========================================================================== */
+
+.pfg-filters-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pfg-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: var(--pfg-card-bg);
+    border: 1px solid var(--pfg-border);
+    border-radius: var(--pfg-radius);
+    margin-bottom: 10px;
+    cursor: move;
+}
+
+.pfg-filter-item:hover {
+    border-color: var(--pfg-primary);
+}
+
+.pfg-filter-drag {
+    color: var(--pfg-text-light);
+    cursor: move;
+}
+
+.pfg-filter-name-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--pfg-border);
+    border-radius: var(--pfg-radius);
+    font-size: 14px;
+}
+
+.pfg-filter-slug {
+    color: var(--pfg-text-muted);
+    font-size: 12px;
+    min-width: 120px;
+}
+
+.pfg-filter-delete {
+    color: var(--pfg-text-light);
+    cursor: pointer;
+    transition: color var(--pfg-transition);
+}
+
+.pfg-filter-delete:hover {
+    color: var(--pfg-error);
+}
+
+/* ==========================================================================
+   Notices
+   ========================================================================== */
+
+.pfg-notice {
+    padding: 15px 20px;
+    border-radius: var(--pfg-radius);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.pfg-notice-info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+}
+
+.pfg-notice-success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+}
+
+.pfg-notice-warning {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+}
+
+.pfg-notice-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.pfg-notice-icon {
+    flex-shrink: 0;
+}
+
+.pfg-notice-content {
+    flex: 1;
+}
+
+.pfg-notice-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 782px) {
+    .pfg-admin-wrap {
+        padding: 0 10px;
+    }
+
+    .pfg-form-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .pfg-form-label {
+        padding-top: 0;
+    }
+
+    .pfg-image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .pfg-tabs {
+        overflow-x: auto;
+    }
+
+    .pfg-tab {
+        white-space: nowrap;
+    }
+}
+
+/* ==========================================================================
+   Pro Badge & Locked Settings (Freemium)
+   ========================================================================== */
+
+/* Pro badge */
+.pfg-pro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+.pfg-pro-badge-link {
+    text-decoration: none;
+}
+
+.pfg-pro-badge-link:hover .pfg-pro-badge {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* Locked setting row */
+.pfg-setting-locked {
+    position: relative;
+}
+
+.pfg-setting-locked th {
+    color: var(--pfg-text-muted);
+}
+
+/* Locked input wrapper */
+.pfg-locked-input {
+    position: relative;
+}
+
+.pfg-input-disabled input,
+.pfg-input-disabled select,
+.pfg-input-disabled textarea,
+.pfg-input-disabled .pfg-toggle-slider {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* Locked overlay */
+.pfg-locked-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--pfg-radius);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity var(--pfg-transition);
+}
+
+.pfg-locked-input:hover .pfg-locked-overlay {
+    opacity: 1;
+}
+
+.pfg-locked-content {
+    text-align: center;
+    padding: 15px;
+}
+
+.pfg-locked-content .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: var(--pfg-text-muted);
+    margin-bottom: 8px;
+}
+
+.pfg-locked-content p {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: var(--pfg-text);
+}
+
+.pfg-upgrade-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: var(--pfg-radius);
+    font-size: 12px;
+}
+
+.pfg-upgrade-btn:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Premium feature section */
+.pfg-premium-section {
+    position: relative;
+    border: 2px dashed var(--pfg-border);
+    border-radius: var(--pfg-radius-lg);
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.pfg-premium-section::before {
+    content: 'PREMIUM';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 2px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 4px;
+}
+
+.pfg-premium-section.pfg-locked {
+    opacity: 0.7;
+}
+
+.pfg-premium-section.pfg-locked::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--pfg-radius-lg);
+    pointer-events: none;
+}
+
+/* Upsell banner */
+.pfg-upsell-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 20px;
+    border-radius: var(--pfg-radius-lg);
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.pfg-upsell-content h3 {
+    margin: 0 0 5px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.pfg-upsell-content p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.pfg-upsell-btn {
+    background: #fff;
+    color: #667eea;
+    padding: 12px 24px;
+    border-radius: var(--pfg-radius);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all var(--pfg-transition);
+}
+
+.pfg-upsell-btn:hover {
+    background: #f8fafc;
+    color: #764ba2;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Tab with Pro badge */
+.pfg-tab .pfg-pro-badge {
+    margin-left: 6px;
+    padding: 1px 5px;
+    font-size: 8px;
+}
+
+/* ==========================================================================
+   Filter Checkbox Hierarchy Styles (Edit Image Modal)
+   ========================================================================== */
+
+.pfg-filter-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.pfg-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #475569;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.pfg-checkbox-label:hover {
+    border-color: var(--pfg-primary);
+    background: var(--pfg-primary-light);
+}
+
+.pfg-checkbox-label input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.pfg-checkbox-label input[type="checkbox"]:checked + .pfg-filter-dot {
+    box-shadow: 0 0 0 2px rgba(56, 88, 233, 0.3);
+}
+
+.pfg-filter-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.pfg-tree-connector {
+    color: #94a3b8;
+    font-size: 12px;
+    margin-right: 2px;
+}
+
+.pfg-filter-name {
+    color: inherit;
+}
+
+/* Children group container */
+.pfg-filter-children-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 0;
+    margin-top: 4px;
+}
+
+/* =====================================
+   Tree-style Filter Checkboxes
+   ===================================== */
+
+/* Container for tree items */
+.pfg-tree-filter-item {
+    display: block;
+}
+
+/* Each filter row */
+.pfg-tree-filter-row {
+    display: flex;
+    align-items: center;
+    padding: 2px 0;
+}
+
+/* Checkbox label - wraps all content */
+.pfg-tree-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    font-size: 13px;
+    color: #475569;
+}
+
+.pfg-tree-checkbox-label:hover {
+    background: #f1f5f9;
+}
+
+.pfg-tree-checkbox-label:has(input:checked) {
+    background: var(--pfg-primary-light, #eef2ff);
+    color: var(--pfg-primary, #3858e9);
+}
+
+/* Custom checkbox styling */
+.pfg-tree-checkbox-label input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--pfg-primary, #3858e9);
+}
+
+/* Toggle button (+/-) for parents */
+.pfg-tree-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #64748b;
+    background: #e2e8f0;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.pfg-tree-toggle:hover {
+    background: var(--pfg-primary-light, #eef2ff);
+    color: var(--pfg-primary, #3858e9);
+}
+
+/* Spacer when no toggle - hide it completely */
+.pfg-tree-toggle-spacer {
+    display: none;
+}
+
+/* Toggle icons using ::before - direct child only to avoid affecting nested */
+.pfg-filter-collapsible-group[data-expanded="false"] > .pfg-tree-filter-row .pfg-tree-toggle::before,
+.pfg-filter-collapsible-group[data-expanded="false"] > div > .pfg-tree-filter-row .pfg-tree-toggle::before {
+    content: "+";
+}
+
+.pfg-filter-collapsible-group[data-expanded="true"] > .pfg-tree-filter-row .pfg-tree-toggle::before,
+.pfg-filter-collapsible-group[data-expanded="true"] > div > .pfg-tree-filter-row .pfg-tree-toggle::before {
+    content: "−";
+}
+
+/* Default state for toggle */
+.pfg-tree-toggle::before {
+    content: "−";
+    font-size: 14px;
+}
+
+.pfg-tree-toggle {
+    font-size: 0; /* Hide any text content */
+}
+
+/* Hide children when collapsed */
+.pfg-filter-collapsible-group[data-expanded="false"] .pfg-collapsible-content {
+    display: none;
+}
+
+/* Tree connector */
+.pfg-tree-connector {
+    color: #94a3b8;
+    font-size: 12px;
+    margin-right: 2px;
+    flex-shrink: 0;
+}
+
+/* Color dot */
+.pfg-tree-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Filter name */
+.pfg-tree-filter-name {
+    color: inherit;
+}
+
+/* Children container */
+.pfg-tree-children {
+    display: block;
+}
+
+/* Collapsible content transition */
+.pfg-collapsible-content {
+    overflow: hidden;
+    transition: all 0.2s ease-out;
+}
+
+/* Legacy compatibility - keep old classes working */
+.pfg-filter-collapsible-group {
+    display: block;
+}
+
+.pfg-collapse-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+    color: #94a3b8;
+    background: #f1f5f9;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 4px;
+}
+
+.pfg-collapse-toggle:hover {
+    background: var(--pfg-primary-light, #eef2ff);
+    color: var(--pfg-primary, #3858e9);
+}
+
+/* Collapsed state - rotate arrow */
+.pfg-filter-collapsible-group[data-expanded="false"] .pfg-collapse-toggle {
+    transform: rotate(-90deg);
+}
+
+/* Parent filter styling */
+.pfg-checkbox-label.pfg-parent-filter {
+    font-weight: 500;
+}
+
+/* Child filter styling */
+.pfg-checkbox-label.pfg-child-filter {
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+/* Checked state */
+.pfg-checkbox-label:has(input:checked) {
+    background: var(--pfg-primary-light);
+    border-color: var(--pfg-primary);
+    color: var(--pfg-primary);
+}
+
+/* Editable slug field styling */
+.pfg-col-slug input.pfg-editable-slug {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    color: var(--pfg-primary);
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+.pfg-col-slug input.pfg-editable-slug:hover {
+    background: #f1f5f9;
+}
+
+.pfg-col-slug input.pfg-editable-slug:focus {
+    background: white;
+    border-color: var(--pfg-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 88, 233, 0.1);
+}
+
+/* Duplicate slug warning */
+.pfg-col-slug input.pfg-editable-slug.pfg-slug-warning {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.pfg-col-slug input.pfg-editable-slug.pfg-slug-duplicate {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+/* ==========================================================================
+   Disabled Form Rows (Layout-dependent settings)
+   ========================================================================== */
+
+.pfg-form-row.pfg-row-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    position: relative;
+}
+
+.pfg-form-row.pfg-row-disabled::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    cursor: not-allowed;
+}
+
+.pfg-form-row.pfg-row-disabled select,
+.pfg-form-row.pfg-row-disabled input {
+    cursor: not-allowed;
+    background-color: #f1f5f9;
+}

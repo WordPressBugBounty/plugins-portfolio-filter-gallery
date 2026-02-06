@@ -1,0 +1,95 @@
+/**
+ * Portfolio Filter Gallery - Block Editor Styles
+ * 
+ * @package Portfolio_Filter_Gallery
+ * @version 2.0.0
+ */
+
+/* Block placeholder */
+.wp-block-portfolio-filter-gallery-gallery .components-placeholder {
+    min-height: 200px;
+}
+
+.wp-block-portfolio-filter-gallery-gallery .components-placeholder__label svg {
+    fill: currentColor;
+    margin-right: 8px;
+}
+
+/* Block preview */
+.pfg-block-preview {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 200px;
+}
+
+.pfg-block-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.pfg-block-header svg {
+    width: 20px;
+    height: 20px;
+    fill: #3858e9;
+}
+
+.pfg-block-gallery-title {
+    margin: 0 0 15px;
+    font-size: 16px;
+    color: #1e293b;
+}
+
+.pfg-block-gallery-preview {
+    background: white;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+}
+
+.pfg-block-gallery-icon {
+    margin-bottom: 10px;
+}
+
+.pfg-block-gallery-icon .dashicons {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #94a3b8;
+}
+
+.pfg-block-gallery-preview p {
+    margin: 0 0 5px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.pfg-block-gallery-preview small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+/* Error and placeholder messages */
+.pfg-block-placeholder,
+.pfg-block-error {
+    padding: 20px;
+    text-align: center;
+    background: #f8fafc;
+    border: 1px dashed #e2e8f0;
+    border-radius: 8px;
+    color: #64748b;
+}
+
+.pfg-block-error {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+}

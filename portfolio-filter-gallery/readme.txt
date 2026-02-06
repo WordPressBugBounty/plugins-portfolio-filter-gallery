@@ -1,120 +1,171 @@
-﻿=== Portfolio Gallery - Image Gallery Plugin ===
+=== Portfolio Filter Gallery ===
 Contributors: awordpresslife, razipathhan, hanif0991, muhammadshahid, fkfaisalkhan007, sharikkhan007, zishlife, FARAZFRANK
 Donate link: https://paypal.me/awplife
-Tags: portfolio, gallery, portfolio gallery, responsive, wordpress portfolio plugin
-Requires at least: 5
-Tested up to: 6.8.1
-Requires PHP: 7
-Stable tag: 1.7.4
+Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
+Requires at least: 5.8
+Tested up to: 6.9
+Requires PHP: 7.4
+Stable tag: 2.0.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Portfolio gallery comes with a separate category page and user-friendly interface. Showcase portfolio, images, video, gallery.
+A WordPress plugin designed for creating filterable portfolio galleries. Supports images and videos with masonry layouts and lightbox display.
 
 == Description ==
 
-A super easy way to create a beautiful and responsive portfolio for your WordPress websites. Portfolio filter gallery is fully responsive and works with all devices like Macbook, desktop PC, tablets, mobile.
-The first portfolio plugin in WordPress for a separate category page. 
+**Portfolio Filter Gallery** is a WordPress plugin built to help you organize and display your creative work. It provides a structured way to present images and videos, allowing visitors to filter content by category.
 
-== Links ==
 
-* [Upgrade To Portfolio Premium](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
-* [Free Live Demo](https://awplife.com/demo/portfolio-filter-gallery-free-wordpress-plugin/)
-* [Premium Live Demo](https://awplife.com/demo/portfolio-filter-gallery-premium/)
+= Demo Links =
 
-* [Ultimate Portfolio - Advanced Version With Gutenberg ](https://webenvo.com/ultimate-portfolio/)
+* [Video Gallery](https://awplife.com/demo/portfolio-filter-gallery-premium/video-gallery/)
+* [Plugin Features](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
+* [Gallery Demo](https://awplife.com/demo/portfolio-filter-gallery-premium/)
+* [Upgrade To Premium](https://awplife.com/account/signup/portfolio-filter-gallery)
 
-= HOW TO USE THE EASIEST PORTFOLIO WITH WORDPRESS =
 
-https://www.youtube.com/watch?v=6rvJ9NN_kA0
+= Support Links =
 
-== Features ==
+* [Documentation](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-new-wordpress-plugin/)
+* [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/)
 
-* Filters - an easy way to create filters for portfolio galleries
-* Bootstrap Lightbox - the best and responsive bootstrap image lightbox
-* Multiple Column Layout - show the portfolio gallery in multiple columns like two columns, three columns, four columns
-* Responsive - all device compatible like PC, Mac, tabs, phones
-* Numbering - show numbering on images
-* Title - show image title / label / caption on gallery images
-* Spacing or Without Spacing - Show gallery with and without spacing 
-* Gray Scale - make beautiful photo gallery with Grayscale effect
-* Masonry - masonry style image photo video galleries
-* Multi-Color For Filters - apply multiple colors for filters button
+= What This Plugin Does =
 
-== Pro Features ==
+The core function of Portfolio Filter Gallery is to let you build galleries where users can click filter buttons to view specific categories of work. Instead of scrolling through an entire page of images, a visitor can select "Web Design" or "Photography" and see only those items.
 
-* Easy & Simple 
-* Responsive Gallery 
-* Portfolio Filtration 
-* Add Unlimited Filters 
-* Unlimited Filter colors 
-* Customize Border Settings
-* Portfolio Masonry Gallery 
-* Link Portfolio Gallery  
-* Load More Portfolio
-* Multiple Column Layouts 
-* Bootstrap 3.3.6 Based 
-* 30 Hover Effect 
-* 5 Light Box Pop-up Style
-* Image Title
-* Gallery in Post
-* Gallery in Page
-* Gallery in Widget
-* SEO Friendly Gallery
-* Thumbnail Size & Quality Setting
-* Navigation Error in Lightbox Preview
-* Portfolio Gallery Images Order Buttons Like Ascending, Descending & Shuffle
-* Simple & User-Friendly Custom Plugin Dashboard
-* Create Unlimited Portfolio Galleries With Unlimited Images
-* Custom CSS
-* Easy To Implement Anywhere Into WordPress
-* Easily Customizable Portfolio
-* Fast, Friendly & Quality Support
-* You will get the best filtration in multiple themes
-* You can change unlimited colors, change title & description background colors, change title description color, also change the border color of images. 
-* You can customize image border like border colors, border size
-* Beautifully created masonry gallery
-* Link option with both theme you can also set a read more or view button and give a link into it or give the link on the image 
-* Set multiple column layouts like 1 column, 2 columns, 3 columns, 4 column 
+The plugin includes a dedicated page for managing filter categories. You create your filters once, then assign them to individual images or videos as you build your gallery. This separation keeps your workflow clean and organized.
 
-### 🎨 PORTFOLIO FILTER GALLERY DESIGN ###
+= Use Cases =
 
-Portfolio gallery method is really easy to use you will find a separate category page, the user can easily create a portfolio within a minute. choose the filters with the images with a select box
-that makes a really different portfolio filter gallery with other plugins. Show portfolio with or without a lightbox, in the free version of the portfolio you have a bootstrap lightbox with navigation.
-you can also show title with images and the title will also appear with bootstrap lightbox in the bottom. If you don't want lightbox you can also link your portfolio for an external project.
-The default layout of the portfolio is the masonry layout. If you want to use the grid layout you can use the same size image for the portfolio. then you can show your portfolio with grid layout also.
-Show your portfolio gallery with a border or you can show your portfolio without spacing or with spacing.
+This plugin suits a range of users and projects:
 
-### 📱 DEFINING MASONRY LAYOUT IN PORTFOLIO ###
-The term Masonry layout probably owes its name to the popular jQuery Masonry plugin that is used to generate this type of layout. 
-Masonry layout is also referred to as the Pinterest Style Layout, as www.pinterest.com was the first major website to use this layout style. Masonry layout gives a great look of your portfolio gallery
-The plugins listed contain unique features in addition to the common feature set. It is difficult to understand the difference between each plugin just by looking at a Masonry layout generated by each one. All of the layouts will appear quite similar. It is important to consider the available features before choosing a plugin. Generally, most plugins provide an API and documentation for identifying their features.
-I suggest looking at the available features of each plugin before making your choice. I have compiled the following list of common features from the plugins listed in the previous section. These are some of the main features, but each plugin also has its own unique ones. It’s up to you to choose the best plugin based on your application requirements.
-Masonry layouts can have fixed-size columns or dynamic columns. Fixed-size columns are the norm. It is better to choose a plugin that allows dynamic columns, as it enhances flexibility.
-Sorting and Filtering – Plugins like Isotope allow you to sort and filter the elements without losing the structure of the layout. It is a good feature to have when you need dynamic Masonry layouts.
-Animation – Unlike normal layouts, Masonry layouts change completely with the addition or removal of elements. Because of this, it is better to have animation effects for adjusting elements – this creates an awesome user experience.
-Dynamic Elements – Generally, we create the layout on page load using the available elements. But some sites might require the ability to add or remove elements without refreshing. In such cases, the plugin should have the ability to auto adjust the layout to provide the optimal structure.
-Layout Options – The plugin should allow you to set column width, gutter size, alignment, etc.
-Developers and designers are accustomed to seeing web pages laid out with CSS floats. But this common type of layout doesn’t take the size of the elements into consideration. Instead, it adds elements one after another, first in the horizontal direction, then vertically.
+* Photographers displaying work by genre (portraits, landscapes, events)
+* Web designers showcasing projects by type (e-commerce, corporate, landing pages)
+* Agencies presenting client work across different industries
+* Architects organizing projects by category (residential, commercial, renovations)
+* Artists grouping pieces by medium or theme
+* Freelancers building a professional online presence
 
-### (PORTFOLIO ) CUSTOM CSS OPTION ###
-Custom CSS is part of Custom Design, which is a feature of the WordPress.com Premium and WordPress.com Business plans. … CSS stands for Cascading Style Sheets. It is a markup language that controls the appearance of HTML elements on a web page.
+= Free Features =
 
-###(PORTFOLIO ) LINK OPTION ###
-Link portfolio by giving a link on separate images
+**Gallery Filtering**
 
-### FAST CUSTOMER SUPPORT ###
+* Manage filters through a separate category interface
+* Assign multiple filters to each gallery item
+* CSS3 animations for smooth filter transitions
 
-Low response time
-We always try to respond within hours or within a day.
-Resolving an issue within 24 hours.
+**Layout Options**
+
+* Masonry layout that adapts to varying image dimensions
+* Grid layout for uniform presentation
+* Column options: 2, 3, or 4 columns
+* Configurable spacing between items
+
+**Lightbox**
+
+* Bootstrap-based responsive lightbox
+* Navigation arrows for browsing images
+* Title display within the lightbox
+* Touch support for mobile devices
+
+**Video Support**
+
+* Embed YouTube videos
+* Embed Vimeo videos
+* Videos play directly in the lightbox
+
+**Customization**
+
+* Show or hide image titles
+* Optional image numbering
+* Grayscale effect on hover
+* Customizable filter button colors
+* Border width and color settings
+
+= Premium Features =
+
+The [premium version](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/) extends the plugin with additional capabilities:
+
+
+
+**Additional Lightboxes**
+
+* LD Lightbox
+* Swipebox with touch gestures
+* PopTrox with video support
+* Viewer Lightbox
+* BlueImp Gallery
+
+**Advanced Features**
+
+* Ajax Load More for paginated loading
+* URL-based filtering (load a page with a specific filter pre-selected)
+* Default filter selection on page load
+* Ascending/descending sort controls
+* Shuffle button for randomized display
+* Search functionality within galleries
+* Watermark overlay support
+* Custom CSS input
+
+**Extended Customization**
+
+* Unlimited filter color schemes
+* Custom thumbnail dimensions
+* Responsive column control per device type (desktop, tablet, mobile)
+* Dropdown-style filter menu
+
+= How to Use Portfolio Filter Gallery =
+
+1. Navigate to **Portfolio Gallery > Filters** in your WordPress dashboard
+2. Create the filter categories you need
+3. Go to **Portfolio Gallery > Add New** to create a gallery
+4. Upload images, add video URLs, and assign filters to each item
+5. Adjust settings for layout, lightbox style, and appearance
+6. Copy the generated shortcode and paste it into any page or post
+
+The shortcode follows this format:
+`[Portfolio_Gallery id="123"]`
+
+Replace "123" with your gallery's ID.
+
+= Masonry Layout =
+
+The masonry layout arranges images in a Pinterest-style grid. Images of different sizes fit together naturally without requiring uniform dimensions. This layout includes:
+
+* Automatic adjustment to image proportions
+* CSS3 animation effects
+* Full compatibility with filtering and sorting
+
+= Linking Portfolio Items =
+
+You can attach custom URLs to individual gallery items. This allows you to:
+
+* Link images to project detail pages
+* Direct users to external client websites
+* Open links in the same tab or a new tab
+
+= Page Builder Compatibility =
+
+Portfolio Filter Gallery works with standard WordPress editing tools and popular page builders:
+
+* Gutenberg block editor
+* Elementor
+* WPBakery Page Builder
+* Divi Builder
+* Beaver Builder
+
+Simply paste the shortcode into any text block or widget.
+
+= Support =
+
+For questions or troubleshooting, visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/). The development team typically responds within the same day.
 
 == Screenshots ==
 
 1. Portfolio Filter Gallery 3 Column With Number And Title
 2. Portfolio Filter Gallery Without Spacing
 3. Portfolio Filter Gallery With 2 Column Layout
-4. Portfolio Filter Gallery With Gray Scale(Gray Effect On Hover) On Thumbnails
+4. Portfolio Filter Gallery With Gray Scale (Gray Effect On Hover) On Thumbnails
 5. Portfolio Filter Gallery With Masonry
 6. Add Filters In Portfolio Gallery
 7. Filter Thumbnails By Portfolio Filters
@@ -123,67 +174,126 @@ Resolving an issue within 24 hours.
 
 == Installation ==
 
-Install Portfolio Filter Gallery either via the WordPress.org plugin directory or by uploading the files to your server.
+**Automatic Installation**
 
-After activating  Filter Gallery plugin, go to plugin menu.
+1. Go to WordPress Dashboard → Plugins → Add New
+2. Search for "Portfolio Filter Gallery"
+3. Click "Install Now" and then "Activate"
 
-Add your filters.
+**Manual Installation**
 
-Create Portfolio Filter Gallery, configure settings and save.
+1. Download the plugin from WordPress.org
+2. Upload the `portfolio-filter-gallery` folder to `/wp-content/plugins/`
+3. Activate the plugin through the 'Plugins' menu in WordPress
 
-Copy gallery shortcode and publish on page/post.
+**Getting Started**
 
-That's it. You're ready to go!
+1. Go to Portfolio Gallery → Filters to create your filter categories
+2. Go to Portfolio Gallery → Add New to create your gallery
+3. Upload images and assign filters to each image
+4. Configure your gallery settings (layout, lightbox, colors)
+5. Copy the shortcode and paste it into any page or post
 
 == Frequently Asked Questions ==
 
-= Have any queries? =
+= Is Portfolio Filter Gallery free? =
 
-Please post your question on the plugin support forum
+Yes. The free version includes all core features: filterable galleries, masonry layout, video embedding, and the Bootstrap lightbox. A [premium version](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/) is available with additional hover effects, lightbox styles, and advanced functionality.
 
-https://wordpress.org/support/plugin/portfolio-filter-gallery/
+= How do I create filters? =
 
-= How can I create filters for images? =
+Go to Portfolio Gallery > Filters in your WordPress dashboard. This dedicated page allows you to add, edit, and remove filter categories independently from your galleries.
 
-In the Portfolio Gallery plugin, you can find a separate page for creating filters Go to Portfolio Gallery menu then click filters submenu.
+= Can I include videos? =
 
-= How can I show videos in the plugin? =
+Yes. Portfolio Filter Gallery supports YouTube and Vimeo. When adding a gallery item, select the video option and enter the video URL. Videos will play in the lightbox.
+[See Video Gallery Demo](https://awplife.com/demo/portfolio-filter-gallery-premium/portfolio-video-gallery/)
 
-After uploading the images choose the image type = (video) from the select box below the image and then type your video link (Vimeo or youtube) then click on publish or update the post.
+= Is the gallery responsive? =
 
-= Is there any limit to upload the images in the plugin? =
+Yes. The gallery layout and lightbox adapt to all screen sizes. The masonry layout uses CSS3 for smooth animations on any device.
 
-* No, there is no limit for uploading the images, You can upload unlimited images.
+= Is there a limit to gallery items? =
 
-= How to add portfolio galleries to a post or page? =
+No. You can add as many images and videos as needed. For large galleries, the premium version offers Ajax Load More for improved performance.
 
-* After creating your gallery you will find copy shortcode option. Copy shortcode and just paste it to your page or post to show gallery.
+= Can I place multiple galleries on one page? =
 
-= How many images and videos can be added to the gallery? =
+Yes. Each gallery has its own shortcode and operates independently with separate filters and settings.
 
-* This plugin doesn’t have the limit for images and videos. You are able to add an unlimited amount of photos to your projects.
+= Can I rearrange gallery items? =
 
-= Can I change the sequence of images in the gallery? =
+Yes. The gallery editor supports drag-and-drop reordering.
 
-* When you create a gallery you can see drag and drop option for images so you can drag and drop images to get your desirable gallery.
+= Does it work with page builders? =
 
-= Is Portfolio Gallery responsive? =
+Yes. The plugin is compatible with Gutenberg, Elementor, WPBakery, Divi, and Beaver Builder. Paste the shortcode into any text block or widget.
 
-* Gallery plugin has fully responsive design and layout. It is designed to display all of its views and react with your device smoothly.
+= Is the plugin GDPR compliant? =
 
-= Can I add URL links to the image? =
+Yes. Portfolio Filter Gallery does not collect user data or make external requests. All assets load locally from your WordPress installation.
 
-* Yes, you can add the links to images. you can find the link option under the image when you will upload.
+= Is translation supported? =
 
-= How do I Publish galleries on pages or posts? =
+Yes. The plugin is translation-ready and works with WPML and other translation plugins.
 
-* Open the post/page you want to display the gallery. Paste your gallery shortcode into text editor and press plublish button to show your gallery or Instagram feed. You can also show the gallery in widget like page or post just paste your shortcode into text widget and your gallery is ready to show.
+= Where can I get help? =
+
+Visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/) for assistance. For premium support, visit the [developer website](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/).
 
 == Changelog ==
 
+= 2.0.5 =
+* Fixed: Legacy migration now correctly extracts alt text, descriptions, and links
+* Fixed: External link images now properly set Link Type to "Link to External URL" after migration
+* Improved: Re-migration functionality to repair galleries with missing data
+
+= 2.0.4 =
+* Added: LD Lightbox is now filter-aware - lightbox only shows visible (filtered) images
+* Improved: All lightbox libraries (Fancybox, PhotoSwipe, LD Lightbox) now respect active filters
+* Improved: Lightbox navigation correctly shows "Image X of Y" based on filtered count
+
+= 2.0.3 =
+* Added: Comprehensive documentation page with sidebar navigation
+* Added: Both free and premium versions can now be active simultaneously (premium takes priority)
+* Improved: Premium detection system for seamless upgrades
+* Fixed: Function conflicts when both versions active
+
+= 2.0.2 =
+* Added: Filter multiple languages support
+* Added: Search Placeholder field in gallery settings
+* Fixed: Show Title toggle not saving when OFF
+* Fixed: Columns/Gap settings preserved on template change
+
+= 2.0.1 =
+* Bug Fixed
+
+= 2.0.0 =
+**Major Update - Complete Redesign**
+
+This is a major update with a completely redesigned interface. Your existing galleries and data will be automatically migrated and preserved.
+
+* **New:** Completely redesigned admin interface with modern UI
+* **New:** Enhanced image management with drag-and-drop ordering
+* **New:** Improved modal editor for individual image settings
+* **New:** Bulk selection and batch operations
+* **New:** Filter hierarchy support with parent-child relationships
+* **New:** Multiple lightbox options (LD Lightbox, Bootstrap Lightbox)
+* **New:** Enhanced migration system for legacy data
+* **New:** Version tracking for future upgrade logic
+* **Improved:** Better PHP 8.x compatibility with strict type handling
+* **Improved:** Performance optimizations for large galleries
+* **Fixed:** Sanitize_title error with legacy filter data stored as arrays
+* **Fixed:** Filter count migration from legacy versions
+* **Fixed:** Version conflict handling when both Free and Premium active
+
+= 1.7.5 =
+* Text domain error fixed.
+* Tested with WordPress version 6.9
+
 = 1.7.4 =
 * Text domain error fixed.
-* Tested with WordPress version 6.8.1
+* Tested with WordPress version 6.8.3
 
 = 1.7.2 =
 * Regular plugin check and update.
@@ -198,11 +308,11 @@ After uploading the images choose the image type = (video) from the select box b
 * Tested with WordPress version 6.7
 
 = 1.6.9 =
-* Filter selecet box error fix.
+* Filter select box error fix.
 * Tested with WordPress version 6.7
 
 = 1.6.8 =
-* Alphabatic image sorting issue fixed.
+* Alphabetical image sorting issue fixed.
 * Tested with WordPress version 6.6.2
 
 = 1.6.7 =
@@ -213,217 +323,58 @@ After uploading the images choose the image type = (video) from the select box b
 * Lightbox error fixed.
 
 = 1.6.5 =
-* Lightbox senetization fixed.
+* Lightbox sanitization fixed.
 
 = 1.6.4 =
 * Filter alignment fixed.
 * Tested with WordPress version 6.5.5
 
 = 1.6.3 =
-* Botstrap CSS fixed.
+* Bootstrap CSS fixed.
 
 = 1.6.2 =
 * Tested with WordPress version 6.5.4
 
 = 1.6.1 =
-* Bootstrap Extra menu css remove.
-
+* Bootstrap extra menu CSS removed.
 
 == Other Notes ==
 
-== GENERAL Features ==
+= Shortcode Usage =
 
+Copy the shortcode from your gallery and paste it into any page, post, or widget:
+`[Portfolio_Gallery id="123"]`
+Replace "123" with your actual gallery ID.
 
-**Portfolio Filtration**
+= Browser Compatibility =
 
-* Sparate page of portfolio filters
-* Create filters 
-* Edit filters
-* Delete filters
+Portfolio Filter Gallery works on all modern browsers:
+* Google Chrome
+* Mozilla Firefox
+* Apple Safari
+* Microsoft Edge
+* Opera
+* iOS Safari & Android browsers
 
-**Bootstrap Lightbox**
+= Security & Privacy =
 
-* Onclick lightbox on the gallery
-* Navigation with the portfolio
-* Display title with the gallery
+* GDPR Compliant
+* No external requests
+* No data collection
+* Secure code following WordPress standards
+* Regular security updates
 
-**Multiple Column Layout**
+= Contact & Support =
 
-* Show in 2, 3  column layout with portfolio
-* Manage space of the gallery
+* [WordPress Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/)
+* [Premium Support](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
+* [Documentation](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
+* [Video Tutorials](https://www.youtube.com/watch?v=6rvJ9NN_kA0)
 
-**Responsive Portfolio**
+== Upgrade Notice ==
 
-* Show portfolio gallery with responsive mode
-* Show gallery with desktop and mobile with center align 
+= 2.0.0 =
+**Major Update - Complete Redesign!** This version includes a completely redesigned admin interface with a modern and user-friendly design. Don't worry - your existing galleries and settings will be automatically migrated and preserved. We recommend backing up your site before updating. New features include: enhanced image management, bulk operations, filter hierarchy support, better PHP 8.x compatibility, and improved performance.
 
-**Title On Portfolio**
-
-* Show title on gallery in a unique way 
-* Title with background color option on the gallery 
-* Show discription with gallery no limit
-* Show read more link option
-
-**Ease Of Customization**
-
-* Create your portfolio with the easiest way on the WordPress
-* Create filters on a separate page
-* Choose filters with your images of portfolio
-* Filter images according to the category
-
-**Masonry Portfolio Gallery**
-
-* Masonry layouts are a great choice for creating galleries
-* Show your portfolio with an uneven height of images
-* Manage sccording to window size
-
-**Link Option**
-
-* Link your portfolio with external page or site
-* You can link your portfolio gallery with separate image
-* Option for open link into same tab or new tab
-
-**Video Option**
-
-* Show your work or portfolio with images and videos
-* Show portfolio gallery with vemio or youtube videos
-* Youtube icon on hover
-* Vemio icon on hover
-* Close button availabe
-* Esc close option
-
-== Pro Features In Detail ==
-
-**Unlimited Filters**
-Create unlimited filter and category in the premium version, the plugin has a unique separate category page for creating the filters so you don't need to use WordPress categories.
-users will really like the ease of use the plugin. You can set up your project in some clicks. You can also edit, update, delete your category names.
-
-**Upload Images**
-Upload process of images it also really easy process. this plugin uses WordPress media uploader so you can upload multiple images at a time. you can also use cropped images from your media.
-Images have the option to filter images with filters that you will find with a select box on the bottom of images. choose your desire filter with the image to filter it. 
-Images have also Title option and link option that you can change any time or multiple time.
-Note: recommended to do not repeat images in the gallery for performance issues.
-
-*Bootstrap Based*
-Build responsive, mobile-first projects on the web.Bootstrap is an open source toolkit with HTML, CSS, and JS.responsive grid system, extensive prebuilt components, and powerful plugins built on jQuery.
-Bootstrap allows to create responsive and dynamic layouts that manage according to your device.
-The most prominent components of Bootstrap are its layout components, as they affect an entire web page. The basic layout component is called "Container", as every other element in the page is placed in it. 
-Users can choose between a fixed-width container and a fluid-width container. 
-
-**Filterizer**
-This plugin is build on jQuery that searches, sorts, shuffles and applies stunning filters over responsive galleries using CSS3 transitions.
-Pluggable look & feel (write your CSS effects in the box on the right and hit Filterize)
-Smooth performance — optimized for smooth experience on mobile devices
-Lightweight - Fast to load on the page
-Responsive — with your Media Queries (resize the window)
-Platform support:
-Chrome, Firefox, Safari, Opera
-Android and iOS browsers
-Edge, IE(v.10+)
-
-**Multi Layout** 
-The plugin has the option to create a gallery into multiple layouts. In the plugin two layout option available that you can choose from the setting page. The first layout is a minimal type layout that gives your site a minimal and fresh look. the second layout gives an attractive and nice look to your site. You can use multi-layout with multiple pages.
-
-**Beauty Of Hover Effects**
-There are an additional three types of hover effects available in the plugin. That you can use according to your layout. Hover effects available with transition effects that give beautiful look to your gallery.
-Hover effects show your title or description in a smooth way. The effect with icon also available.
- 
-* Overlay Zoom
-* Image with title & caption on hover
-* Image with title and slide in the icon on hover
-
-**Filters Layout**
-Change the filter layout with color, underline color different filters available with a different layout. You can also hide filters from your gallery if you don't want to show filters in any case.
-Multifilter option available, Sorting control, Search box available for search with the image title or image description.
-
-**Multiple Lightbox**
-There are six types of lightbox available in the plugin. The lightbox shows the image into a popup or large container you can also navigate the images to the next image. All the lightbox are responsive and works
-according to your device type. It also looks beautiful on the small devices. The Swipebox lightbox works according to filtered image groups. It will filter only the images that you have on the active filter.
-LD lightbox changes its size according to image.
-
-* LD Light Box 
-Fully responsive and changes size according to the images
-* Swipebox Light Box ( Lightbox work filtered images group ) -
-Swipebox is a jQuery "lightbox" plugin for desktop, mobile and tablet. Main features is 
-- Swipe gestures for mobile
-- Keyboard Navigation for desktop
-- CSS transitions with jQuery fallback
-- Retina support for UI icons
-- Easy CSS customization
-Compatibility - Chrome, Safari, Firefox, Opera, IE9+, IOS4+, Android, windows phone.
-* Pop Trox Light Box
-poptrox is another simple yet fully customizable jQuery lightbox plugin for displaying html content (image, youtube/vimeo video) in a responsive popup window.
-* Viewer Light Box 
-A dead simple jQuery based image viewer to display all the images in a navigatable, lightbox-style gallery popup that auto resizes when the screen size changes.
-* Blue Imp Light Box 
-blueimp Gallery is a touch-enabled, responsive and customizable image & video gallery, carousel and lightbox, optimized for both mobile and desktop web browsers.
-It features swipe, mouse and keyboard navigation, transition effects, slideshow functionality, fullscreen support and on-demand content loading and can be extended to display additional content types.
-* Bootstrap 3 Light Box 
-
-**User Interface**
-Plugin has easy user inerface all the setting is devied into saprate tab, user can esaely changes the setting. It also based on Bootstrap and it is also responsive.
-
-**Load More Option**
-Users can set the limit of images on the page to load If you want to load more image then click on load button and it will load the remaining images. Option available for change color for the load button and for the loader icon.
-
-* Image Limit For Load More
-* Change text For Load More Button
-* Change load More Button Color
-* Change load More Icon Color
-
-**Customization**
-
-**Gallery Thumbnail Size**
-
-* Medium - 300 x 169
-* Large - 840 x 473
-* Full Size - 1280 x 720
-* Custom Thumbnail - 300 x 300
-* Custom Thumbnail - 500 x 500
-
-**Columns Settings**
-
-* Columns On Large Desktops
-* Columns On Desktops
-* Columns On Tablets
-* Columns On Phone
-
-**Title & discription**
-
-* Title & discription On Thumbnail Show/Hide
-* Title & discription Color
-* Select Color
-* Title & discription Background Color
-* Select Color
-* Title Font Size
-* Read More Show/Hide
-* Change Read More Text
-
-**Thumbnail Options**
-
-* Thumbnails Custom Border Setting
-* Show Numbering On Thumbnails
-* Thumbnails Spacing ( px )
-* Image Gray Scale (Gray Effect)
-* Video Auto-Play In lightbox
-* Open Image Link URL
-* Link Nofollow
-* Link No opener
-* Link No referrer
-
-**Filters**
-
-* Hide filters
-* Multi-Filters Enable
-* Ascending
-* Descending Button
-* Shuffle Button
-* Search Box
-* Filters Color
-* Filters underline Color
-
-**SHORTCODE**
-
-Portfolio Gallery offers an easy-to-use Insert Gallery, which means you never need to work with shortcodes again when inserting and manageing galleries. You just need to copy and paste gallery shortcode into the gallery.
-If you do want to work with shortcodes, there is a powerful shortcode system as you’d expect of a popular WordPress gallery plugin.
-For more information, feel free to visit the official website for portfolio gallery.
+= 1.7.5 =
+Text domain error fixed. Tested with WordPress 6.9.
