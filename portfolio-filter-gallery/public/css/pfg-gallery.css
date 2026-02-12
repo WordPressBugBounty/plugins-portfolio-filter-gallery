@@ -948,70 +948,54 @@
   }
 }
 
-/* Masonry layout - CSS Columns (browser handles positioning - no flash) */
+/* Masonry layout - JS-powered absolute positioning (horizontal ordering) */
 .pfg-grid--masonry {
   display: block;
-  column-count: var(--pfg-cols-lg, 4);
-  column-gap: var(--pfg-gap, 16px);
-}
-
-/* Responsive column counts for masonry */
-@media (max-width: 575px) {
-  .pfg-grid--masonry {
-    column-count: var(--pfg-cols-sm, 2);
-  }
-}
-
-@media (min-width: 576px) and (max-width: 767px) {
-  .pfg-grid--masonry {
-    column-count: var(--pfg-cols-sm, 2);
-  }
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  .pfg-grid--masonry {
-    column-count: var(--pfg-cols-md, 3);
-  }
-}
-
-@media (min-width: 992px) and (max-width: 1199px) {
-  .pfg-grid--masonry {
-    column-count: var(--pfg-cols-lg, 4);
-  }
-}
-
-@media (min-width: 1200px) {
-  .pfg-grid--masonry {
-    column-count: var(--pfg-cols-xl, 5);
-  }
+  position: relative;
+  overflow: hidden;
+  transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pfg-grid--masonry .pfg-item {
-  break-inside: avoid;
-  margin-bottom: var(--pfg-gap, 16px);
+  position: absolute;
   border-radius: var(--pfg-radius, 8px);
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  /* No base transition - controlled by JavaScript */
+  opacity: 1;
+  transform: scale(1);
+  /* Smooth position transitions for filtering */
+  transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out;
+}
+
+/* Items waiting for JS positioning */
+.pfg-grid--masonry .pfg-item:not(.pfg-item--positioned) {
+  opacity: 0;
+}
+
+/* Items positioned by JS */
+.pfg-grid--masonry .pfg-item.pfg-item--positioned {
   opacity: 1;
   transform: scale(1);
 }
 
-/* Phase 1: HIDING in masonry - fade out + scale down while staying in layout */
+/* Phase 1: HIDING in masonry - fade out + scale down */
 .pfg-grid--masonry .pfg-item.pfg-item--hiding {
   opacity: 0;
   transform: scale(0.9);
   pointer-events: none;
-  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
 }
 
-/* Phase 2: HIDDEN in masonry - remove from column flow */
+/* Phase 2: HIDDEN in masonry - remove from layout */
 .pfg-grid--masonry .pfg-item.pfg-item--hidden {
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  left: -9999px;
+  left: -9999px !important;
+  top: -9999px !important;
   width: 0;
   height: 0;
 }
@@ -1059,10 +1043,11 @@
   object-position: center;
 }
 
-.pfg-grid--grid .pfg-caption {
+.pfg-grid--grid .pfg-item-caption {
   width: 100%;
   padding-top: 10px;
-  /* Below-image captions are always visible */
+  flex-grow: 1;
+  /* Below-image captions stretch to fill card height */
 }
 
 /* Grayscale effect */
@@ -1141,7 +1126,7 @@
     minmax(var(--pfg-packed-min, 150px), 1fr)
   );
   grid-auto-rows: var(--pfg-packed-min, 150px);
-  grid-auto-flow: row; /* Changed from 'dense' to preserve DOM/sort order */
+  grid-auto-flow: row dense; /* Dense packing fills gaps when items span multiple cells */
   gap: var(--pfg-gap, 10px);
 }
 
@@ -1222,12 +1207,15 @@
 }
 
 .pfg-grid--packed.pfg-grid--packed-cards .pfg-item {
-  overflow: visible;
+  overflow: hidden; /* Clips children to rounded corners */
   border-radius: var(--pfg-radius, 8px);
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  opacity: 0;
-  transform: translateY(15px) translateZ(0);
+  opacity: 1;
+  transform: translateY(0) translateZ(0);
+  /* JS positioning via custom properties */
+  left: var(--pfg-x, 0);
+  top: var(--pfg-y, 0);
   will-change: transform, opacity, left, top;
   transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
     top 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease-out,
@@ -1244,7 +1232,7 @@
 .pfg-grid--packed.pfg-grid--packed-cards .pfg-item-link {
   display: block;
   overflow: hidden;
-  border-radius: var(--pfg-radius, 8px);
+  border-radius: 0; /* Card handles border radius, not the image container */
 }
 
 /* Creative Agency template - top-only border radius (no bottom corners) */
@@ -1259,6 +1247,9 @@
   bottom: auto !important;
   left: auto !important;
   right: auto !important;
+  /* Override inherited overlay styles - make visible for cards layout */
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .pfg-grid--packed.pfg-grid--packed-cards .pfg-item-caption .pfg-item-title {
@@ -1518,6 +1509,14 @@
   font-weight: 600;
   color: var(--pfg-caption-text, #1e293b);
   line-height: 1.4;
+}
+
+.pfg-item-caption:not(.pfg-item-caption--overlay) .pfg-item-description {
+  margin: 6px 0 8px 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--pfg-caption-text, #64748b);
+  line-height: 1.6;
 }
 
 .pfg-item-caption:not(.pfg-item-caption--overlay) .pfg-item-categories {
@@ -2292,5 +2291,14 @@
 
 .pfg-item-link--dual {
   position: relative;
+}
+
+/* Description below image */
+.pfg-item-description {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--pfg-caption-text, #64748b);
+  line-height: 1.5;
+  padding: 0 4px;
 }
 

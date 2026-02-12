@@ -60,6 +60,7 @@ class PFG_Gallery {
 
         // Thumbnail settings
         'show_title'           => array( 'default' => true, 'type' => 'bool' ),
+        'show_description'     => array( 'default' => false, 'type' => 'bool' ),
         'title_position'       => array( 'default' => 'overlay', 'type' => 'key' ),
         'show_categories'      => array( 'default' => false, 'type' => 'bool' ),
         'caption_bg_color'     => array( 'default' => '#ffffff', 'type' => 'hex_color' ),
@@ -101,7 +102,8 @@ class PFG_Gallery {
         'search_placeholder'   => array( 'default' => 'Search...', 'type' => 'text' ),
 
         // Sort settings
-        'sort_by_title'        => array( 'default' => '', 'type' => 'key' ),
+        'sort_order'           => array( 'default' => 'custom', 'type' => 'key' ),
+        'sort_by_title'        => array( 'default' => '', 'type' => 'key' ), // Legacy - kept for backward compat
 
         // Advanced settings
         'custom_css'           => array( 'default' => '', 'type' => 'css' ),

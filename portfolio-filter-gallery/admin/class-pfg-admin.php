@@ -358,6 +358,7 @@ class PFG_Admin {
             'lazy_loading'      => 'lazy_loading',
             'title_position'    => 'title_position',
             'show_categories'   => 'show_categories',
+            'show_description'  => 'show_description',
             'caption_bg_color'  => 'caption_bg_color',
             'caption_text_color'=> 'caption_text_color',
             'template'          => 'template',
@@ -368,12 +369,10 @@ class PFG_Admin {
             // URL Deep Linking
             'deep_linking'      => 'deep_linking',
             'url_param_name'    => 'url_param_name',
-            // Shuffle & Default Filter
-            'shuffle_images'    => 'shuffle_images',
+            // Sort Order & Default Filter
+            'sort_order'        => 'sort_order',
             'hide_type_icons'   => 'hide_type_icons',
             'default_filter'    => 'default_filter',
-            // Sort, Direction, URL Target
-            'sort_by_title'     => 'sort_by_title',
             'direction'         => 'direction',
             'url_target'        => 'url_target',
             // Filter Count
@@ -621,7 +620,7 @@ class PFG_Admin {
             'url_target'         => $settings['url_target'],
             'search_box'         => $settings['search_enabled'] ? 1 : 0,
             'search_txt'         => $settings['search_placeholder'],
-            'sort_by_title'      => $settings['sort_by_title'] ? 'asc' : 'no',
+            'sort_by_title'      => in_array( $settings['sort_order'], array( 'title_asc', 'title_desc' ), true ) ? ( $settings['sort_order'] === 'title_desc' ? 'desc' : 'asc' ) : 'no',
             'custom-css'         => $settings['custom_css'],
             'bootstrap_disable'  => 'no',
             'show_image_count'   => $settings['show_image_count'] ? 1 : 0,

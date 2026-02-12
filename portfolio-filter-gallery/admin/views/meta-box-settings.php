@@ -305,6 +305,18 @@ if ( class_exists( 'PFG_Templates' ) ) {
                 </label>
             </div>
             
+            <!-- Show Description -->
+            <div class="pfg-form-row">
+                <label class="pfg-form-label">
+                    <?php esc_html_e( 'Show Description', 'portfolio-filter-gallery' ); ?>
+                    <small><?php esc_html_e( 'Display image description below the title', 'portfolio-filter-gallery' ); ?></small>
+                </label>
+                <label class="pfg-toggle">
+                    <input type="checkbox" name="pfg_settings[show_description]" value="1" <?php checked( $settings['show_description'] ?? false ); ?>>
+                    <span class="pfg-toggle-slider"></span>
+                </label>
+            </div>
+            
             <!-- Show Categories -->
             <div class="pfg-form-row">
                 <label class="pfg-form-label">
@@ -768,16 +780,20 @@ if ( class_exists( 'PFG_Templates' ) ) {
                 <?php esc_html_e( 'Display & Behavior', 'portfolio-filter-gallery' ); ?>
             </h4>
             
-            <!-- Shuffle Images -->
+            <!-- Sort Order -->
             <div class="pfg-form-row">
                 <label class="pfg-form-label">
-                    <?php esc_html_e( 'Shuffle Images', 'portfolio-filter-gallery' ); ?>
-                    <small><?php esc_html_e( 'Randomize image order on each page load', 'portfolio-filter-gallery' ); ?></small>
+                    <?php esc_html_e( 'Sort Order', 'portfolio-filter-gallery' ); ?>
+                    <small><?php esc_html_e( 'Default display order for gallery images', 'portfolio-filter-gallery' ); ?></small>
                 </label>
-                <label class="pfg-toggle">
-                    <input type="checkbox" name="pfg_settings[shuffle_images]" id="pfg-shuffle-images" value="1" <?php checked( $settings['shuffle_images'] ?? false ); ?>>
-                    <span class="pfg-toggle-slider"></span>
-                </label>
+                <select name="pfg_settings[sort_order]" class="pfg-select">
+                    <option value="custom" <?php selected( $settings['sort_order'] ?? 'custom', 'custom' ); ?>><?php esc_html_e( 'Custom (Manual Order)', 'portfolio-filter-gallery' ); ?></option>
+                    <option value="date_newest" <?php selected( $settings['sort_order'] ?? 'custom', 'date_newest' ); ?>><?php esc_html_e( 'Newest First', 'portfolio-filter-gallery' ); ?></option>
+                    <option value="date_oldest" <?php selected( $settings['sort_order'] ?? 'custom', 'date_oldest' ); ?>><?php esc_html_e( 'Oldest First', 'portfolio-filter-gallery' ); ?></option>
+                    <option value="title_asc" <?php selected( $settings['sort_order'] ?? 'custom', 'title_asc' ); ?>><?php esc_html_e( 'Title A → Z', 'portfolio-filter-gallery' ); ?></option>
+                    <option value="title_desc" <?php selected( $settings['sort_order'] ?? 'custom', 'title_desc' ); ?>><?php esc_html_e( 'Title Z → A', 'portfolio-filter-gallery' ); ?></option>
+                    <option value="random" <?php selected( $settings['sort_order'] ?? 'custom', 'random' ); ?>><?php esc_html_e( 'Random / Shuffle', 'portfolio-filter-gallery' ); ?></option>
+                </select>
             </div>
             
             <!-- Hide Type Icons -->
@@ -830,18 +846,7 @@ if ( class_exists( 'PFG_Templates' ) ) {
                 </select>
             </div>
             
-            <!-- Sort Images by Title -->
-            <div class="pfg-form-row" id="pfg-sort-by-title-row" style="<?php echo ! empty( $settings['shuffle_images'] ) ? 'display:none;' : ''; ?>">
-                <label class="pfg-form-label">
-                    <?php esc_html_e( 'Sort Images by Title', 'portfolio-filter-gallery' ); ?>
-                    <small><?php esc_html_e( 'Alphabetically sort images (disabled when shuffle is on)', 'portfolio-filter-gallery' ); ?></small>
-                </label>
-                <select name="pfg_settings[sort_by_title]" id="pfg-sort-by-title" class="pfg-select">
-                    <option value="" <?php selected( $settings['sort_by_title'] ?? '', '' ); ?>><?php esc_html_e( 'No Sorting', 'portfolio-filter-gallery' ); ?></option>
-                    <option value="asc" <?php selected( $settings['sort_by_title'] ?? '', 'asc' ); ?>><?php esc_html_e( 'A to Z', 'portfolio-filter-gallery' ); ?></option>
-                    <option value="desc" <?php selected( $settings['sort_by_title'] ?? '', 'desc' ); ?>><?php esc_html_e( 'Z to A', 'portfolio-filter-gallery' ); ?></option>
-                </select>
-            </div>
+
             
             <!-- Gallery Direction -->
             <div class="pfg-form-row">
@@ -1466,11 +1471,17 @@ jQuery(document).ready(function($) {
         $template_data = array();
         foreach ( $templates as $id => $template ) {
             $template_data[ $id ] = array(
-                'columns'         => isset( $template['settings']['columns_lg'] ) ? $template['settings']['columns_lg'] : 3,
-                'gap'             => isset( $template['settings']['gap'] ) ? $template['settings']['gap'] : 20,
-                'border_radius'   => isset( $template['settings']['border_radius'] ) ? $template['settings']['border_radius'] : 0,
-                'title_position'  => isset( $template['settings']['title_position'] ) ? $template['settings']['title_position'] : 'overlay',
-                'show_categories' => isset( $template['settings']['show_categories'] ) ? (bool) $template['settings']['show_categories'] : false,
+                'columns'              => isset( $template['settings']['columns_lg'] ) ? $template['settings']['columns_lg'] : 3,
+                'columns_md'           => isset( $template['settings']['columns_md'] ) ? $template['settings']['columns_md'] : 2,
+                'columns_sm'           => isset( $template['settings']['columns_sm'] ) ? $template['settings']['columns_sm'] : 1,
+                'gap'                  => isset( $template['settings']['gap'] ) ? $template['settings']['gap'] : 20,
+                'border_radius'        => isset( $template['settings']['border_radius'] ) ? $template['settings']['border_radius'] : 0,
+                'hover_effect'         => isset( $template['settings']['hover_effect'] ) ? $template['settings']['hover_effect'] : 'fade',
+                'show_title'           => isset( $template['settings']['show_title'] ) ? (bool) $template['settings']['show_title'] : false,
+                'title_position'       => isset( $template['settings']['title_position'] ) ? $template['settings']['title_position'] : 'overlay',
+                'show_categories'      => isset( $template['settings']['show_categories'] ) ? (bool) $template['settings']['show_categories'] : false,
+                'justified_row_height' => isset( $template['settings']['justified_row_height'] ) ? $template['settings']['justified_row_height'] : 200,
+                'packed_min_size'      => isset( $template['settings']['packed_min_size'] ) ? $template['settings']['packed_min_size'] : 150,
             );
         }
         echo wp_json_encode( $template_data );
@@ -1504,14 +1515,53 @@ jQuery(document).ready(function($) {
         // Update Layout Type dropdown to match template
         $('#pfg-layout').val(layoutType).trigger('change');
         
-        // Note: We no longer auto-sync columns, gap, border radius etc. with template defaults
-        // User's current settings are preserved - they can manually adjust if needed
-        // Note: We no longer auto-sync any settings with template selection.
-        // User's settings for title_position, show_categories, columns, gap, etc. are all preserved.
-        // Templates only change the layout type now.
+        // Apply template defaults to sliders and inputs
         if (templateSettings[templateId]) {
-            // Show notification that template changed
-            showTemplateNotice('Template applied: ' + (layoutNames[layoutType] || layoutType) + ' layout');
+            var ts = templateSettings[templateId];
+            
+            // Helper: update a range slider and its display value
+            function applySlider(name, value, suffix) {
+                var $slider = $('input[name="pfg_settings[' + name + ']"]');
+                if ($slider.length) {
+                    $slider.val(value).trigger('input');
+                    $slider.siblings('.pfg-range-value').text(value + (suffix || ''));
+                }
+            }
+            
+            // Apply columns (desktop, tablet, mobile)
+            applySlider('columns', ts.columns, '');
+            applySlider('columns_md', ts.columns_md, '');
+            applySlider('columns_sm', ts.columns_sm, '');
+            
+            // Apply gap and border radius
+            applySlider('gap', ts.gap, 'px');
+            applySlider('border_radius', ts.border_radius, 'px');
+            
+            // Apply layout-specific settings
+            if (ts.justified_row_height) {
+                applySlider('justified_row_height', ts.justified_row_height, 'px');
+            }
+            if (ts.packed_min_size) {
+                applySlider('packed_min_size', ts.packed_min_size, 'px');
+            }
+            
+            // Apply hover effect
+            if (ts.hover_effect) {
+                $('select[name="pfg_settings[hover_effect]"]').val(ts.hover_effect);
+            }
+            
+            // Apply show title
+            var $showTitle = $('input[name="pfg_settings[show_title]"]');
+            if ($showTitle.length) {
+                $showTitle.prop('checked', !!ts.show_title);
+            }
+            
+            // Apply title position
+            if (ts.title_position) {
+                $('select[name="pfg_settings[title_position]"]').val(ts.title_position);
+            }
+            
+            showTemplateNotice('Template applied: ' + $this.find('.pfg-template-name').text());
         }
         
         // Update layout options visibility (without triggering the change handler conflict)
@@ -1616,15 +1666,7 @@ jQuery(document).ready(function($) {
     // On source change
     $('#pfg-source').on('change', updateWooOptions);
     
-    // Shuffle Images / Sort by Title toggle
-    $('#pfg-shuffle-images').on('change', function() {
-        if ($(this).is(':checked')) {
-            $('#pfg-sort-by-title-row').hide();
-            $('#pfg-sort-by-title').val(''); // Reset sort when shuffle is enabled
-        } else {
-            $('#pfg-sort-by-title-row').show();
-        }
-    });
+
     
     // Watermark toggle
     $('#pfg-watermark-enabled').on('change', function() {

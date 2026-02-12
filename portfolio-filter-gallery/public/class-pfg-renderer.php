@@ -81,20 +81,44 @@ class PFG_Renderer {
         $pagination_type    = $this->settings['pagination_type'] ?? 'load_more';
         $items_per_page     = absint( $this->settings['items_per_page'] ?? 12 );
 
-        // Shuffle images if enabled
-        if ( ! empty( $this->settings['shuffle_images'] ) ) {
-            shuffle( $this->images );
+        // Sort images based on sort_order setting
+        $sort_order = $this->settings['sort_order'] ?? 'custom';
+
+        // Backward compat: derive sort_order from old settings if still 'custom'
+        if ( $sort_order === 'custom' ) {
+            if ( ! empty( $this->settings['shuffle_images'] ) ) {
+                $sort_order = 'random';
+            } elseif ( ! empty( $this->settings['sort_by_title'] ) ) {
+                $sort_order = ( $this->settings['sort_by_title'] === 'desc' ) ? 'title_desc' : 'title_asc';
+            }
         }
 
-        // Sort images by title if enabled (asc or desc)
-        if ( ! empty( $this->settings['sort_by_title'] ) && empty( $this->settings['shuffle_images'] ) ) {
-            $sort_order = $this->settings['sort_by_title'];
-            usort( $this->images, function( $a, $b ) use ( $sort_order ) {
-                $title_a = isset( $a['title'] ) ? $a['title'] : '';
-                $title_b = isset( $b['title'] ) ? $b['title'] : '';
-                $result = strcasecmp( $title_a, $title_b );
-                return ( $sort_order === 'desc' ) ? -$result : $result;
-            });
+        switch ( $sort_order ) {
+            case 'random':
+                shuffle( $this->images );
+                break;
+            case 'title_asc':
+                usort( $this->images, function( $a, $b ) {
+                    return strcasecmp( $a['title'] ?? '', $b['title'] ?? '' );
+                });
+                break;
+            case 'title_desc':
+                usort( $this->images, function( $a, $b ) {
+                    return strcasecmp( $b['title'] ?? '', $a['title'] ?? '' );
+                });
+                break;
+            case 'date_newest':
+                usort( $this->images, function( $a, $b ) {
+                    return ( $b['id'] ?? 0 ) - ( $a['id'] ?? 0 );
+                });
+                break;
+            case 'date_oldest':
+                usort( $this->images, function( $a, $b ) {
+                    return ( $a['id'] ?? 0 ) - ( $b['id'] ?? 0 );
+                });
+                break;
+            default: // 'custom' - keep original order
+                break;
         }
 
         // Determine active filter: URL param > Default setting > null
@@ -936,11 +960,15 @@ class PFG_Renderer {
         echo '</a>';
         
         // Caption below for below mode (same structure as images)
-        if ( $title_position === 'below' && ( $show_title || $show_price ) ) {
+        if ( $title_position === 'below' && ( $show_title || $show_price || ! empty( $this->settings['show_description'] ) ) ) {
             echo '<div class="pfg-item-caption">';
             
             if ( $show_title && ! empty( $image['title'] ) ) {
                 echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
+            }
+            
+            if ( ! empty( $this->settings['show_description'] ) && ! empty( $image['description'] ) ) {
+                echo '<p class="pfg-item-description">' . esc_html( $image['description'] ) . '</p>';
             }
             
             if ( $show_price && isset( $product_data['price'] ) ) {
@@ -1139,7 +1167,7 @@ class PFG_Renderer {
         }
 
         // Card caption below image (when title_position is 'below')
-        if ( $title_position === 'below' && ( $this->settings['show_title'] || $show_categories ) ) {
+        if ( $title_position === 'below' && ( $this->settings['show_title'] || $this->settings['show_description'] || $show_categories ) ) {
             echo '<div class="pfg-item-caption">';
             
             if ( $this->settings['show_numbering'] ) {
@@ -1148,6 +1176,10 @@ class PFG_Renderer {
             
             if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
                 echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
+            }
+            
+            if ( ! empty( $this->settings['show_description'] ) && ! empty( $image['description'] ) ) {
+                echo '<p class="pfg-item-description">' . esc_html( $image['description'] ) . '</p>';
             }
             
             if ( $show_categories ) {
@@ -1246,7 +1278,7 @@ class PFG_Renderer {
         echo '</a>';
 
         // Card caption below image (when title_position is 'below')
-        if ( $title_position === 'below' && ( $this->settings['show_title'] || $show_categories ) ) {
+        if ( $title_position === 'below' && ( $this->settings['show_title'] || $this->settings['show_description'] || $show_categories ) ) {
             echo '<div class="pfg-item-caption">';
             
             if ( $this->settings['show_numbering'] ) {
@@ -1255,6 +1287,10 @@ class PFG_Renderer {
             
             if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
                 echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
+            }
+            
+            if ( ! empty( $this->settings['show_description'] ) && ! empty( $image['description'] ) ) {
+                echo '<p class="pfg-item-description">' . esc_html( $image['description'] ) . '</p>';
             }
             
             if ( $show_categories ) {

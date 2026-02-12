@@ -5,7 +5,7 @@ Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.5
+Stable tag: 2.0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -242,6 +242,10 @@ Yes. The plugin is translation-ready and works with WPML and other translation p
 Visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/) for assistance. For premium support, visit the [developer website](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/).
 
 == Changelog ==
+
+= 2.0.6 =
+* Fixed: Description text color now uses caption color setting instead of hardcoded value
+* Fixed: Masonry columns now display horizontally instead of vertically
 
 = 2.0.5 =
 * Fixed: Legacy migration now correctly extracts alt text, descriptions, and links

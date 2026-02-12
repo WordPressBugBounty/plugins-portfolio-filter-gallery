@@ -379,8 +379,23 @@
                 },
                 success: function(response) {
                     if (response.success) {
+                        // Remove from master array BEFORE removing from DOM
+                        if (typeof window.pfgRemoveImageFromMaster === 'function') {
+                            window.pfgRemoveImageFromMaster(imageId);
+                        }
+                        
                         $item.fadeOut(300, function() {
                             $(this).remove();
+                            
+                            // Mark as structurally modified
+                            if (typeof window.pfgMarkImagesModified === 'function') {
+                                window.pfgMarkImagesModified();
+                            }
+                            
+                            // Update pagination UI
+                            if (typeof window.pfgUpdatePaginationUI === 'function') {
+                                window.pfgUpdatePaginationUI();
+                            }
                         });
                     } else {
                         PFGAdmin.showNotice('error', response.data.message);
@@ -412,6 +427,8 @@
                 order.push($(this).data('id'));
             });
 
+            console.log('PFG Free: updateImageOrder called with ' + order.length + ' images');
+
             $.ajax({
                 url: pfgAdmin.ajaxUrl,
                 type: 'POST',
@@ -423,9 +440,18 @@
                 }
             });
             
+            // Reorder master array to ensure save works correctly
+            if (typeof window.pfgReorderMasterArray === 'function') {
+                window.pfgReorderMasterArray(order);
+                console.log('PFG Free: Master array reordered via pfgReorderMasterArray');
+            } else {
+                console.error('PFG Free: pfgReorderMasterArray function NOT FOUND!');
+            }
+            
             // Mark images as modified for chunked save
             if (typeof window.pfgMarkImagesModified === 'function') {
                 window.pfgMarkImagesModified();
+                console.log('PFG Free: Images marked as modified');
             }
         },
 

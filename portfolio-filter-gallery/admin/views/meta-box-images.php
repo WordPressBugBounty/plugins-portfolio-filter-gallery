@@ -32,6 +32,7 @@ if ( $is_woo_gallery ) {
         'orderby'    => isset( $settings['woo_orderby'] ) ? $settings['woo_orderby'] : 'date',
         'order'      => isset( $settings['woo_order'] ) ? strtoupper( $settings['woo_order'] ) : 'DESC',
         'limit'      => isset( $settings['woo_limit'] ) ? intval( $settings['woo_limit'] ) : -1,
+        'image_size' => 'thumbnail', // Use thumbnails for faster admin preview
     );
     $products = PFG_WooCommerce::get_products( $woo_args );
     $images = array(); // Not used for WooCommerce
@@ -381,6 +382,211 @@ $filter_tree = pfg_build_filter_tree_for_images( $filters );
             <span class="dashicons dashicons-trash"></span>
             <?php esc_html_e( 'Delete Selected', 'portfolio-filter-gallery' ); ?>
         </button>
+        
+        <!-- Sort Order (inline in toolbar) -->
+        <div style="border-left: 1px solid #e2e8f0; padding-left: 15px; margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <span class="dashicons dashicons-sort" style="font-size: 16px; width: 16px; height: 16px; color: #94a3b8;"></span>
+            <select id="pfg-sort-order-images" class="pfg-select" style="max-width: 200px; margin: 0; font-size: 13px;">
+                <option value="custom" <?php selected( $settings['sort_order'] ?? 'custom', 'custom' ); ?>><?php esc_html_e( 'Custom Order', 'portfolio-filter-gallery' ); ?></option>
+                <option value="date_newest" <?php selected( $settings['sort_order'] ?? 'custom', 'date_newest' ); ?>><?php esc_html_e( 'Newest First', 'portfolio-filter-gallery' ); ?></option>
+                <option value="date_oldest" <?php selected( $settings['sort_order'] ?? 'custom', 'date_oldest' ); ?>><?php esc_html_e( 'Oldest First', 'portfolio-filter-gallery' ); ?></option>
+                <option value="title_asc" <?php selected( $settings['sort_order'] ?? 'custom', 'title_asc' ); ?>><?php esc_html_e( 'Title A → Z', 'portfolio-filter-gallery' ); ?></option>
+                <option value="title_desc" <?php selected( $settings['sort_order'] ?? 'custom', 'title_desc' ); ?>><?php esc_html_e( 'Title Z → A', 'portfolio-filter-gallery' ); ?></option>
+                <option value="random" <?php selected( $settings['sort_order'] ?? 'custom', 'random' ); ?>><?php esc_html_e( 'Random', 'portfolio-filter-gallery' ); ?></option>
+            </select>
+        </div>
+    </div>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        // Defer sort setup until master array and pagination are ready
+        setTimeout(function() {
+            var $settingsSelect = $('select[name="pfg_settings[sort_order]"]');
+            var $imagesSelect = $('#pfg-sort-order-images');
+            
+            // Store original order for "custom" restore
+            var originalOrder = [];
+            if (typeof window.pfgGetMasterImages === 'function') {
+                var master = window.pfgGetMasterImages();
+                for (var i = 0; i < master.length; i++) {
+                    originalOrder.push(parseInt(master[i].id, 10));
+                }
+            }
+            
+            function sortMasterImages(order) {
+                if (typeof window.pfgGetMasterImages !== 'function') return;
+                var master = window.pfgGetMasterImages();
+                if (!master.length) return;
+                
+                switch(order) {
+                    case 'title_asc':
+                        master.sort(function(a, b) {
+                            var tA = (a.title || '').toLowerCase();
+                            var tB = (b.title || '').toLowerCase();
+                            return tA.localeCompare(tB);
+                        });
+                        break;
+                    case 'title_desc':
+                        master.sort(function(a, b) {
+                            var tA = (a.title || '').toLowerCase();
+                            var tB = (b.title || '').toLowerCase();
+                            return tB.localeCompare(tA);
+                        });
+                        break;
+                    case 'date_newest':
+                        master.sort(function(a, b) {
+                            return parseInt(b.id, 10) - parseInt(a.id, 10);
+                        });
+                        break;
+                    case 'date_oldest':
+                        master.sort(function(a, b) {
+                            return parseInt(a.id, 10) - parseInt(b.id, 10);
+                        });
+                        break;
+                    case 'random':
+                        for (var i = master.length - 1; i > 0; i--) {
+                            var j = Math.floor(Math.random() * (i + 1));
+                            var temp = master[i]; master[i] = master[j]; master[j] = temp;
+                        }
+                        break;
+                    case 'custom':
+                    default:
+                        master.sort(function(a, b) {
+                            var idA = parseInt(a.id, 10);
+                            var idB = parseInt(b.id, 10);
+                            var indexA = originalOrder.indexOf(idA);
+                            var indexB = originalOrder.indexOf(idB);
+                            if (indexA === -1) indexA = 99999;
+                            if (indexB === -1) indexB = 99999;
+                            return indexA - indexB;
+                        });
+                        break;
+                }
+                
+                // Save sorted order to DB via AJAX, then reload page 1
+                var $grid = $('#pfg-image-grid');
+                var adminNonce = '<?php echo wp_create_nonce( "pfg_admin_nonce" ); ?>';
+                var galleryId = <?php echo (int) $gallery_id; ?>;
+                
+                $grid.addClass('pfg-loading');
+                
+                // Save all images as a single chunk
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'pfg_save_images_chunk',
+                        nonce: adminNonce,
+                        gallery_id: galleryId,
+                        chunk_index: 0,
+                        total_chunks: 1,
+                        images: JSON.stringify(master)
+                    },
+                    success: function() {
+                        // Now reload page 1 from server (DB now has sorted order)
+                        $.ajax({
+                            url: ajaxurl,
+                            type: 'POST',
+                            data: {
+                                action: 'pfg_get_admin_images_page',
+                                nonce: adminNonce,
+                                gallery_id: galleryId,
+                                page: 1,
+                                per_page: 50
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    $grid.html(response.data.html);
+                                    // Update pagination UI if visible
+                                    if ($('#pfg-pagination-controls').length) {
+                                        $('#pfg-showing-start').text(response.data.showing_start || 1);
+                                        $('#pfg-showing-end').text(response.data.showing_end || master.length);
+                                        $('#pfg-total-count').text(response.data.total_images || master.length);
+                                        $('#pfg-page-input').val(1);
+                                    }
+                                    // Refresh sortable
+                                    if ($.fn.sortable && $grid.data('ui-sortable')) {
+                                        $grid.sortable('refresh');
+                                    }
+                                }
+                                $grid.removeClass('pfg-loading');
+                            },
+                            error: function() {
+                                $grid.removeClass('pfg-loading');
+                            }
+                        });
+                    },
+                    error: function() {
+                        // Fallback: just sort visible DOM elements
+                        var $items = $grid.find('.pfg-image-item').detach().toArray();
+                        if ($items.length) {
+                            var idOrder = master.map(function(m) { return parseInt(m.id, 10); });
+                            $items.sort(function(a, b) {
+                                return idOrder.indexOf($(a).data('id')) - idOrder.indexOf($(b).data('id'));
+                            });
+                            $.each($items, function(i, item) { $grid.append(item); });
+                        }
+                        $grid.removeClass('pfg-loading');
+                    }
+                });
+                
+                console.log('PFG: Sorted ' + master.length + ' images by ' + order);
+            }
+            
+            // Sort order change handlers
+            $imagesSelect.on('change', function() {
+                var val = $(this).val();
+                $settingsSelect.val(val);
+                $settingsSelect.find('option').prop('selected', false);
+                $settingsSelect.find('option[value="' + val + '"]').prop('selected', true);
+                sortMasterImages(val);
+            });
+            
+            $settingsSelect.on('change', function() {
+                var val = $(this).val();
+                $imagesSelect.val(val);
+                sortMasterImages(val);
+            });
+            
+            // CRITICAL: Sync sort_order to settings select just before form submission
+            $('form#post').on('submit', function() {
+                var currentVal = $imagesSelect.val();
+                if (currentVal && $settingsSelect.length) {
+                    $settingsSelect.val(currentVal);
+                    $settingsSelect.find('option').prop('selected', false);
+                    $settingsSelect.find('option[value="' + currentVal + '"]').prop('selected', true);
+                }
+            });
+        }, 500); // Wait for master array initialization
+    });
+    </script>
+    
+    <!-- Pagination Controls (placed above grid like Pro version) -->
+    <div id="pfg-pagination-controls" class="pfg-pagination-controls" style="display: none; margin-bottom: 15px; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+            <div class="pfg-pagination-info" style="color: #64748b; font-size: 13px;">
+                <?php esc_html_e( 'Showing', 'portfolio-filter-gallery' ); ?>
+                <span id="pfg-page-start">1</span>-<span id="pfg-page-end">50</span>
+                <?php esc_html_e( 'of', 'portfolio-filter-gallery' ); ?>
+                <span id="pfg-total-images">0</span>
+                <?php esc_html_e( 'images', 'portfolio-filter-gallery' ); ?>
+            </div>
+            <div class="pfg-pagination-buttons" style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="pfg-page-prev" class="pfg-btn pfg-btn-secondary" style="padding: 6px 12px;" disabled>
+                    <span class="dashicons dashicons-arrow-left-alt2" style="width: 16px; height: 16px; font-size: 16px;"></span>
+                    <?php esc_html_e( 'Previous', 'portfolio-filter-gallery' ); ?>
+                </button>
+                <span id="pfg-page-numbers" style="display: flex; gap: 4px;"></span>
+                <button type="button" id="pfg-page-next" class="pfg-btn pfg-btn-secondary" style="padding: 6px 12px;">
+                    <?php esc_html_e( 'Next', 'portfolio-filter-gallery' ); ?>
+                    <span class="dashicons dashicons-arrow-right-alt2" style="width: 16px; height: 16px; font-size: 16px;"></span>
+                </button>
+            </div>
+            <div class="pfg-pagination-loading" style="display: none; color: #3b82f6;">
+                <span class="spinner is-active" style="float: none; margin: 0 5px 0 0;"></span>
+                <?php esc_html_e( 'Loading...', 'portfolio-filter-gallery' ); ?>
+            </div>
+        </div>
     </div>
     
     <!-- Image Grid -->
@@ -391,11 +597,17 @@ $filter_tree = pfg_build_filter_tree_for_images( $filters );
                 <p><?php esc_html_e( 'No images yet. Add some to get started!', 'portfolio-filter-gallery' ); ?></p>
             </div>
         <?php else : ?>
-            <?php foreach ( $images as $index => $image ) : 
+            <?php 
+            // For large galleries, only render first page (50 images) on initial load
+            // JavaScript pagination handles subsequent pages from masterImagesArray
+            $pagination_threshold = 50;
+            $display_images = ( count( $images ) > $pagination_threshold ) ? array_slice( $images, 0, $pagination_threshold, true ) : $images;
+            ?>
+            <?php foreach ( $display_images as $index => $image ) : 
                 $attachment = get_post( $image['id'] );
                 if ( ! $attachment ) continue;
                 
-                $thumb_url = wp_get_attachment_image_url( $image['id'], 'medium' );
+                $thumb_url = wp_get_attachment_image_url( $image['id'], 'thumbnail' );
                 $title     = ! empty( $image['title'] ) ? $image['title'] : $attachment->post_title;
                 $image_filters = isset( $image['filters'] ) ? $image['filters'] : array();
             ?>
@@ -503,7 +715,27 @@ $filter_tree = pfg_build_filter_tree_for_images( $filters );
     <?php endif; ?>
     
     <!-- Hidden field for JSON-serialized image data (bypasses max_input_vars limit) -->
-    <textarea name="pfg_images_json" id="pfg-images-json" style="display: none;"></textarea>
+    <?php
+    // Pre-populate with all images for masterImagesArray initialization
+    $json_images = array();
+    if ( ! empty( $images ) && is_array( $images ) ) {
+        foreach ( $images as $img ) {
+            $json_images[] = array(
+                'id'           => (int) $img['id'],
+                'title'        => $img['title'] ?? '',
+                'alt'          => $img['alt'] ?? '',
+                'description'  => $img['description'] ?? '',
+                'link'         => $img['link'] ?? '',
+                'type'         => $img['type'] ?? 'image',
+                'filters'      => is_array( $img['filters'] ?? null ) ? implode( ',', $img['filters'] ) : ( $img['filters'] ?? '' ),
+                'product_id'   => $img['product_id'] ?? '',
+                'product_name' => $img['product_name'] ?? '',
+                'original_id'  => $img['original_id'] ?? $img['id'],
+            );
+        }
+    }
+    ?>
+    <textarea name="pfg_images_json" id="pfg-images-json" style="display: none;"><?php echo esc_textarea( wp_json_encode( $json_images ) ); ?></textarea>
     
 </div>
 
@@ -978,6 +1210,327 @@ jQuery(document).ready(function($) {
     var originalImageData = null; // Store original image for revert functionality
     
     // ========================================
+    // PAGINATION CONFIGURATION
+    // ========================================
+    var PAGINATION_THRESHOLD = 50; // Show pagination when images exceed this
+    var IMAGES_PER_PAGE = 50;
+    var paginationCurrentPage = 1;
+    var paginationTotalPages = 1;
+    var paginationTotalImages = 0;
+    var paginationLoading = false;
+    
+    // ========================================
+    // MASTER IMAGES ARRAY
+    // ========================================
+    // This holds ALL images for the gallery, regardless of pagination
+    // The DOM only shows the current page, but this array is the source of truth
+    var masterImagesArray = [];
+    
+    // Initialize masterImagesArray from JSON textarea or DOM
+    var initialJsonData = $('#pfg-images-json').val();
+    if (initialJsonData && initialJsonData !== '' && initialJsonData !== '[]') {
+        try {
+            masterImagesArray = JSON.parse(initialJsonData);
+            console.log('PFG Free: Initialized masterImagesArray from JSON with ' + masterImagesArray.length + ' images');
+        } catch(e) {
+            console.error('PFG Free: Failed to parse initial JSON:', e);
+            masterImagesArray = [];
+        }
+    }
+    
+    // If no JSON data, populate from DOM (backward compatibility)
+    if (masterImagesArray.length === 0) {
+        $('.pfg-image-item:not(.pfg-product-preview-item)').each(function() {
+            var $item = $(this);
+            var imageData = {
+                id: parseInt($item.data('id'), 10) || parseInt($item.find('input[name$="[id]"]').val(), 10),
+                title: $item.find('input[name$="[title]"]').val() || '',
+                alt: $item.find('input[name$="[alt]"]').val() || '',
+                description: $item.find('input[name$="[description]"]').val() || '',
+                link: $item.find('input[name$="[link]"]').val() || '',
+                type: $item.find('input[name$="[type]"]').val() || 'image',
+                filters: $item.find('input[name$="[filters]"]').val() || '',
+                product_id: $item.find('input[name$="[product_id]"]').val() || '',
+                product_name: $item.find('input[name$="[product_name]"]').val() || '',
+                original_id: $item.find('input[name$="[original_id]"]').val() || ''
+            };
+            if (imageData.id) {
+                masterImagesArray.push(imageData);
+            }
+        });
+        console.log('PFG Free: Initialized masterImagesArray from DOM with ' + masterImagesArray.length + ' images');
+    }
+    
+    // Update pagination info
+    paginationTotalImages = masterImagesArray.length;
+    paginationTotalPages = Math.max(1, Math.ceil(paginationTotalImages / IMAGES_PER_PAGE));
+    
+    // Expose masterImagesArray globally for sort handler
+    window.pfgGetMasterImages = function() { return masterImagesArray; };
+    
+    // Sync current page DOM changes to masterImagesArray
+    function syncCurrentPageToMaster() {
+        $('.pfg-image-item:not(.pfg-product-preview-item)').each(function() {
+            var $item = $(this);
+            var imageId = parseInt($item.data('id'), 10);
+            
+            // Find this image in master array
+            for (var i = 0; i < masterImagesArray.length; i++) {
+                if (parseInt(masterImagesArray[i].id, 10) === imageId) {
+                    // Update from hidden inputs
+                    masterImagesArray[i].title = $item.find('input[name$="[title]"]').val() || masterImagesArray[i].title;
+                    masterImagesArray[i].alt = $item.find('input[name$="[alt]"]').val() || masterImagesArray[i].alt;
+                    masterImagesArray[i].description = $item.find('input[name$="[description]"]').val() || masterImagesArray[i].description;
+                    masterImagesArray[i].link = $item.find('input[name$="[link]"]').val() || masterImagesArray[i].link;
+                    masterImagesArray[i].type = $item.find('input[name$="[type]"]').val() || masterImagesArray[i].type;
+                    masterImagesArray[i].filters = $item.find('input[name$="[filters]"]').val() || masterImagesArray[i].filters;
+                    break;
+                }
+            }
+        });
+    }
+    
+    // Reorder master array based on new order IDs
+    function reorderMasterArray(newOrderIds) {
+        if (!Array.isArray(newOrderIds) || newOrderIds.length === 0) return;
+        
+        // Normalize IDs to integers
+        var normalizedNewOrderIds = newOrderIds.map(function(id) {
+            return parseInt(id, 10);
+        });
+        
+        // Create lookup map
+        var idMap = {};
+        masterImagesArray.forEach(function(img) {
+            idMap[parseInt(img.id, 10)] = img;
+        });
+        
+        var newMasterArray = [];
+        normalizedNewOrderIds.forEach(function(id) {
+            if (idMap[id]) {
+                newMasterArray.push(idMap[id]);
+                delete idMap[id];
+            }
+        });
+        
+        // Add remaining images (from other pages)
+        Object.keys(idMap).forEach(function(key) {
+            newMasterArray.push(idMap[key]);
+        });
+        
+        masterImagesArray = newMasterArray;
+        console.log('PFG Free: Master array reordered');
+    }
+    
+    // Remove image from master array
+    function removeImageFromMaster(imageId) {
+        var normalizedId = parseInt(imageId, 10);
+        masterImagesArray = masterImagesArray.filter(function(img) {
+            return parseInt(img.id, 10) !== normalizedId;
+        });
+        paginationTotalImages = masterImagesArray.length;
+        paginationTotalPages = Math.max(1, Math.ceil(paginationTotalImages / IMAGES_PER_PAGE));
+        console.log('PFG Free: Removed image ' + imageId + ' from master array');
+    }
+    
+    // Expose functions globally
+    window.pfgReorderMasterArray = reorderMasterArray;
+    window.pfgRemoveImageFromMaster = removeImageFromMaster;
+    window.pfgSyncCurrentPageToMaster = syncCurrentPageToMaster;
+    // Note: pfgUpdatePaginationUI and pfgMarkImagesModified are exposed after their definitions below
+    
+    // ========================================
+    // PAGINATION FUNCTIONS
+    // ========================================
+    
+    // Update pagination UI based on current state
+    function updatePaginationUI() {
+        var $controls = $('#pfg-pagination-controls');
+        
+        // Show/hide based on threshold
+        if (masterImagesArray.length > PAGINATION_THRESHOLD) {
+            $controls.show();
+            
+            // Update counts
+            var start = ((paginationCurrentPage - 1) * IMAGES_PER_PAGE) + 1;
+            var end = Math.min(paginationCurrentPage * IMAGES_PER_PAGE, paginationTotalImages);
+            
+            $('#pfg-page-start').text(start);
+            $('#pfg-page-end').text(end);
+            $('#pfg-total-images').text(paginationTotalImages);
+            
+            // Update button states
+            $('#pfg-page-prev').prop('disabled', paginationCurrentPage <= 1);
+            $('#pfg-page-next').prop('disabled', paginationCurrentPage >= paginationTotalPages);
+            
+            // Render page numbers
+            var $pageNumbers = $('#pfg-page-numbers');
+            $pageNumbers.empty();
+            
+            // Show up to 5 page numbers centered around current page
+            var startPage = Math.max(1, paginationCurrentPage - 2);
+            var endPage = Math.min(paginationTotalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (var i = startPage; i <= endPage; i++) {
+                var $btn = $('<button type="button" class="pfg-page-num" style="min-width: 32px; padding: 6px 10px; border: 1px solid #e2e8f0; background: ' + (i === paginationCurrentPage ? '#3858e9' : '#fff') + '; color: ' + (i === paginationCurrentPage ? '#fff' : '#475569') + '; border-radius: 4px; cursor: pointer; font-weight: 500;">' + i + '</button>');
+                $btn.data('page', i);
+                $pageNumbers.append($btn);
+            }
+        } else {
+            $controls.hide();
+        }
+    }
+    
+    // Render images for current page from masterImagesArray
+    function renderCurrentPage() {
+        if (paginationLoading) return;
+        
+        // Sync current DOM changes before switching
+        syncCurrentPageToMaster();
+        
+        var $grid = $('#pfg-image-grid');
+        var $loading = $('.pfg-pagination-loading');
+        
+        paginationLoading = true;
+        $loading.show();
+        
+        // Calculate slice
+        var start = (paginationCurrentPage - 1) * IMAGES_PER_PAGE;
+        var end = start + IMAGES_PER_PAGE;
+        var pageImages = masterImagesArray.slice(start, end);
+        
+        // Build HTML for this page
+        var html = '';
+        if (pageImages.length === 0) {
+            html = '<div class="pfg-no-images"><span class="dashicons dashicons-format-gallery"></span><p><?php esc_html_e( 'No images yet. Add some to get started!', 'portfolio-filter-gallery' ); ?></p></div>';
+        } else {
+            pageImages.forEach(function(image, idx) {
+                var actualIndex = start + idx;
+                var filters = image.filters || '';
+                var imageType = image.type || 'image';
+                
+                html += '<div class="pfg-image-item" data-id="' + image.id + '" data-index="' + actualIndex + '">';
+                html += '<label class="pfg-image-checkbox" style="position: absolute; top: 8px; left: 8px; z-index: 10;">';
+                html += '<input type="checkbox" class="pfg-image-select" style="width: 18px; height: 18px; cursor: pointer;">';
+                html += '</label>';
+                
+                // Type badge for video/url
+                if (imageType === 'video' || imageType === 'url') {
+                    var badgeClass = 'pfg-image-type-badge';
+                    var badgeIcon = 'dashicons-external';
+                    if (imageType === 'video') {
+                        if (image.link && image.link.indexOf('youtube') !== -1) {
+                            badgeClass += ' pfg-badge-youtube';
+                            badgeIcon = 'dashicons-youtube';
+                        } else if (image.link && image.link.indexOf('vimeo') !== -1) {
+                            badgeClass += ' pfg-badge-vimeo';
+                            badgeIcon = 'dashicons-video-alt3';
+                        } else {
+                            badgeClass += ' pfg-badge-video';
+                            badgeIcon = 'dashicons-video-alt3';
+                        }
+                    }
+                    html += '<div class="' + badgeClass + '"><span class="dashicons ' + badgeIcon + '"></span></div>';
+                }
+                
+                // Use AJAX to get thumbnail URL later, for now use placeholder
+                html += '<img src="" alt="" class="pfg-image-thumb" data-image-id="' + image.id + '" loading="lazy">';
+                
+                html += '<div class="pfg-image-actions">';
+                html += '<button type="button" class="pfg-image-action pfg-image-edit" title="Edit"><span class="dashicons dashicons-edit"></span></button>';
+                html += '<button type="button" class="pfg-image-action pfg-image-delete" title="Delete"><span class="dashicons dashicons-trash"></span></button>';
+                html += '</div>';
+                
+                html += '<div class="pfg-image-info">';
+                html += '<p class="pfg-image-title">' + (image.title || 'Untitled') + '</p>';
+                html += '</div>';
+                
+                // Hidden inputs
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][id]" value="' + image.id + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][title]" value="' + (image.title || '') + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][alt]" value="' + (image.alt || '') + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][description]" value="' + (image.description || '') + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][link]" value="' + (image.link || '') + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][type]" value="' + (image.type || 'image') + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][filters]" value="' + filters + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][product_id]" value="' + (image.product_id || '') + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][product_name]" value="' + (image.product_name || '') + '">';
+                html += '<input type="hidden" name="pfg_images[' + actualIndex + '][original_id]" value="' + (image.original_id || image.id) + '">';
+                
+                html += '</div>';
+            });
+        }
+        
+        $grid.html(html);
+        
+        // Load thumbnails via AJAX
+        loadThumbnails(pageImages);
+        
+        // Re-initialize Sortable
+        if (window.PFGAdmin && typeof window.PFGAdmin.initSortable === 'function') {
+            window.PFGAdmin.initSortable();
+        }
+        
+        paginationLoading = false;
+        $loading.hide();
+        
+        updatePaginationUI();
+    }
+    
+    // Load thumbnails for displayed images
+    function loadThumbnails(images) {
+        if (!images || images.length === 0) return;
+        
+        var ids = images.map(function(img) { return img.id; });
+        
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'pfg_get_thumbnails',
+                nonce: '<?php echo wp_create_nonce( 'pfg_admin_nonce' ); ?>',
+                image_ids: ids
+            },
+            success: function(response) {
+                if (response.success && response.data.thumbnails) {
+                    $.each(response.data.thumbnails, function(id, url) {
+                        $('img.pfg-image-thumb[data-image-id="' + id + '"]').attr('src', url);
+                    });
+                }
+            }
+        });
+    }
+    
+    // Handle page navigation
+    function goToPage(page) {
+        if (page < 1 || page > paginationTotalPages || page === paginationCurrentPage) return;
+        
+        paginationCurrentPage = page;
+        renderCurrentPage();
+    }
+    
+    // Pagination event handlers
+    $('#pfg-page-prev').on('click', function() {
+        goToPage(paginationCurrentPage - 1);
+    });
+    
+    $('#pfg-page-next').on('click', function() {
+        goToPage(paginationCurrentPage + 1);
+    });
+    
+    $(document).on('click', '.pfg-page-num', function() {
+        goToPage($(this).data('page'));
+    });
+    
+    // Initialize pagination on load
+    paginationTotalImages = masterImagesArray.length;
+    paginationTotalPages = Math.max(1, Math.ceil(paginationTotalImages / IMAGES_PER_PAGE));
+    updatePaginationUI();
+    
+    // ========================================
     // CHUNKED SAVE CONFIGURATION
     // ========================================
     var CHUNK_SIZE = 50;           // Images per chunk
@@ -1006,30 +1559,28 @@ jQuery(document).ready(function($) {
     
     // Expose to global scope for pfg-admin.js integration
     window.pfgMarkImagesModified = markStructurallyModified;
+    window.pfgUpdatePaginationUI = updatePaginationUI;
     
-    // Get all image data as array
+    // Get all image data as array - uses masterImagesArray for pagination support
     function getAllImagesData() {
-        var imagesData = [];
-        $('.pfg-image-item:not(.pfg-product-preview-item)').each(function() {
-            var $item = $(this);
-            var imageData = {
-                id: $item.find('input[name$="[id]"]').val() || $item.data('id'),
-                title: $item.find('input[name$="[title]"]').val() || '',
-                alt: $item.find('input[name$="[alt]"]').val() || '',
-                description: $item.find('input[name$="[description]"]').val() || '',
-                link: $item.find('input[name$="[link]"]').val() || '',
-                type: $item.find('input[name$="[type]"]').val() || 'image',
-                filters: $item.find('input[name$="[filters]"]').val() || '',
-                product_id: $item.find('input[name$="[product_id]"]').val() || '',
-                product_name: $item.find('input[name$="[product_name]"]').val() || '',
-                original_id: $item.find('input[name$="[original_id]"]').val() || ''
+        // First sync any DOM changes to master array
+        syncCurrentPageToMaster();
+        
+        // Return the master array (contains ALL images, not just current page)
+        return masterImagesArray.map(function(img) {
+            return {
+                id: img.id,
+                title: img.title || '',
+                alt: img.alt || '',
+                description: img.description || '',
+                link: img.link || '',
+                type: img.type || 'image',
+                filters: img.filters || '',
+                product_id: img.product_id || '',
+                product_name: img.product_name || '',
+                original_id: img.original_id || ''
             };
-            
-            if (imageData.id) {
-                imagesData.push(imageData);
-            }
         });
-        return imagesData;
     }
     
     // Split array into chunks
@@ -1498,10 +2049,21 @@ jQuery(document).ready(function($) {
         e.stopPropagation();
         
         if (confirm('<?php esc_html_e( 'Remove this image from the gallery?', 'portfolio-filter-gallery' ); ?>')) {
-            $(this).closest('.pfg-image-item').fadeOut(200, function() {
+            var $item = $(this).closest('.pfg-image-item');
+            var imageId = $item.data('id');
+            
+            // Remove from master array BEFORE DOM removal (element won't exist after .remove())
+            removeImageFromMaster(imageId);
+            
+            $item.fadeOut(200, function() {
                 $(this).remove();
                 reindexImages();
                 markStructurallyModified(); // Deletion is a structural change
+                
+                // Show empty state if no images left
+                if ($('.pfg-image-item').length === 0) {
+                    $('#pfg-image-grid').html('<div class="pfg-no-images"><span class="dashicons dashicons-format-gallery"></span><p><?php echo esc_js( __( "No images yet. Add some to get started!", "portfolio-filter-gallery" ) ); ?></p></div>');
+                }
             });
         }
     });
@@ -1888,7 +2450,15 @@ jQuery(document).ready(function($) {
         
         if (confirm(confirmMsg)) {
             $('.pfg-image-select:checked').each(function() {
-                $(this).closest('.pfg-image-item').remove();
+                var $item = $(this).closest('.pfg-image-item');
+                var imageId = $item.data('id');
+                
+                // Remove from master array BEFORE removing from DOM
+                if (typeof removeImageFromMaster === 'function') {
+                    removeImageFromMaster(imageId);
+                }
+                
+                $item.remove();
             });
             
             reindexImages();
@@ -1896,9 +2466,16 @@ jQuery(document).ready(function($) {
             updateBulkActionsBar();
             markStructurallyModified(); // Bulk delete is a structural change
             
+            // Update pagination after deletion
+            if (typeof updatePaginationUI === 'function') {
+                updatePaginationUI();
+            }
+            
             // Check if no images left
-            if ($('.pfg-image-item').length === 0) {
+            if ($('.pfg-image-item').length === 0 && masterImagesArray.length === 0) {
                 $('#pfg-image-grid').html('<div class="pfg-no-images"><span class="dashicons dashicons-format-gallery"></span><p><?php echo esc_js( __( 'No images yet. Add some to get started!', 'portfolio-filter-gallery' ) ); ?></p></div>');
+                // Hide pagination when no images
+                $('#pfg-pagination-controls').hide();
             }
         }
     });

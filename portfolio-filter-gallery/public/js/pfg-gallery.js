@@ -313,13 +313,104 @@
     }
 
     /**
-     * Filter gallery items with smooth FLIP animation
-     * FLIP = First, Last, Invert, Play - for smooth position animations
+     * Filter gallery items with smooth animation
+     * Uses masonry-aware repositioning for masonry layouts,
+     * FLIP animation for other layouts
      */
     filterItems() {
       // Re-query items from DOM to include any dynamically loaded items (Load More)
       this.items = this.container.querySelectorAll(".pfg-item");
       
+      // Check if masonry layout — needs different animation strategy
+      const isMasonry = this.grid && this.grid.classList.contains("pfg-grid--masonry");
+      
+      if (isMasonry) {
+        this._filterItemsMasonry();
+      } else {
+        this._filterItemsFLIP();
+      }
+
+      // Dispatch custom event for other scripts
+      let visibleCount = 0;
+      this.items.forEach((item) => {
+        if (!item.classList.contains("pfg-item--hidden") && !item.classList.contains("pfg-item--hiding")) {
+          visibleCount++;
+        }
+      });
+      this.container.dispatchEvent(
+        new CustomEvent("pfg:filtered", {
+          bubbles: true,
+          detail: {
+            filters: Array.from(this.activeFilters),
+            logic: this.filterLogic,
+            search: this.searchTerm,
+            visibleCount: visibleCount,
+          },
+        })
+      );
+
+      // Update numbered pagination after filtering
+      this.updateNumberedPaginationAfterFilter();
+      
+      // Reset Load More button visibility when filter changes
+      this.resetLoadMoreButton();
+    }
+
+    /**
+     * Masonry-aware filtering: hide/show items then recalculate all positions.
+     * CSS transitions on left/top handle smooth repositioning of remaining items.
+     */
+    _filterItemsMasonry() {
+      const itemsToShow = [];
+      const itemsToHide = [];
+
+      this.items.forEach((item) => {
+        const matchesFilter = this.itemMatchesFilter(item);
+        const matchesSearch = this.itemMatchesSearch(item);
+        const wasHidden = item.classList.contains("pfg-item--hidden");
+
+        if (matchesFilter && matchesSearch) {
+          if (wasHidden) {
+            itemsToShow.push(item);
+          }
+        } else if (!wasHidden) {
+          itemsToHide.push(item);
+        }
+      });
+
+      // Phase 1: Fade out items that need hiding
+      itemsToHide.forEach((item) => {
+        item.classList.remove("pfg-item--visible", "pfg-item--hidden");
+        item.classList.add("pfg-item--hiding");
+      });
+
+      // Phase 2: After fade-out completes, collapse hidden items and recalculate layout
+      setTimeout(() => {
+        // Mark hidden items
+        itemsToHide.forEach((item) => {
+          item.classList.remove("pfg-item--hiding");
+          item.classList.add("pfg-item--hidden");
+          item.classList.remove("pfg-item--positioned");
+        });
+
+        // Prepare items to show (they'll be positioned by applyMosaicLayout)
+        itemsToShow.forEach((item) => {
+          item.classList.remove("pfg-item--hidden", "pfg-item--hiding");
+          item.classList.add("pfg-item--visible");
+          item.classList.remove("pfg-item--positioned");
+        });
+
+        // Recalculate all masonry positions
+        this.applyMosaicLayout();
+
+      }, 250); // Wait for hide (opacity) animation
+    }
+
+    /**
+     * FLIP-based filtering for non-masonry layouts
+     * FLIP = First, Last, Invert, Play - for smooth position animations
+     */
+    _filterItemsFLIP() {
       // FLIP Step 1: FIRST - Record current positions of ALL items
       const firstPositions = new Map();
       this.items.forEach((item) => {
@@ -332,9 +423,8 @@
       let visibleIndex = 0;
       const itemsToShow = [];
       const itemsToHide = [];
-      const itemsToAnimate = []; // Items that stay visible but may move
+      const itemsToAnimate = [];
 
-      // Determine which items to show/hide
       this.items.forEach((item) => {
         const matchesFilter = this.itemMatchesFilter(item);
         const matchesSearch = this.itemMatchesSearch(item);
@@ -342,97 +432,70 @@
 
         if (matchesFilter && matchesSearch) {
           if (wasVisible) {
-            itemsToAnimate.push(item); // Already visible, may need to move
+            itemsToAnimate.push(item);
           } else {
-            itemsToShow.push({ item, index: visibleIndex }); // Newly shown
+            itemsToShow.push({ item, index: visibleIndex });
           }
           visibleIndex++;
         } else if (wasVisible) {
-          itemsToHide.push(item); // Was visible, now hiding
+          itemsToHide.push(item);
         }
       });
 
-      // Phase 1: Apply HIDING animation (fade out while staying in layout)
       itemsToHide.forEach((item) => {
         item.classList.remove("pfg-item--visible", "pfg-item--hidden");
         item.classList.add("pfg-item--hiding");
       });
 
-      // Phase 2: After hide animation, collapse and apply FLIP
       setTimeout(() => {
-        // Collapse hidden items from layout
         itemsToHide.forEach((item) => {
           item.classList.remove("pfg-item--hiding");
           item.classList.add("pfg-item--hidden");
         });
 
-        // Show new items - apply inline styles FIRST to prevent CSS animation conflict
         itemsToShow.forEach(({ item }) => {
-          // Remove hidden state
           item.classList.remove("pfg-item--hidden", "pfg-item--hiding");
-          // Apply starting state BEFORE adding visible class
           item.style.opacity = "0";
           item.style.transform = "scale(0.9)";
-          item.style.transition = "none"; // Prevent any transition during setup
+          item.style.transition = "none";
         });
 
-        // Force reflow to get new positions
         void this.container.offsetHeight;
 
-        // FLIP Step 2: LAST - Get new positions
         const lastPositions = new Map();
         [...itemsToAnimate, ...itemsToShow.map(i => i.item)].forEach((item) => {
           const rect = item.getBoundingClientRect();
           lastPositions.set(item, { x: rect.left, y: rect.top });
         });
 
-        // FLIP Step 3: INVERT - Apply inverse transform (so items appear in old position)
         itemsToAnimate.forEach((item) => {
           const first = firstPositions.get(item);
           const last = lastPositions.get(item);
-          
-          // IMPORTANT: Explicitly set opacity to prevent CSS transition from causing double fade
           item.style.opacity = "1";
           
-          // For items with recorded first position: do full FLIP animation
           if (first && last) {
             const deltaX = first.x - last.x;
             const deltaY = first.y - last.y;
-            
-            // Check if item moved significantly
             const didMove = Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1;
             
-            // Disable transition and apply inverse transform with scale
             item.style.transition = "none";
             if (didMove) {
-              // Item moved - apply inverse position + slight scale down
               item.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.97)`;
             } else {
-              // Item didn't move - just add subtle scale pulse
               item.style.transform = "scale(0.97)";
             }
-            
-            // Force reflow
             void item.offsetHeight;
-            
-            // FLIP Step 4: PLAY - Enable ONLY transform transition (not opacity)
             item.style.transition = "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)";
             item.style.transform = "translate(0, 0) scale(1)";
           } else {
-            // For items without recorded first position (e.g., Load More items):
-            // Just do a subtle scale pulse animation
             item.style.transition = "none";
             item.style.transform = "scale(0.97)";
-            
-            // Force reflow
             void item.offsetHeight;
-            
             item.style.transition = "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)";
             item.style.transform = "scale(1)";
           }
         });
 
-        // Animate in new items with stagger
         itemsToShow.forEach(({ item, index }) => {
           const delay = index * 50;
           setTimeout(() => {
@@ -442,7 +505,6 @@
           }, delay);
         });
 
-        // Clean up inline styles after animation and add proper CSS classes
         setTimeout(() => {
           itemsToAnimate.forEach((item) => {
             item.style.transition = "";
@@ -453,32 +515,11 @@
             item.style.transition = "";
             item.style.transform = "";
             item.style.opacity = "";
-            // Now add visible class after animation is done
             item.classList.add("pfg-item--visible");
           });
         }, 500);
 
-      }, 280); // Wait for hide animation to complete
-
-      // Dispatch custom event for other scripts
-      this.container.dispatchEvent(
-        new CustomEvent("pfg:filtered", {
-          bubbles: true,
-          detail: {
-            filters: Array.from(this.activeFilters),
-            logic: this.filterLogic,
-            search: this.searchTerm,
-            visibleCount: visibleIndex,
-          },
-        })
-      );
-
-      // Update numbered pagination after filtering
-      this.updateNumberedPaginationAfterFilter();
-      
-      // Reset Load More button visibility when filter changes
-      // Show button if pagination is enabled and there might be more items
-      this.resetLoadMoreButton();
+      }, 280);
     }
     
     /**
@@ -694,17 +735,18 @@
     }
 
     /**
-     * Initialize Packed layout with JS positioning for correct sort order
-     * Note: Masonry now uses CSS columns - no JavaScript positioning needed
+     * Initialize JS-positioned layouts (packed-cards and masonry)
+     * Packed-cards: mosaic grid with captions below
+     * Masonry: horizontal fill, shortest-column-first (Pinterest-style)
      */
     initPackedLayout() {
-      // Check if this is a packed-cards layout (JS positioning needed)
-      // Masonry uses CSS columns now - no JS positioning required
+      // Check if this is a packed-cards or masonry layout (both need JS positioning)
       const packedCardsGrid = this.grid?.classList.contains(
         "pfg-grid--packed-cards"
       );
+      const masonryGrid = this.grid?.classList.contains("pfg-grid--masonry");
 
-      if (!packedCardsGrid) {
+      if (!packedCardsGrid && !masonryGrid) {
         return;
       }
 
@@ -746,37 +788,52 @@
     }
 
     /**
-     * Apply mosaic/packed layout with absolute positioning
+     * Apply mosaic/packed/masonry layout with absolute positioning
      * Uses requestAnimationFrame for reliable caption height measurement
-     * Note: Masonry uses CSS columns - skipped here
+     * Masonry: places items horizontally (shortest-column-first) for left-to-right ordering
      */
     applyMosaicLayout() {
       if (!this.grid) return;
       
-      // Skip masonry - CSS columns handle it now
       const isMasonry = this.grid.classList.contains("pfg-grid--masonry");
-      if (isMasonry) return;
 
       const items = Array.from(
         this.grid.querySelectorAll(".pfg-item:not(.pfg-item--hidden)")
       );
-      if (items.length === 0) return;
+      if (items.length === 0) {
+        this.grid.style.height = "0px";
+        return;
+      }
 
       const containerWidth = this.grid.offsetWidth;
       const gap =
         parseInt(getComputedStyle(this.grid).getPropertyValue("--pfg-gap")) ||
         10;
 
-      // Calculate columns from min-size for packed layout
-      const minSize =
-        parseInt(
-          getComputedStyle(this.grid).getPropertyValue("--pfg-packed-min")
-        ) || 200;
-      const cols = Math.max(2, Math.floor(containerWidth / (minSize + gap)));
+      let cols;
+      if (isMasonry) {
+        const w = window.innerWidth;
+        const styles = getComputedStyle(this.grid);
+        if (w >= 1200) {
+          cols = parseInt(styles.getPropertyValue("--pfg-cols-xl")) || 4;
+        } else if (w >= 992) {
+          cols = parseInt(styles.getPropertyValue("--pfg-cols-lg")) || 3;
+        } else if (w >= 768) {
+          cols = parseInt(styles.getPropertyValue("--pfg-cols-md")) || 2;
+        } else {
+          cols = parseInt(styles.getPropertyValue("--pfg-cols-sm")) || 1;
+        }
+      } else {
+        const minSize =
+          parseInt(
+            getComputedStyle(this.grid).getPropertyValue("--pfg-packed-min")
+          ) || 200;
+        cols = Math.max(2, Math.floor(containerWidth / (minSize + gap)));
+      }
       
       const colWidth = (containerWidth - gap * (cols - 1)) / cols;
 
-      // Prepare item data with widths
+      const newItems = [];
       const itemData = [];
 
       items.forEach((item, index) => {
@@ -784,13 +841,11 @@
         const imgLink = item.querySelector(".pfg-item-link");
         const caption = item.querySelector(".pfg-item-caption");
 
-        // Get image aspect ratio
         let aspectRatio = 1;
         if (img && img.naturalWidth && img.naturalHeight) {
           aspectRatio = img.naturalWidth / img.naturalHeight;
         }
 
-        // Determine column span - only for packed layout, masonry is always single column
         let itemCols = 1;
         if (!isMasonry && aspectRatio > 1.5 && cols >= 3 && index % 4 === 0) {
           itemCols = 2;
@@ -799,27 +854,45 @@
         const itemWidth = colWidth * itemCols + gap * (itemCols - 1);
         const imgHeight = Math.round(itemWidth / aspectRatio);
 
-        // Set item width and image height
-        // Disable transitions for initial positioning if item is new (not yet positioned)
         const isNewItem = !item.classList.contains("pfg-item--positioned");
+
         if (isNewItem) {
           item.style.transition = "none";
+          item.style.opacity = "0";
+          item.style.transform = "scale(0.92)";
         }
 
         item.style.position = "absolute";
         item.style.width = itemWidth + "px";
 
-        if (imgLink) {
-          imgLink.style.display = "block";
-          imgLink.style.width = "100%";
-          imgLink.style.height = imgHeight + "px";
-          imgLink.style.overflow = "hidden";
+        if (isMasonry) {
+          if (imgLink) {
+            imgLink.style.display = "block";
+            imgLink.style.width = "100%";
+            imgLink.style.height = "auto";
+            imgLink.style.overflow = "hidden";
+          }
+          if (img) {
+            img.style.width = "100%";
+            img.style.height = "auto";
+            img.style.objectFit = "";
+          }
+        } else {
+          if (imgLink) {
+            imgLink.style.display = "block";
+            imgLink.style.width = "100%";
+            imgLink.style.height = imgHeight + "px";
+            imgLink.style.overflow = "hidden";
+          }
+          if (img) {
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.objectFit = "cover";
+          }
         }
 
-        if (img) {
-          img.style.width = "100%";
-          img.style.height = "100%";
-          img.style.objectFit = "cover";
+        if (isNewItem) {
+          newItems.push(item);
         }
 
         itemData.push({
@@ -831,37 +904,41 @@
         });
       });
 
-      // Use setTimeout to ensure DOM has fully rendered captions
       setTimeout(() => {
-        // Track column heights
         const colHeights = new Array(cols).fill(0);
         let visibleIndex = 0;
 
         itemData.forEach((data) => {
           const { item, itemCols, imgHeight, caption, itemWidth } = data;
 
-          // Skip hidden items
           if (item.classList.contains("pfg-item--hidden")) {
             return;
           }
 
-          // Measure caption height - use fallback if 0
-          let captionHeight = 0;
-          if (caption) {
-            captionHeight = Math.ceil(caption.getBoundingClientRect().height);
-            // Fallback: if caption exists but height is 0, estimate it
-            if (captionHeight === 0) {
-              captionHeight = 50; // Fallback for 2 lines of text
+          let itemHeight;
+          if (isMasonry) {
+            itemHeight = Math.ceil(item.offsetHeight);
+            if (itemHeight <= 0) {
+              const img = item.querySelector("img");
+              if (img && img.naturalWidth && img.naturalHeight) {
+                itemHeight = Math.ceil(itemWidth / (img.naturalWidth / img.naturalHeight));
+              } else {
+                itemHeight = Math.ceil(itemWidth);
+              }
             }
+          } else {
+            let captionHeight = 0;
+            if (caption) {
+              captionHeight = Math.ceil(caption.getBoundingClientRect().height);
+              if (captionHeight === 0) {
+                captionHeight = 50;
+              }
+            }
+            itemHeight = Math.ceil(imgHeight + captionHeight);
           }
 
-          // Round up to prevent fractional pixel gaps
-          const itemHeight = Math.ceil(imgHeight + captionHeight);
-
-          // Column selection differs by layout type
           let bestCol;
           if (isMasonry) {
-            // Masonry: use shortest column for Pinterest-style layout
             bestCol = 0;
             for (let c = 1; c < cols; c++) {
               if (colHeights[c] < colHeights[bestCol]) {
@@ -869,51 +946,33 @@
               }
             }
           } else {
-            // Packed/other: use round-robin to preserve sort order
             bestCol = visibleIndex % cols;
-            // For multi-column items, place in first column that fits
             if (itemCols > 1) {
               bestCol = Math.min(bestCol, cols - itemCols);
             }
           }
           
-          // Get the height at this column position
           let minHeight = colHeights[bestCol];
           if (itemCols > 1) {
             minHeight = Math.max(...colHeights.slice(bestCol, bestCol + itemCols));
           }
 
-          // Calculate position - round to whole pixels for crisp rendering
           const x = Math.round(bestCol * (colWidth + gap));
           const y = Math.round(minHeight);
 
-          // Use CSS custom properties for GPU-accelerated transform positioning
-          const isFirstPosition = !item.classList.contains("pfg-item--positioned");
-          
-          if (isFirstPosition) {
-            // First time positioning - disable transition for instant placement
-            item.classList.add("pfg-item--flip-first");
+          if (isMasonry) {
+            item.style.left = x + "px";
+            item.style.top = y + "px";
+          } else {
+            item.style.setProperty("--pfg-x", x + "px");
+            item.style.setProperty("--pfg-y", y + "px");
           }
-          
-          // Set position via CSS custom properties (used by transform in CSS)
-          item.style.setProperty("--pfg-x", x + "px");
-          item.style.setProperty("--pfg-y", y + "px");
 
-          // Add staggered delay for smooth cascade effect
-          item.style.setProperty(
-            "--pfg-stagger-delay",
-            visibleIndex * 30 + "ms"
-          );
-
-          if (isFirstPosition) {
-            // Force reflow to apply position without transition
-            item.offsetHeight;
-            // Enable transitions and mark as positioned
-            item.classList.remove("pfg-item--flip-first");
+          if (!item.classList.contains("pfg-item--positioned")) {
+            void item.offsetHeight;
             item.classList.add("pfg-item--positioned");
           }
 
-          // Update column heights
           for (let c = bestCol; c < bestCol + itemCols && c < cols; c++) {
             colHeights[c] = y + itemHeight + gap;
           }
@@ -921,10 +980,28 @@
           visibleIndex++;
         });
 
-        // Set container height
         const maxHeight = Math.max(...colHeights, 0);
         this.grid.style.position = "relative";
         this.grid.style.height = Math.ceil(maxHeight) + "px";
+
+        if (newItems.length > 0) {
+          void this.grid.offsetHeight;
+
+          newItems.forEach((item, i) => {
+            const delay = i * 40;
+            setTimeout(() => {
+              item.style.transition = "opacity 0.35s ease-out, transform 0.35s ease-out";
+              item.style.opacity = "1";
+              item.style.transform = "scale(1)";
+
+              setTimeout(() => {
+                item.style.transition = "";
+                item.style.opacity = "";
+                item.style.transform = "";
+              }, 400);
+            }, delay);
+          });
+        }
       }, 50);
     }
 
@@ -1199,43 +1276,20 @@
             // No client-side filter check needed - just animate all received items
 
             if (isMosaicLayout) {
-              // For mosaic/masonry layout: add items with animation
-              // Items are already filtered by server, so all loaded items should be shown
-              Array.from(temp.children).forEach((item, i) => {
-                // Add visible class for filtering state
+              // For mosaic/masonry layout:
+              // Append items fully hidden, wait for images, then position + fade in
+              const newItems = Array.from(temp.children);
+              newItems.forEach((item) => {
                 item.classList.add("pfg-item--visible");
-                
-                // Start hidden for animation
-                item.style.opacity = "0";
-                item.style.transform = "scale(0.9)";
-                item.style.transition = "none";
                 grid.appendChild(item);
-
-                // Trigger animation with stagger
-                requestAnimationFrame(() => {
-                  setTimeout(() => {
-                    item.style.transition = "opacity 0.3s ease-out, transform 0.3s ease-out";
-                    item.style.opacity = "1";
-                    item.style.transform = "scale(1)";
-                    
-                    // Clean up inline styles after animation
-                    setTimeout(() => {
-                      item.style.transition = "";
-                      item.style.opacity = "";
-                      item.style.transform = "";
-                    }, 350);
-                  }, i * 50);
-                });
               });
 
-              // Refresh mosaic layout after items added
+              // Wait for images to load, then recalculate layout
               if (
                 gallery.pfgGallery &&
                 gallery.pfgGallery.refreshMosaicLayout
               ) {
-                setTimeout(() => {
-                  gallery.pfgGallery.refreshMosaicLayout();
-                }, 100);
+                gallery.pfgGallery.refreshMosaicLayout();
               }
             } else {
               // For other layouts: animate each new item

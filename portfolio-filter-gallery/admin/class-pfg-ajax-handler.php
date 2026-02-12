@@ -68,6 +68,12 @@ class PFG_Ajax_Handler {
         
         // Chunked image saving for large galleries
         add_action( 'wp_ajax_pfg_save_images_chunk', array( $this, 'save_images_chunk' ) );
+        
+        // Admin pagination for large galleries
+        add_action( 'wp_ajax_pfg_get_admin_images_page', array( $this, 'get_admin_images_page' ) );
+        
+        // Get thumbnails for paginated images
+        add_action( 'wp_ajax_pfg_get_thumbnails', array( $this, 'get_thumbnails' ) );
     }
     
     /**
@@ -1395,5 +1401,191 @@ class PFG_Ajax_Handler {
                 'complete'    => false,
             ) );
         }
+    }
+    
+    /**
+     * Get paginated images for admin gallery editor.
+     * Returns HTML for a specific page of images.
+     */
+    public function get_admin_images_page() {
+        // Verify nonce
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'pfg_admin_nonce' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Security check failed.', 'portfolio-filter-gallery' ) ), 403 );
+        }
+        
+        if ( ! current_user_can( 'edit_posts' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'portfolio-filter-gallery' ) ), 403 );
+        }
+        
+        $gallery_id = isset( $_POST['gallery_id'] ) ? absint( $_POST['gallery_id'] ) : 0;
+        $page       = isset( $_POST['page'] ) ? max( 1, absint( $_POST['page'] ) ) : 1;
+        $per_page   = isset( $_POST['per_page'] ) ? absint( $_POST['per_page'] ) : 50;
+        
+        if ( ! $gallery_id ) {
+            wp_send_json_error( array( 'message' => __( 'Gallery ID is required.', 'portfolio-filter-gallery' ) ) );
+        }
+        
+        // Get gallery images
+        $gallery = new PFG_Gallery( $gallery_id );
+        $all_images = $gallery->get_images();
+        $total_images = count( $all_images );
+        $total_pages = max( 1, ceil( $total_images / $per_page ) );
+        
+        // Ensure page is within bounds
+        $page = min( $page, $total_pages );
+        
+        // Calculate offset and get slice
+        $offset = ( $page - 1 ) * $per_page;
+        $paged_images = array_slice( $all_images, $offset, $per_page, true );
+        
+        // Get filters for display
+        $filters = get_option( 'pfg_filters', array() );
+        
+        // Build HTML for this page
+        ob_start();
+        
+        foreach ( $paged_images as $index => $image ) {
+            $attachment = get_post( $image['id'] );
+            if ( ! $attachment ) continue;
+            
+            $thumb_url = wp_get_attachment_image_url( $image['id'], 'thumbnail' );
+            $title     = ! empty( $image['title'] ) ? $image['title'] : $attachment->post_title;
+            $image_filters = isset( $image['filters'] ) ? $image['filters'] : array();
+            
+            // Type indicator
+            $image_type = isset( $image['type'] ) ? $image['type'] : 'image';
+            $image_link = isset( $image['link'] ) ? $image['link'] : '';
+            
+            $video_source = '';
+            if ( $image_type === 'video' && $image_link ) {
+                if ( strpos( $image_link, 'youtube.com' ) !== false || strpos( $image_link, 'youtu.be' ) !== false ) {
+                    $video_source = 'youtube';
+                } elseif ( strpos( $image_link, 'vimeo.com' ) !== false ) {
+                    $video_source = 'vimeo';
+                }
+            }
+            ?>
+            <div class="pfg-image-item" data-id="<?php echo esc_attr( $image['id'] ); ?>" data-index="<?php echo esc_attr( $index ); ?>">
+                
+                <!-- Selection Checkbox -->
+                <label class="pfg-image-checkbox" style="position: absolute; top: 8px; left: 8px; z-index: 10;">
+                    <input type="checkbox" class="pfg-image-select" style="width: 18px; height: 18px; cursor: pointer;">
+                </label>
+                
+                <?php if ( $image_type === 'video' || $image_type === 'url' ) :
+                    $badge_class = 'pfg-image-type-badge';
+                    if ( $video_source === 'youtube' ) {
+                        $badge_class .= ' pfg-badge-youtube';
+                        $badge_icon = 'dashicons-youtube';
+                    } elseif ( $video_source === 'vimeo' ) {
+                        $badge_class .= ' pfg-badge-vimeo';
+                        $badge_icon = 'dashicons-video-alt3';
+                    } elseif ( $image_type === 'video' ) {
+                        $badge_class .= ' pfg-badge-video';
+                        $badge_icon = 'dashicons-video-alt3';
+                    } else {
+                        $badge_icon = 'dashicons-external';
+                    }
+                ?>
+                <div class="<?php echo esc_attr( $badge_class ); ?>">
+                    <span class="dashicons <?php echo esc_attr( $badge_icon ); ?>"></span>
+                </div>
+                <?php endif; ?>
+                
+                <img src="<?php echo esc_url( $thumb_url ); ?>" 
+                     alt="<?php echo esc_attr( $title ); ?>" 
+                     class="pfg-image-thumb"
+                     loading="lazy">
+                
+                <div class="pfg-image-actions">
+                    <button type="button" class="pfg-image-action pfg-image-edit" title="<?php esc_attr_e( 'Edit', 'portfolio-filter-gallery' ); ?>">
+                        <span class="dashicons dashicons-edit"></span>
+                    </button>
+                    <button type="button" class="pfg-image-action pfg-image-delete" title="<?php esc_attr_e( 'Delete', 'portfolio-filter-gallery' ); ?>">
+                        <span class="dashicons dashicons-trash"></span>
+                    </button>
+                </div>
+                
+                <div class="pfg-image-info">
+                    <p class="pfg-image-title"><?php echo esc_html( $title ); ?></p>
+                    
+                    <?php if ( ! empty( $image_filters ) ) : ?>
+                    <div class="pfg-image-filters">
+                        <?php foreach ( $image_filters as $filter_id ) :
+                            $filter = null;
+                            foreach ( $filters as $f ) {
+                                if ( $f['id'] === $filter_id || $f['slug'] === $filter_id ) {
+                                    $filter = $f;
+                                    break;
+                                }
+                            }
+                            if ( $filter ) :
+                            $tag_color = isset( $filter['color'] ) && $filter['color'] ? $filter['color'] : '#94a3b8';
+                            $is_child = ! empty( $filter['parent'] ); ?>
+                            <span class="pfg-image-filter-tag"><?php if ( $is_child ) : ?><span class="pfg-tag-connector">└</span><?php endif; ?><span class="pfg-tag-dot" style="background-color: <?php echo esc_attr( $tag_color ); ?>;"></span><?php echo esc_html( $filter['name'] ); ?></span>
+                            <?php endif;
+                        endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                
+                <!-- Hidden inputs -->
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][id]" value="<?php echo esc_attr( $image['id'] ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][title]" value="<?php echo esc_attr( $title ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][alt]" value="<?php echo esc_attr( $image['alt'] ?? '' ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][description]" value="<?php echo esc_attr( $image['description'] ?? '' ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][link]" value="<?php echo esc_url( $image['link'] ?? '' ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][type]" value="<?php echo esc_attr( $image['type'] ?? 'image' ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][filters]" value="<?php echo esc_attr( implode( ',', $image_filters ) ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][product_id]" value="<?php echo esc_attr( $image['product_id'] ?? '' ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][product_name]" value="<?php echo esc_attr( $image['product_name'] ?? '' ); ?>">
+                <input type="hidden" name="pfg_images[<?php echo esc_attr( $index ); ?>][original_id]" value="<?php echo esc_attr( $image['original_id'] ?? $image['id'] ); ?>">
+                
+            </div>
+            <?php
+        }
+        
+        $html = ob_get_clean();
+        
+        wp_send_json_success( array(
+            'html'          => $html,
+            'page'          => $page,
+            'per_page'      => $per_page,
+            'total_images'  => $total_images,
+            'total_pages'   => $total_pages,
+            'showing_start' => $offset + 1,
+            'showing_end'   => min( $offset + $per_page, $total_images ),
+        ) );
+    }
+    
+    /**
+     * Get thumbnail URLs for multiple attachment IDs.
+     * Used by client-side pagination to load thumbnails after rendering.
+     */
+    public function get_thumbnails() {
+        // Verify nonce
+        if ( ! wp_verify_nonce( $_POST['nonce'], 'pfg_admin_nonce' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Security check failed.', 'portfolio-filter-gallery' ) ), 403 );
+        }
+        
+        if ( ! current_user_can( 'edit_posts' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'portfolio-filter-gallery' ) ), 403 );
+        }
+        
+        $image_ids = isset( $_POST['image_ids'] ) ? array_map( 'absint', (array) $_POST['image_ids'] ) : array();
+        
+        if ( empty( $image_ids ) ) {
+            wp_send_json_success( array( 'thumbnails' => array() ) );
+        }
+        
+        $thumbnails = array();
+        foreach ( $image_ids as $image_id ) {
+            $thumb_url = wp_get_attachment_image_url( $image_id, 'thumbnail' );
+            if ( $thumb_url ) {
+                $thumbnails[ $image_id ] = $thumb_url;
+            }
+        }
+        
+        wp_send_json_success( array( 'thumbnails' => $thumbnails ) );
     }
 }
