@@ -648,15 +648,39 @@
             // Get current highest index
             let currentIndex = $('.pfg-image-item').length;
             
+            // Get reference to masterImagesArray for adding new images
+            const masterImages = (typeof window.pfgGetMasterImages === 'function') ? window.pfgGetMasterImages() : null;
+            
             images.forEach(function(image) {
                 const html = PFGAdmin.getImageItemHtml(image, currentIndex);
                 $grid.append(html);
                 currentIndex++;
+                
+                // Push new image into masterImagesArray so it's included on save
+                if (masterImages) {
+                    masterImages.push({
+                        id: image.id,
+                        title: image.title || '',
+                        alt: image.alt || '',
+                        description: image.description || '',
+                        link: image.link || '',
+                        type: image.type || 'image',
+                        filters: image.filters || '',
+                        product_id: image.product_id || '',
+                        product_name: image.product_name || '',
+                        original_id: image.original_id || image.id
+                    });
+                }
             });
             
             // Show bulk actions bar if we have images
             if ($('.pfg-image-item').length > 0) {
                 $('#pfg-bulk-actions').css('display', 'flex');
+            }
+            
+            // Update pagination counts
+            if (typeof window.pfgUpdatePaginationUI === 'function') {
+                window.pfgUpdatePaginationUI();
             }
             
             // Mark images as modified for chunked save
