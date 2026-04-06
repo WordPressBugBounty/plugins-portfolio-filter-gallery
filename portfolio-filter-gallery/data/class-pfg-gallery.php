@@ -51,12 +51,8 @@ class PFG_Gallery {
         'gap'                  => array( 'default' => 20, 'type' => 'int' ),
         'direction'            => array( 'default' => 'ltr', 'type' => 'key' ),
 
-        // Justified layout settings
-        'justified_row_height' => array( 'default' => 200, 'type' => 'int' ),
-        'justified_last_row'   => array( 'default' => 'left', 'type' => 'key' ),
-
-        // Packed layout settings
-        'packed_min_size'      => array( 'default' => 150, 'type' => 'int' ),
+        // Grid aspect ratio
+        'grid_aspect_ratio'    => array( 'default' => '4:3', 'type' => 'text' ),
 
         // Thumbnail settings
         'show_title'           => array( 'default' => true, 'type' => 'bool' ),
@@ -91,10 +87,7 @@ class PFG_Gallery {
         'filter_active_color'  => array( 'default' => '#3858e9', 'type' => 'hex_color' ),
         'filter_active_text_color' => array( 'default' => 'auto', 'type' => 'text' ),
 
-        // Lightbox settings
-        'lightbox'             => array( 'default' => 'ld-lightbox', 'type' => 'key' ),
-        'lightbox_title'       => array( 'default' => true, 'type' => 'bool' ),
-        'lightbox_description' => array( 'default' => false, 'type' => 'bool' ),
+        // Link settings
         'url_target'           => array( 'default' => '_blank', 'type' => 'key' ),
 
         // Search settings
@@ -106,7 +99,7 @@ class PFG_Gallery {
         'sort_by_title'        => array( 'default' => '', 'type' => 'key' ), // Legacy - kept for backward compat
 
         // Advanced settings
-        'custom_css'           => array( 'default' => '', 'type' => 'css' ),
+
         'bootstrap_disabled'   => array( 'default' => false, 'type' => 'bool' ),
         'lazy_loading'         => array( 'default' => false, 'type' => 'bool' ),
         'show_image_count'     => array( 'default' => false, 'type' => 'bool' ),
@@ -114,10 +107,6 @@ class PFG_Gallery {
         // Template setting
         'template'             => array( 'default' => 'modern-cards', 'type' => 'key' ),
 
-        // Pagination settings (Premium)
-        'pagination_enabled'   => array( 'default' => false, 'type' => 'bool' ),
-        'pagination_type'      => array( 'default' => 'load_more', 'type' => 'key' ),
-        'items_per_page'       => array( 'default' => 12, 'type' => 'int' ),
 
         // URL Deep Linking
         'deep_linking'         => array( 'default' => false, 'type' => 'bool' ),
@@ -142,18 +131,8 @@ class PFG_Gallery {
         // Image Size
         'image_size'           => array( 'default' => 'large', 'type' => 'key' ),
 
-        // WooCommerce Settings (Premium)
-        'source'               => array( 'default' => 'media', 'type' => 'key' ), // 'media' or 'woocommerce'
-        'woo_categories'       => array( 'default' => array(), 'type' => 'array' ),
-        'woo_orderby'          => array( 'default' => 'date', 'type' => 'key' ),
-        'woo_order'            => array( 'default' => 'desc', 'type' => 'key' ),
-        'woo_limit'            => array( 'default' => -1, 'type' => 'int' ),
-        'woo_show_price'       => array( 'default' => true, 'type' => 'bool' ),
-        'woo_show_sale_badge'  => array( 'default' => true, 'type' => 'bool' ),
-        'woo_show_title'       => array( 'default' => true, 'type' => 'bool' ),
-        'woo_link_target'      => array( 'default' => '_self', 'type' => 'key' ),
 
-        // Watermark Settings (Premium)
+        // Watermark Settings
         'watermark_enabled'    => array( 'default' => false, 'type' => 'bool' ),
         'watermark_type'       => array( 'default' => 'text', 'type' => 'key' ),
         'watermark_text'       => array( 'default' => '', 'type' => 'text' ),
@@ -414,9 +393,9 @@ class PFG_Gallery {
 
         // Lightbox mappings - convert numeric values
         // Old plugin: 0 = None, 4 = LD Lightbox, 5 = Bootstrap Lightbox
-        $lightbox_map = array( 0 => 'none', 4 => 'ld-lightbox', 5 => 'bootstrap' );
+        $lightbox_map = array( 0 => 'none', 4 => 'built-in', 5 => 'built-in' );
         $lightbox_val = isset( $legacy['light-box'] ) ? $legacy['light-box'] : 4;
-        $settings['lightbox']         = isset( $lightbox_map[ $lightbox_val ] ) ? $lightbox_map[ $lightbox_val ] : 'ld-lightbox';
+        $settings['lightbox']         = isset( $lightbox_map[ $lightbox_val ] ) ? $lightbox_map[ $lightbox_val ] : 'built-in';
         $settings['url_target']       = isset( $legacy['url_target'] ) ? $legacy['url_target'] : '_blank';
 
         // Search mappings
@@ -427,7 +406,7 @@ class PFG_Gallery {
         $settings['sort_by_title']    = isset( $legacy['sort_by_title'] ) && in_array( $legacy['sort_by_title'], array( 'asc', 'desc', 'yes' ), true );
 
         // Advanced mappings
-        $settings['custom_css']       = isset( $legacy['custom-css'] ) ? $legacy['custom-css'] : '';
+
         $settings['bootstrap_disabled'] = isset( $legacy['bootstrap_disable'] ) && $legacy['bootstrap_disable'] === 'yes';
         
         // Filter count migration - the old plugin used 'show_image_count' for showing counts on filters
@@ -546,12 +525,12 @@ class PFG_Gallery {
 
             $images[] = array(
                 'id'          => $id,
-                'title'       => isset( $titles[ $index ] ) ? $titles[ $index ] : get_the_title( $id ),
-                'alt'         => $alt_text,
-                'description' => $description,
-                'link'        => $link,
-                'type'        => $type,
-                'filters'     => $filter_slugs,
+                'title'       => isset( $titles[ $index ] ) ? sanitize_text_field( $titles[ $index ] ) : sanitize_text_field( get_the_title( $id ) ),
+                'alt'         => sanitize_text_field( $alt_text ),
+                'description' => wp_kses_post( $description ),
+                'link'        => esc_url_raw( $link ),
+                'type'        => sanitize_key( $type ),
+                'filters'     => array_map( 'sanitize_title', $filter_slugs ),
             );
         }
 

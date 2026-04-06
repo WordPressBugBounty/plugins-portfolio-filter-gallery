@@ -216,38 +216,6 @@ class PFG_Templates {
                 ),
             ),
 
-            'justified-rows' => array(
-                'name'        => __( 'Justified Rows', 'portfolio-filter-gallery' ),
-                'description' => __( 'Flickr-style rows that fill the full width.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/justified.jpg',
-                'settings'    => array(
-                    'layout_type'          => 'justified',
-                    'justified_row_height' => 200,
-                    'justified_last_row'   => 'left',
-                    'gap'                  => 8,
-                    'hover_effect'         => 'fade',
-                    'show_title'           => true,
-                    'border_width'         => 0,
-                    'border_radius'        => 0,
-                    'grayscale'            => false,
-                ),
-            ),
-
-            'mosaic-packed' => array(
-                'name'        => __( 'Mosaic Packed', 'portfolio-filter-gallery' ),
-                'description' => __( 'Puzzle-like layout with varying item sizes.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/packed.jpg',
-                'settings'    => array(
-                    'layout_type'     => 'packed',
-                    'packed_min_size' => 150,
-                    'gap'             => 10,
-                    'hover_effect'    => 'overlay-zoom',
-                    'show_title'      => false,
-                    'border_width'    => 0,
-                    'border_radius'   => 8,
-                    'grayscale'       => false,
-                ),
-            ),
         );
     }
 

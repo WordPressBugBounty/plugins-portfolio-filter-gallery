@@ -40,216 +40,9 @@ $steps = array(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php esc_html_e( 'Portfolio Filter Gallery Setup', 'portfolio-filter-gallery' ); ?></title>
     <?php wp_head(); ?>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .pfg-wizard {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .pfg-wizard-header {
-            background: linear-gradient(135deg, #3858e9 0%, #1e40af 100%);
-            padding: 30px;
-            text-align: center;
-            color: #fff;
-        }
-        
-        .pfg-wizard-logo {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-        }
-        
-        .pfg-wizard-logo .dashicons {
-            font-size: 32px;
-            width: 32px;
-            height: 32px;
-        }
-        
-        .pfg-wizard-header h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin: 0;
-        }
-        
-        .pfg-wizard-progress {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            padding: 20px;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .pfg-wizard-progress-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #cbd5e1;
-            transition: all 0.3s;
-        }
-        
-        .pfg-wizard-progress-dot.active {
-            background: #3858e9;
-            transform: scale(1.2);
-        }
-        
-        .pfg-wizard-progress-dot.completed {
-            background: #10b981;
-        }
-        
-        .pfg-wizard-content {
-            padding: 40px 30px;
-            text-align: center;
-        }
-        
-        .pfg-wizard-step-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-        }
-        
-        .pfg-wizard-step-icon .dashicons {
-            font-size: 40px;
-            width: 40px;
-            height: 40px;
-            color: #3858e9;
-        }
-        
-        .pfg-wizard-content h2 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 15px;
-        }
-        
-        .pfg-wizard-content p {
-            font-size: 15px;
-            color: #64748b;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        
-        .pfg-wizard-features {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 25px 0;
-            text-align: left;
-        }
-        
-        .pfg-wizard-feature {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-        
-        .pfg-wizard-feature .dashicons {
-            color: #10b981;
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-        }
-        
-        .pfg-wizard-feature span {
-            font-size: 13px;
-            color: #334155;
-        }
-        
-        .pfg-wizard-actions {
-            padding: 20px 30px 30px;
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
-        
-        .pfg-wizard-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-        }
-        
-        .pfg-wizard-btn-primary {
-            background: linear-gradient(135deg, #3858e9 0%, #1e40af 100%);
-            color: #fff;
-        }
-        
-        .pfg-wizard-btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(56, 88, 233, 0.4);
-        }
-        
-        .pfg-wizard-btn-secondary {
-            background: #f1f5f9;
-            color: #64748b;
-        }
-        
-        .pfg-wizard-btn-secondary:hover {
-            background: #e2e8f0;
-        }
-        
-        .pfg-wizard-btn-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #fff;
-        }
-        
-        .pfg-wizard-btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-        }
-        
-        .pfg-wizard-skip {
-            margin-top: 15px;
-        }
-        
-        .pfg-wizard-skip a {
-            color: #94a3b8;
-            font-size: 13px;
-            text-decoration: none;
-        }
-        
-        .pfg-wizard-skip a:hover {
-            color: #64748b;
-        }
-    </style>
+    
 </head>
-<body>
+<body class="pfg-setup-body">
     <div class="pfg-wizard">
         <div class="pfg-wizard-header">
             <div class="pfg-wizard-logo">
@@ -260,7 +53,7 @@ $steps = array(
         
         <div class="pfg-wizard-progress">
             <?php for ( $i = 1; $i <= $total_steps; $i++ ) : ?>
-                <div class="pfg-wizard-progress-dot <?php echo $i === $step ? 'active' : ''; ?> <?php echo $i < $step ? 'completed' : ''; ?>"></div>
+                <div class="pfg-wizard-progress-dot <?php echo esc_attr( $i === $step ? 'active' : '' ); ?> <?php echo esc_attr( $i < $step ? 'completed' : '' ); ?>"></div>
             <?php endfor; ?>
         </div>
         
@@ -284,7 +77,7 @@ $steps = array(
                     </div>
                     <div class="pfg-wizard-feature">
                         <span class="dashicons dashicons-yes"></span>
-                        <span><?php esc_html_e( 'Lightbox Viewer', 'portfolio-filter-gallery' ); ?></span>
+                        <span><?php esc_html_e( 'Hover Effects', 'portfolio-filter-gallery' ); ?></span>
                     </div>
                     <div class="pfg-wizard-feature">
                         <span class="dashicons dashicons-yes"></span>

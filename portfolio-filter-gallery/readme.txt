@@ -5,11 +5,11 @@ Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.7
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A WordPress plugin designed for creating filterable portfolio galleries. Supports images and videos with masonry layouts and lightbox display.
+A WordPress plugin designed for creating filterable portfolio galleries. Supports images and videos with masonry routing.
 
 == Description ==
 
@@ -18,10 +18,8 @@ A WordPress plugin designed for creating filterable portfolio galleries. Support
 
 = Demo Links =
 
-* [Video Gallery](https://awplife.com/demo/portfolio-filter-gallery-premium/video-gallery/)
 * [Plugin Features](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
-* [Gallery Demo](https://awplife.com/demo/portfolio-filter-gallery-premium/)
-* [Upgrade To Premium](https://awplife.com/account/signup/portfolio-filter-gallery)
+* [Gallery Demo Pro](https://awplife.com/demo/portfolio-filter-gallery-premium/)
 
 
 = Support Links =
@@ -61,18 +59,12 @@ This plugin suits a range of users and projects:
 * Column options: 2, 3, or 4 columns
 * Configurable spacing between items
 
-**Lightbox**
-
-* Bootstrap-based responsive lightbox
-* Navigation arrows for browsing images
-* Title display within the lightbox
-* Touch support for mobile devices
 
 **Video Support**
 
 * Embed YouTube videos
 * Embed Vimeo videos
-* Videos play directly in the lightbox
+* Watch videos via external links
 
 **Customization**
 
@@ -86,26 +78,14 @@ This plugin suits a range of users and projects:
 
 The [premium version](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/) extends the plugin with additional capabilities:
 
-
-
-**Additional Lightboxes**
-
-* LD Lightbox
-* Swipebox with touch gestures
-* PopTrox with video support
-* Viewer Lightbox
-* BlueImp Gallery
-
 **Advanced Features**
 
-* Ajax Load More for paginated loading
 * URL-based filtering (load a page with a specific filter pre-selected)
 * Default filter selection on page load
 * Ascending/descending sort controls
 * Shuffle button for randomized display
 * Search functionality within galleries
 * Watermark overlay support
-* Custom CSS input
 
 **Extended Customization**
 
@@ -120,7 +100,7 @@ The [premium version](https://awplife.com/wordpress-plugins/portfolio-filter-gal
 2. Create the filter categories you need
 3. Go to **Portfolio Gallery > Add New** to create a gallery
 4. Upload images, add video URLs, and assign filters to each item
-5. Adjust settings for layout, lightbox style, and appearance
+5. Adjust settings for layout and appearance
 6. Copy the generated shortcode and paste it into any page or post
 
 The shortcode follows this format:
@@ -191,14 +171,14 @@ For questions or troubleshooting, visit the [Support Forum](https://wordpress.or
 1. Go to Portfolio Gallery → Filters to create your filter categories
 2. Go to Portfolio Gallery → Add New to create your gallery
 3. Upload images and assign filters to each image
-4. Configure your gallery settings (layout, lightbox, colors)
+4. Configure your gallery settings (layout, colors)
 5. Copy the shortcode and paste it into any page or post
 
 == Frequently Asked Questions ==
 
 = Is Portfolio Filter Gallery free? =
 
-Yes. The free version includes all core features: filterable galleries, masonry layout, video embedding, and the Bootstrap lightbox. A [premium version](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/) is available with additional hover effects, lightbox styles, and advanced functionality.
+Yes. The free version includes all core features: filterable galleries, masonry layout, and video embedding. A [premium version](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/) is available with additional hover effects and advanced functionality.
 
 = How do I create filters? =
 
@@ -206,16 +186,16 @@ Go to Portfolio Gallery > Filters in your WordPress dashboard. This dedicated pa
 
 = Can I include videos? =
 
-Yes. Portfolio Filter Gallery supports YouTube and Vimeo. When adding a gallery item, select the video option and enter the video URL. Videos will play in the lightbox.
+Yes. Portfolio Filter Gallery supports YouTube and Vimeo. When adding a gallery item, select the video option and enter the video URL. Videos will open in a new tab.
 [See Video Gallery Demo](https://awplife.com/demo/portfolio-filter-gallery-premium/portfolio-video-gallery/)
 
 = Is the gallery responsive? =
 
-Yes. The gallery layout and lightbox adapt to all screen sizes. The masonry layout uses CSS3 for smooth animations on any device.
+Yes. The gallery layout adapts to all screen sizes. The masonry layout uses CSS3 for smooth animations on any device.
 
 = Is there a limit to gallery items? =
 
-No. You can add as many images and videos as needed. For large galleries, the premium version offers Ajax Load More for improved performance.
+No. You can add as many images and videos as needed.
 
 = Can I place multiple galleries on one page? =
 
@@ -242,6 +222,39 @@ Yes. The plugin is translation-ready and works with WPML and other translation p
 Visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/) for assistance. For premium support, visit the [developer website](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/).
 
 == Changelog ==
+
+= 2.1.2 =
+* Fixed: JavaScript error on image edit modal (undefined variable).
+* Fixed: escapeHtml scope issue causing save failure in modal editor.
+* Security: Hardened all dynamic DOM insertions with output escaping in admin JS.
+* Removed: Deprecated layout options and unused repair feature.
+* Code cleanup and minor bug fixes.
+
+= 2.1.1 =
+* Compliance: Removed Pro Features admin menu page and all associated upsell/gating UI.
+* Compliance: Removed built-in lightbox to conform with free-only restrictions.
+* Compliance: Removed all premium WooCommerce integrations.
+* Compliance: Removed documentation for features not present in this release.
+
+= 2.1.0 =
+* Removed: Custom CSS textarea (WordPress has a built-in CSS editor in the Customizer)
+* Removed: Unused Bootstrap JS/CSS files (not enqueued, legacy only)
+* Removed: Unused bs5-lightbox files (index.bundle.min.js, boot.css)
+* Removed: Remote placeholder.com URL references
+* Fixed: Inline style tag in Pro Features page moved to properly enqueued CSS file
+* Added: Third-party library source documentation in readme
+* Compliance: Resolved all WordPress.org Plugin Directory review issues
+
+= 2.0.8 =
+* Security: Comprehensive security audit — nonce verification, input sanitization, and output escaping across all files
+* Security: Replaced deprecated unlink() with wp_delete_file(), date() with gmdate()
+* Fixed: Added translators comments for all translatable strings with placeholders
+* Fixed: Unordered sprintf placeholders corrected
+* Removed: Pro feature indicators from free version UI (Fancybox/PhotoSwipe in settings)
+* Removed: All upsell banners, cards, and marketing content from free version
+* Improved: WordPress.org Plugin Check compliance
+* Fixed: Gallery items with deleted media attachments no longer show broken images on frontend
+* Added: Grid Aspect Ratio setting (Pro feature) - visible in admin with Pro badge
 
 = 2.0.7 =
 * Fixed: New images added to existing galleries disappearing on update
@@ -366,7 +379,6 @@ Portfolio Filter Gallery works on all modern browsers:
 = Security & Privacy =
 
 * GDPR Compliant
-* No external requests
 * No data collection
 * Secure code following WordPress standards
 * Regular security updates
@@ -378,10 +390,17 @@ Portfolio Filter Gallery works on all modern browsers:
 * [Documentation](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
 * [Video Tutorials](https://www.youtube.com/watch?v=6rvJ9NN_kA0)
 
+= Third-Party Libraries =
+
+This plugin uses standard WordPress libraries. No external third-party libraries are bundled.
+
 == Upgrade Notice ==
 
-= 2.0.0 =
-**Major Update - Complete Redesign!** This version includes a completely redesigned admin interface with a modern and user-friendly design. Don't worry - your existing galleries and settings will be automatically migrated and preserved. We recommend backing up your site before updating. New features include: enhanced image management, bulk operations, filter hierarchy support, better PHP 8.x compatibility, and improved performance.
+= 2.1.2 =
+Bug fix release. Fixed JavaScript errors in the image editor modal and improved admin JS security.
 
-= 1.7.5 =
-Text domain error fixed. Tested with WordPress 6.9.
+= 2.1.0 =
+Compliance update. Removed custom CSS insertion, removed unused Bootstrap/lightbox files, removed remote file calls, fixed inline styles. Resolves all WordPress.org Plugin Directory review issues.
+
+= 2.0.0 =
+Major update with redesigned admin UI. Existing galleries are automatically migrated. Backup recommended before updating.

@@ -69,18 +69,13 @@ $gallery_id = $post->ID;
                     <td><?php esc_html_e( 'Show filter buttons (true, false)', 'portfolio-filter-gallery' ); ?></td>
                     <td><code>show_filters="false"</code></td>
                 </tr>
-                <?php if ( pfg_is_premium() ) : ?>
                 <tr>
                     <td><code>limit</code></td>
                     <td><?php esc_html_e( 'Maximum images to show', 'portfolio-filter-gallery' ); ?></td>
                     <td><code>limit="12"</code></td>
                 </tr>
-                <tr>
-                    <td><code>pagination</code></td>
-                    <td><?php esc_html_e( 'Enable pagination', 'portfolio-filter-gallery' ); ?></td>
-                    <td><code>pagination="true"</code></td>
-                </tr>
-                <?php endif; ?>
+
+
             </tbody>
         </table>
     </div>
@@ -110,136 +105,3 @@ $gallery_id = $post->ID;
     </div>
     
 </div>
-
-<script>
-jQuery(document).ready(function($) {
-    $('#pfg-force-remigrate-btn').on('click', function() {
-        var $btn = $(this);
-        var $status = $('#pfg-remigrate-status');
-        var galleryId = $btn.data('gallery-id');
-        
-        if (!confirm('<?php esc_html_e( 'This will re-import data from the legacy format, overwriting current values. Continue?', 'portfolio-filter-gallery' ); ?>')) {
-            return;
-        }
-        
-        $btn.prop('disabled', true).find('.dashicons').addClass('pfg-spin');
-        $status.hide();
-        
-        $.ajax({
-            url: ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'pfg_force_remigrate',
-                security: '<?php echo wp_create_nonce( 'pfg_admin_action' ); ?>',
-                gallery_id: galleryId
-            },
-            success: function(response) {
-                $btn.prop('disabled', false).find('.dashicons').removeClass('pfg-spin');
-                
-                if (response.success) {
-                    $status.css({
-                        'background': '#dcfce7',
-                        'border': '1px solid #86efac',
-                        'color': '#166534'
-                    }).html('<span class="dashicons dashicons-yes-alt" style="margin-right: 5px;"></span>' + response.data.message).show();
-                    
-                    setTimeout(function() {
-                        location.reload();
-                    }, 2000);
-                } else {
-                    $status.css({
-                        'background': '#fef2f2',
-                        'border': '1px solid #fecaca',
-                        'color': '#991b1b'
-                    }).html('<span class="dashicons dashicons-warning" style="margin-right: 5px;"></span>' + response.data.message).show();
-                }
-            },
-            error: function() {
-                $btn.prop('disabled', false).find('.dashicons').removeClass('pfg-spin');
-                $status.css({
-                    'background': '#fef2f2',
-                    'border': '1px solid #fecaca',
-                    'color': '#991b1b'
-                }).html('<span class="dashicons dashicons-warning" style="margin-right: 5px;"></span><?php esc_html_e( 'An error occurred. Please try again.', 'portfolio-filter-gallery' ); ?>').show();
-            }
-        });
-    });
-});
-</script>
-
-<style>
-.pfg-params-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    font-size: 13px;
-}
-.pfg-params-table th,
-.pfg-params-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
-}
-.pfg-params-table th {
-    background: #f8fafc;
-    font-weight: 600;
-}
-.pfg-params-table code {
-    background: #f1f5f9;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 12px;
-}
-.pfg-gutenberg-tip {
-    margin-top: 20px;
-    padding: 12px 15px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 6px;
-    color: #1e40af;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.pfg-gallery-tools {
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
-}
-.pfg-gallery-tools h4 {
-    margin: 0 0 15px 0;
-    font-size: 14px;
-    color: #334155;
-}
-.pfg-tool-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    padding: 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-}
-.pfg-tool-info {
-    flex: 1;
-}
-.pfg-tool-info strong {
-    display: block;
-    margin-bottom: 4px;
-    color: #334155;
-}
-.pfg-tool-info p {
-    margin: 0;
-    font-size: 12px;
-    color: #64748b;
-}
-.pfg-spin {
-    animation: pfg-spin 1s linear infinite;
-}
-@keyframes pfg-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-</style>

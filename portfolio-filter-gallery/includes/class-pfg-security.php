@@ -236,7 +236,8 @@ class PFG_Security {
      * @return bool
      */
     public static function verify_request_method( $method = 'POST' ) {
-        return isset( $_SERVER['REQUEST_METHOD'] ) && strtoupper( $_SERVER['REQUEST_METHOD'] ) === strtoupper( $method );
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- comparison only, no output.
+        return isset( $_SERVER['REQUEST_METHOD'] ) && strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) === strtoupper( $method );
     }
 
     /**
@@ -248,9 +249,11 @@ class PFG_Security {
      * @return mixed
      */
     public static function get_post( $key, $default = '', $type = 'text' ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- this is a utility method called after nonce verification.
         if ( ! isset( $_POST[ $key ] ) ) {
             return $default;
         }
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized by self::sanitize().
         return self::sanitize( wp_unslash( $_POST[ $key ] ), $type );
     }
 
@@ -263,9 +266,11 @@ class PFG_Security {
      * @return mixed
      */
     public static function get_query( $key, $default = '', $type = 'text' ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- this is a utility method called after nonce verification.
         if ( ! isset( $_GET[ $key ] ) ) {
             return $default;
         }
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized by self::sanitize().
         return self::sanitize( wp_unslash( $_GET[ $key ] ), $type );
     }
 }

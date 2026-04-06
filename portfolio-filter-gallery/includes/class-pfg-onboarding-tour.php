@@ -265,7 +265,7 @@ class PFG_Onboarding_Tour {
                     {
                         element: '#pfg-gallery-settings, .pfg-settings-tabs',
                         title: '" . esc_js( __( 'Configure Settings', 'portfolio-filter-gallery' ) ) . "',
-                        content: '" . esc_js( __( 'Customize your gallery layout, hover effects, lightbox, and more using these tabs.', 'portfolio-filter-gallery' ) ) . "',
+                        content: '" . esc_js( __( 'Customize your gallery layout, hover effects, and more using these tabs.', 'portfolio-filter-gallery' ) ) . "',
                         position: 'top'
                     },
                     {
@@ -326,11 +326,11 @@ class PFG_Onboarding_Tour {
                             '<h4 class=\"pfg-tour-title\">' + step.title + '</h4>' +
                             '<p class=\"pfg-tour-content\">' + step.content + '</p>' +
                             '<div class=\"pfg-tour-footer\">' +
-                                '<span class=\"pfg-tour-step\">Step ' + (index + 1) + ' of ' + self.steps.length + '</span>' +
+                                '<span class=\"pfg-tour-step\">' + '" . esc_js( __( 'Step', 'portfolio-filter-gallery' ) ) . "' + ' ' + (index + 1) + ' ' + '" . esc_js( __( 'of', 'portfolio-filter-gallery' ) ) . "' + ' ' + self.steps.length + '</span>' +
                                 '<div class=\"pfg-tour-actions\">' +
-                                    (index > 0 ? '<button class=\"pfg-tour-btn pfg-tour-btn-secondary pfg-tour-prev\">Back</button>' : '') +
+                                    (index > 0 ? '<button class=\"pfg-tour-btn pfg-tour-btn-secondary pfg-tour-prev\">' + '" . esc_js( __( 'Back', 'portfolio-filter-gallery' ) ) . "' + '</button>' : '') +
                                     '<button class=\"pfg-tour-btn pfg-tour-btn-primary pfg-tour-next\">' + 
-                                        (index === self.steps.length - 1 ? 'Finish' : 'Next') + 
+                                        (index === self.steps.length - 1 ? '" . esc_js( __( 'Finish', 'portfolio-filter-gallery' ) ) . "' : '" . esc_js( __( 'Next', 'portfolio-filter-gallery' ) ) . "') + 
                                     '</button>' +
                                 '</div>' +
                             '</div>' +
@@ -424,6 +424,10 @@ class PFG_Onboarding_Tour {
     public static function ajax_complete_tour() {
         check_ajax_referer( 'pfg_tour_nonce', 'security' );
         
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( array( 'message' => esc_html__( 'Insufficient permissions.', 'portfolio-filter-gallery' ) ) );
+        }
+        
         update_option( self::TOUR_COMPLETED_OPTION, true );
         delete_option( 'pfg_show_tour' );
         
@@ -435,6 +439,10 @@ class PFG_Onboarding_Tour {
      */
     public static function ajax_dismiss_tour() {
         check_ajax_referer( 'pfg_tour_nonce', 'security' );
+        
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( array( 'message' => esc_html__( 'Insufficient permissions.', 'portfolio-filter-gallery' ) ) );
+        }
         
         update_option( self::TOUR_COMPLETED_OPTION, true );
         delete_option( 'pfg_show_tour' );

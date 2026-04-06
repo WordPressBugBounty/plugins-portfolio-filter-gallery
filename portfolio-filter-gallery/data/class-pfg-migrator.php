@@ -128,7 +128,7 @@ class PFG_Migrator {
             file_put_contents( $backup_dir . '/.htaccess', 'deny from all' );
         }
 
-        $backup_file = $backup_dir . '/backup-' . date( 'Y-m-d-His' ) . '.json';
+        $backup_file = $backup_dir . '/backup-' . gmdate( 'Y-m-d-His' ) . '.json';
         $result = file_put_contents( $backup_file, wp_json_encode( $backup_data, JSON_PRETTY_PRINT ) );
 
         if ( $result ) {
@@ -149,6 +149,7 @@ class PFG_Migrator {
             'post_type'      => 'awl_filter_gallery',
             'posts_per_page' => 50,
             'post_status'    => 'any',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to find un-migrated galleries during one-time migration.
             'meta_query'     => array(
                 'relation' => 'OR',
                 array(
@@ -173,6 +174,7 @@ class PFG_Migrator {
             'posts_per_page' => 1,
             'post_status'    => 'any',
             'fields'         => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to check remaining un-migrated galleries.
             'meta_query'     => array(
                 array(
                     'key'     => '_pfg_migrated',
@@ -347,12 +349,12 @@ class PFG_Migrator {
 
             $images[] = array(
                 'id'          => $id,
-                'title'       => isset( $titles[ $index ] ) ? $titles[ $index ] : get_the_title( $id ),
-                'alt'         => $alt_text,
-                'description' => $description,
-                'link'        => $link,
-                'type'        => $type,
-                'filters'     => $filter_slugs,
+                'title'       => isset( $titles[ $index ] ) ? sanitize_text_field( $titles[ $index ] ) : sanitize_text_field( get_the_title( $id ) ),
+                'alt'         => sanitize_text_field( $alt_text ),
+                'description' => wp_kses_post( $description ),
+                'link'        => esc_url_raw( $link ),
+                'type'        => sanitize_key( $type ),
+                'filters'     => array_map( 'sanitize_title', $filter_slugs ),
             );
         }
 
@@ -485,7 +487,7 @@ class PFG_Migrator {
                     $name = $name['name'];
                 } else {
                     // Skip this filter entry
-                    $this->log( "Skipped malformed filter: " . print_r( $name, true ), 'warning' );
+                    $this->log( 'Skipped malformed filter: ' . wp_json_encode( $name ), 'warning' );
                     continue;
                 }
             }
@@ -698,6 +700,7 @@ class PFG_Migrator {
             'posts_per_page' => -1,
             'post_status'    => 'any',
             'fields'         => 'ids',
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Required to count galleries migrated to current version.
             'meta_query'     => array(
                 array(
                     'key'   => '_pfg_migrated',

@@ -42,7 +42,6 @@
           container.dataset.filterHierarchy || "{}"
         );
       } catch (e) {
-        console.warn("PFG: Failed to parse filter hierarchy", e);
       }
 
       this.init();
@@ -56,7 +55,7 @@
       this.initLazyLoading();
       this.assignStaggerDelays();
       this.initDeepLinking();
-      this.initPackedLayout();
+      this.initMasonryLayout();
       this.initPreloader();
     }
 
@@ -282,7 +281,7 @@
     }
 
     /**
-     * Bind cascading dropdown events (single-level for free version)
+     * Bind cascading dropdown events (single-level hierarchy)
      */
     bindCascadingDropdowns() {
       const dropdownContainer = this.container.querySelector('.pfg-cascading-dropdowns');
@@ -318,7 +317,7 @@
      * FLIP animation for other layouts
      */
     filterItems() {
-      // Re-query items from DOM to include any dynamically loaded items (Load More)
+      // Re-query items from DOM
       this.items = this.container.querySelectorAll(".pfg-item");
       
       // Check if masonry layout — needs different animation strategy
@@ -349,11 +348,7 @@
         })
       );
 
-      // Update numbered pagination after filtering
-      this.updateNumberedPaginationAfterFilter();
-      
-      // Reset Load More button visibility when filter changes
-      this.resetLoadMoreButton();
+
     }
 
     /**
@@ -393,7 +388,7 @@
           item.classList.remove("pfg-item--positioned");
         });
 
-        // Prepare items to show (they'll be positioned by applyMosaicLayout)
+        // Prepare items to show (they'll be positioned by initMasonryLayout)
         itemsToShow.forEach((item) => {
           item.classList.remove("pfg-item--hidden", "pfg-item--hiding");
           item.classList.add("pfg-item--visible");
@@ -401,7 +396,7 @@
         });
 
         // Recalculate all masonry positions
-        this.applyMosaicLayout();
+        this.initMasonryLayout();
 
       }, 250); // Wait for hide (opacity) animation
     }
@@ -521,76 +516,13 @@
 
       }, 280);
     }
-    
-    /**
-     * Reset Load More button visibility when filter changes
-     * Shows the button if there are more items to load for the current filter
-     */
-    resetLoadMoreButton() {
-      const gallery = this.container.closest(".pfg-gallery-wrapper");
-      if (!gallery) return;
-      
-      const btn = gallery.querySelector(".pfg-load-more");
-      if (!btn) return;
-      
-      const isPaginationEnabled = gallery.dataset.pagination === "true";
-      if (!isPaginationEnabled) return;
-      
-      // Get current active filter(s)
-      const isAllFilter = this.activeFilters.size === 0 || this.activeFilters.has("*");
-      
-      let filterTotal = 0;
-      let loadedMatching = 0;
-      
-      if (isAllFilter) {
-        // For "All" filter, use global total
-        filterTotal = parseInt(gallery.dataset.totalItems) || 0;
-        loadedMatching = gallery.querySelectorAll(".pfg-item").length;
-      } else {
-        // For specific filter, get count from filter button
-        const activeFilterSlug = Array.from(this.activeFilters)[0];
-        const filterBtn = this.container.querySelector(`.pfg-filter[data-filter="${activeFilterSlug}"]`);
-        
-        if (filterBtn) {
-          // Try to get count from button text (e.g., "Wedding Portraits (2)")
-          const countMatch = filterBtn.textContent.match(/\((\d+)\)/);
-          if (countMatch) {
-            filterTotal = parseInt(countMatch[1]) || 0;
-          }
-        }
-        
-        // Count how many items matching this filter are already in DOM
-        // Use itemMatchesFilter to properly handle parent/child filter relationships
-        const allItems = gallery.querySelectorAll(".pfg-item");
-        allItems.forEach(item => {
-          if (this.itemMatchesFilter(item)) {
-            loadedMatching++;
-          }
-        });
-      }
-      
-      const remaining = filterTotal - loadedMatching;
-      
-      if (remaining > 0) {
-        // Show button with accurate remaining count
-        btn.style.display = "";
-        const countEl = btn.querySelector(".pfg-load-more-count");
-        if (countEl) {
-          countEl.textContent = `(${remaining} remaining)`;
-          countEl.style.display = ""; // Ensure count is visible (may have been hidden by AJAX response)
-        }
-      } else {
-        // No more items for this filter - hide button
-        btn.style.display = "none";
-      }
-    }
-    
+
     /**
      * Apply mosaic layout with FLIP animation for smooth repositioning
      */
     applyMosaicLayoutWithFLIP(firstPositions) {
       // Apply new layout (this sets new --pfg-x and --pfg-y values)
-      this.applyMosaicLayout();
+      this.initMasonryLayout();
       
       // FLIP Step 2 & 3: After layout applied, calculate inverse transforms
       // The CSS will handle the smooth animation via transition
@@ -735,27 +667,22 @@
     }
 
     /**
-     * Initialize JS-positioned layouts (packed-cards and masonry)
-     * Packed-cards: mosaic grid with captions below
+     * Initialize JS-positioned masonry layout
      * Masonry: horizontal fill, shortest-column-first (Pinterest-style)
      */
-    initPackedLayout() {
-      // Check if this is a packed-cards or masonry layout (both need JS positioning)
-      const packedCardsGrid = this.grid?.classList.contains(
-        "pfg-grid--packed-cards"
-      );
+    initMasonryLayout() {
       const masonryGrid = this.grid?.classList.contains("pfg-grid--masonry");
 
-      if (!packedCardsGrid && !masonryGrid) {
+      if (!masonryGrid) {
         return;
       }
 
-      // Mark that this gallery uses mosaic layout
+      // Mark that this gallery uses masonry layout
       this.usesMosaicLayout = true;
 
       // Wait for all images to load before calculating layout
       this.waitForImages().then(() => {
-        this.applyMosaicLayout();
+        this.applyMasonryLayout();
       });
 
       // Re-apply on resize with debounce
@@ -764,7 +691,7 @@
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
           if (this.usesMosaicLayout) {
-            this.applyMosaicLayout();
+            this.applyMasonryLayout();
           }
         }, 200);
       });
@@ -788,14 +715,11 @@
     }
 
     /**
-     * Apply mosaic/packed/masonry layout with absolute positioning
-     * Uses requestAnimationFrame for reliable caption height measurement
-     * Masonry: places items horizontally (shortest-column-first) for left-to-right ordering
+     * Apply masonry layout with absolute positioning
+     * Places items horizontally (shortest-column-first) for left-to-right ordering
      */
-    applyMosaicLayout() {
+    applyMasonryLayout() {
       if (!this.grid) return;
-      
-      const isMasonry = this.grid.classList.contains("pfg-grid--masonry");
 
       const items = Array.from(
         this.grid.querySelectorAll(".pfg-item:not(.pfg-item--hidden)")
@@ -810,25 +734,17 @@
         parseInt(getComputedStyle(this.grid).getPropertyValue("--pfg-gap")) ||
         10;
 
+      const w = window.innerWidth;
+      const styles = getComputedStyle(this.grid);
       let cols;
-      if (isMasonry) {
-        const w = window.innerWidth;
-        const styles = getComputedStyle(this.grid);
-        if (w >= 1200) {
-          cols = parseInt(styles.getPropertyValue("--pfg-cols-xl")) || 4;
-        } else if (w >= 992) {
-          cols = parseInt(styles.getPropertyValue("--pfg-cols-lg")) || 3;
-        } else if (w >= 768) {
-          cols = parseInt(styles.getPropertyValue("--pfg-cols-md")) || 2;
-        } else {
-          cols = parseInt(styles.getPropertyValue("--pfg-cols-sm")) || 1;
-        }
+      if (w >= 1200) {
+        cols = parseInt(styles.getPropertyValue("--pfg-cols-xl")) || 4;
+      } else if (w >= 992) {
+        cols = parseInt(styles.getPropertyValue("--pfg-cols-lg")) || 3;
+      } else if (w >= 768) {
+        cols = parseInt(styles.getPropertyValue("--pfg-cols-md")) || 2;
       } else {
-        const minSize =
-          parseInt(
-            getComputedStyle(this.grid).getPropertyValue("--pfg-packed-min")
-          ) || 200;
-        cols = Math.max(2, Math.floor(containerWidth / (minSize + gap)));
+        cols = parseInt(styles.getPropertyValue("--pfg-cols-sm")) || 1;
       }
       
       const colWidth = (containerWidth - gap * (cols - 1)) / cols;
@@ -836,23 +752,9 @@
       const newItems = [];
       const itemData = [];
 
-      items.forEach((item, index) => {
+      items.forEach((item) => {
         const img = item.querySelector("img");
         const imgLink = item.querySelector(".pfg-item-link");
-        const caption = item.querySelector(".pfg-item-caption");
-
-        let aspectRatio = 1;
-        if (img && img.naturalWidth && img.naturalHeight) {
-          aspectRatio = img.naturalWidth / img.naturalHeight;
-        }
-
-        let itemCols = 1;
-        if (!isMasonry && aspectRatio > 1.5 && cols >= 3 && index % 4 === 0) {
-          itemCols = 2;
-        }
-
-        const itemWidth = colWidth * itemCols + gap * (itemCols - 1);
-        const imgHeight = Math.round(itemWidth / aspectRatio);
 
         const isNewItem = !item.classList.contains("pfg-item--positioned");
 
@@ -863,32 +765,18 @@
         }
 
         item.style.position = "absolute";
-        item.style.width = itemWidth + "px";
+        item.style.width = colWidth + "px";
 
-        if (isMasonry) {
-          if (imgLink) {
-            imgLink.style.display = "block";
-            imgLink.style.width = "100%";
-            imgLink.style.height = "auto";
-            imgLink.style.overflow = "hidden";
-          }
-          if (img) {
-            img.style.width = "100%";
-            img.style.height = "auto";
-            img.style.objectFit = "";
-          }
-        } else {
-          if (imgLink) {
-            imgLink.style.display = "block";
-            imgLink.style.width = "100%";
-            imgLink.style.height = imgHeight + "px";
-            imgLink.style.overflow = "hidden";
-          }
-          if (img) {
-            img.style.width = "100%";
-            img.style.height = "100%";
-            img.style.objectFit = "cover";
-          }
+        if (imgLink) {
+          imgLink.style.display = "block";
+          imgLink.style.width = "100%";
+          imgLink.style.height = "auto";
+          imgLink.style.overflow = "hidden";
+        }
+        if (img) {
+          img.style.width = "100%";
+          img.style.height = "auto";
+          img.style.objectFit = "";
         }
 
         if (isNewItem) {
@@ -897,87 +785,50 @@
 
         itemData.push({
           item,
-          itemCols,
-          imgHeight,
-          itemWidth,
-          caption,
+          colWidth,
         });
       });
 
       setTimeout(() => {
         const colHeights = new Array(cols).fill(0);
-        let visibleIndex = 0;
 
         itemData.forEach((data) => {
-          const { item, itemCols, imgHeight, caption, itemWidth } = data;
+          const { item, colWidth: itemWidth } = data;
 
           if (item.classList.contains("pfg-item--hidden")) {
             return;
           }
 
-          let itemHeight;
-          if (isMasonry) {
-            itemHeight = Math.ceil(item.offsetHeight);
-            if (itemHeight <= 0) {
-              const img = item.querySelector("img");
-              if (img && img.naturalWidth && img.naturalHeight) {
-                itemHeight = Math.ceil(itemWidth / (img.naturalWidth / img.naturalHeight));
-              } else {
-                itemHeight = Math.ceil(itemWidth);
-              }
+          let itemHeight = Math.ceil(item.offsetHeight);
+          if (itemHeight <= 0) {
+            const img = item.querySelector("img");
+            if (img && img.naturalWidth && img.naturalHeight) {
+              itemHeight = Math.ceil(itemWidth / (img.naturalWidth / img.naturalHeight));
+            } else {
+              itemHeight = Math.ceil(itemWidth);
             }
-          } else {
-            let captionHeight = 0;
-            if (caption) {
-              captionHeight = Math.ceil(caption.getBoundingClientRect().height);
-              if (captionHeight === 0) {
-                captionHeight = 50;
-              }
-            }
-            itemHeight = Math.ceil(imgHeight + captionHeight);
           }
 
-          let bestCol;
-          if (isMasonry) {
-            bestCol = 0;
-            for (let c = 1; c < cols; c++) {
-              if (colHeights[c] < colHeights[bestCol]) {
-                bestCol = c;
-              }
+          // Shortest-column-first placement
+          let bestCol = 0;
+          for (let c = 1; c < cols; c++) {
+            if (colHeights[c] < colHeights[bestCol]) {
+              bestCol = c;
             }
-          } else {
-            bestCol = visibleIndex % cols;
-            if (itemCols > 1) {
-              bestCol = Math.min(bestCol, cols - itemCols);
-            }
-          }
-          
-          let minHeight = colHeights[bestCol];
-          if (itemCols > 1) {
-            minHeight = Math.max(...colHeights.slice(bestCol, bestCol + itemCols));
           }
 
           const x = Math.round(bestCol * (colWidth + gap));
-          const y = Math.round(minHeight);
+          const y = Math.round(colHeights[bestCol]);
 
-          if (isMasonry) {
-            item.style.left = x + "px";
-            item.style.top = y + "px";
-          } else {
-            item.style.setProperty("--pfg-x", x + "px");
-            item.style.setProperty("--pfg-y", y + "px");
-          }
+          item.style.left = x + "px";
+          item.style.top = y + "px";
 
           if (!item.classList.contains("pfg-item--positioned")) {
             void item.offsetHeight;
             item.classList.add("pfg-item--positioned");
           }
 
-          for (let c = bestCol; c < bestCol + itemCols && c < cols; c++) {
-            colHeights[c] = y + itemHeight + gap;
-          }
-
-          visibleIndex++;
+          colHeights[bestCol] = y + itemHeight + gap;
         });
 
         const maxHeight = Math.max(...colHeights, 0);
@@ -1006,7 +857,7 @@
     }
 
     /**
-     * Public method to re-apply mosaic layout (called after Load More)
+     * Public method to re-apply mosaic layout
      */
     refreshMosaicLayout() {
       if (this.usesMosaicLayout) {
@@ -1014,7 +865,7 @@
         this.items = this.container.querySelectorAll(".pfg-item");
 
         this.waitForImages().then(() => {
-          this.applyMosaicLayout();
+          this.initMasonryLayout();
         });
       }
     }
@@ -1050,585 +901,10 @@
       this.filterItems();
     }
 
-    /**
-     * Update numbered pagination after filtering
-     * Re-paginates only the visible (filtered) items
-     */
-    updateNumberedPaginationAfterFilter() {
-      const paginationWrap = this.container.querySelector(
-        ".pfg-numbered-pagination"
-      );
-      if (!paginationWrap) return;
 
-      const itemsPerPage = parseInt(this.container.dataset.itemsPerPage) || 12;
-
-      // Get only visible (non-filtered-hidden) items
-      const visibleItems = Array.from(
-        this.container.querySelectorAll(".pfg-item:not(.pfg-item--hidden)")
-      );
-      const totalVisible = visibleItems.length;
-      const totalPages = Math.ceil(totalVisible / itemsPerPage);
-
-      // Show first page of filtered items, hide rest
-      visibleItems.forEach((item, index) => {
-        if (index < itemsPerPage) {
-          item.classList.remove("pfg-item--paginated-hidden");
-        } else {
-          item.classList.add("pfg-item--paginated-hidden");
-        }
-      });
-
-      // Rebuild pagination buttons
-      paginationWrap.innerHTML = "";
-      for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "pfg-pagination-btn" + (i === 1 ? " active" : "");
-        btn.dataset.page = i;
-        btn.textContent = i;
-        paginationWrap.appendChild(btn);
-      }
-
-      // Hide pagination if only one page
-      paginationWrap.style.display = totalPages <= 1 ? "none" : "";
-    }
   }
 
-  /**
-   * Pagination handler class
-   */
-  class PFGPagination {
-    constructor() {
-      this.init();
-    }
 
-    init() {
-      this.bindLoadMore();
-      this.bindNumberedPagination();
-      this.initInfiniteScroll();
-      this.bindFilterReset();
-    }
-
-    /**
-     * Listen for filter changes to reset pagination
-     * NOTE: Disabled - items loaded via Load More now persist until page reload
-     * Client-side filtering handles show/hide without AJAX reset
-     */
-    bindFilterReset() {
-      // Removed: AJAX reset on filter change
-      // Items loaded via Load More now stay in DOM and are filtered client-side
-      // This provides better UX - users don't lose loaded items when filtering
-      
-      // document.addEventListener("pfg:filtered", (e) => {
-      //   const gallery = e.target.closest(".pfg-gallery-wrapper");
-      //   if (gallery && gallery.dataset.pagination === "true") {
-      //     this.resetPagination(gallery);
-      //   }
-      // });
-    }
-
-    /**
-     * Bind Load More button clicks
-     */
-    bindLoadMore() {
-      document.addEventListener("click", (e) => {
-        const btn = e.target.closest(".pfg-load-more");
-        if (!btn) return;
-
-        const gallery = btn.closest(".pfg-gallery-wrapper");
-        this.loadMoreItems(gallery, btn);
-      });
-    }
-
-    /**
-     * Bind numbered pagination clicks
-     */
-    bindNumberedPagination() {
-      document.addEventListener("click", (e) => {
-        const btn = e.target.closest(".pfg-pagination-btn");
-        if (!btn || btn.disabled || btn.classList.contains("active")) return;
-
-        const gallery = btn.closest(".pfg-gallery-wrapper");
-        const page = parseInt(btn.dataset.page);
-
-        this.goToPage(gallery, page);
-      });
-    }
-
-    /**
-     * Navigate to specific page (numbered pagination)
-     */
-    goToPage(gallery, page) {
-      const items = gallery.querySelectorAll(
-        ".pfg-item:not(.pfg-item--hidden)"
-      );
-      const itemsPerPage = parseInt(gallery.dataset.itemsPerPage) || 12;
-      const startIndex = (page - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-
-      items.forEach((item, index) => {
-        if (index >= startIndex && index < endIndex) {
-          item.classList.remove("pfg-item--paginated-hidden");
-        } else {
-          item.classList.add("pfg-item--paginated-hidden");
-        }
-      });
-
-      // Update pagination buttons
-      gallery.querySelectorAll(".pfg-pagination-btn").forEach((btn) => {
-        btn.classList.toggle("active", parseInt(btn.dataset.page) === page);
-      });
-
-      // Scroll to gallery
-      gallery.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
-    /**
-     * Load more items via AJAX
-     * NOTE: Always loads ALL items regardless of current filter
-     * Client-side filtering handles show/hide after loading
-     */
-    async loadMoreItems(gallery, btn) {
-      const galleryId = gallery.dataset.galleryId;
-      const itemsPerPage = parseInt(gallery.dataset.itemsPerPage) || 12;
-      const currentPage = parseInt(gallery.dataset.currentPage) || 1;
-      const nextPage = currentPage + 1;
-      
-      // Get current active filter to load matching items
-      const pfgGallery = gallery.pfgGallery;
-      const activeFilters = pfgGallery ? pfgGallery.activeFilters : new Set();
-      const isMultiSelect = gallery.dataset.multiSelect === "true";
-      
-      // Build filter parameter based on active filters
-      let filter = "*";
-      if (activeFilters.size > 0 && !activeFilters.has("*")) {
-        filter = Array.from(activeFilters).join(",");
-      }
-      
-      // Use total items count (not filtered count)
-      const totalItems = parseInt(gallery.dataset.totalItems) || 0;
-
-      // Calculate how many are already loaded
-      const loadedCount = gallery.querySelectorAll(".pfg-item").length;
-
-      // Check if all items are already loaded
-      if (loadedCount >= totalItems) {
-        if (btn) btn.style.display = "none";
-        return;
-      }
-
-      if (btn) {
-        btn.classList.add("loading");
-        const spinner = btn.querySelector(".pfg-load-more-spinner");
-        const text = btn.querySelector(".pfg-load-more-text");
-        if (spinner) spinner.style.display = "inline-block";
-        if (text) text.textContent = "Loading...";
-      }
-
-      try {
-        // Track the filter used for this load (so resetPagination knows if we need to reload for "All")
-        gallery.dataset.lastLoadFilter = filter;
-        
-        // Get IDs of already loaded items to avoid duplicates
-        const existingItems = gallery.querySelectorAll(".pfg-item");
-        const excludeIds = Array.from(existingItems)
-          .map(item => item.dataset.id)
-          .filter(id => id);
-        
-        // Calculate offset based on items already in DOM
-        const offset = existingItems.length;
-        
-        // Make AJAX request
-        const formData = new FormData();
-        formData.append("action", "pfg_load_more");
-        formData.append("gallery_id", galleryId);
-        formData.append("page", nextPage);
-        formData.append("items_per_page", itemsPerPage);
-        formData.append("filter", filter);
-        formData.append("filter_logic", gallery.dataset.filterLogic || "or");
-        formData.append("nonce", window.pfgData?.nonce || "");
-        formData.append("offset", offset);
-        formData.append("exclude_ids", excludeIds.join(","));
-
-        const response = await fetch(
-          window.pfgData?.ajaxUrl || "/wp-admin/admin-ajax.php",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        const data = await response.json();
-
-        if (data.success && data.data.html) {
-          // Append new items to grid
-          const grid = gallery.querySelector(".pfg-grid");
-          if (grid) {
-            // Check if using mosaic layout (packed-cards OR masonry)
-            const isMosaicLayout = grid.classList.contains("pfg-grid--packed-cards") ||
-              grid.classList.contains("pfg-grid--masonry");
-
-            // Create temp container to parse HTML
-            const temp = document.createElement("div");
-            temp.innerHTML = data.data.html;
-
-            // Note: Items are pre-filtered by server based on current filter
-            // No client-side filter check needed - just animate all received items
-
-            if (isMosaicLayout) {
-              // For mosaic/masonry layout:
-              // Append items fully hidden, wait for images, then position + fade in
-              const newItems = Array.from(temp.children);
-              newItems.forEach((item) => {
-                item.classList.add("pfg-item--visible");
-                grid.appendChild(item);
-              });
-
-              // Wait for images to load, then recalculate layout
-              if (
-                gallery.pfgGallery &&
-                gallery.pfgGallery.refreshMosaicLayout
-              ) {
-                gallery.pfgGallery.refreshMosaicLayout();
-              }
-            } else {
-              // For other layouts: animate each new item
-              // Items are already filtered by server, so all loaded items should be shown
-              Array.from(temp.children).forEach((item, i) => {
-                // Add visible class for filtering state
-                item.classList.add("pfg-item--visible");
-                
-                // Start hidden for animation
-                item.style.opacity = "0";
-                item.style.transform = "translateY(20px) scale(0.95)";
-                item.style.transition = "none";
-                grid.appendChild(item);
-
-                // Trigger animation with stagger
-                requestAnimationFrame(() => {
-                  setTimeout(() => {
-                    item.style.transition =
-                      "opacity 0.3s ease, transform 0.3s ease";
-                    item.style.opacity = "1";
-                    item.style.transform = "translateY(0) scale(1)";
-                    
-                    // Clean up inline styles after animation
-                    setTimeout(() => {
-                      item.style.transition = "";
-                      item.style.opacity = "";
-                      item.style.transform = "";
-                    }, 350);
-                  }, i * 50);
-                });
-              });
-            }
-          }
-
-          // Update state
-          gallery.dataset.currentPage = nextPage;
-
-          // Update remaining count
-          this.updateLoadMoreCount(gallery, data.data.remaining);
-
-
-          // Note: Items are now pre-filtered during load, no need for separate filterItems call
-
-          // Hide button if no more items
-          if (!data.data.has_more && btn) {
-            btn.style.display = "none";
-          }
-        }
-      } catch (error) {
-        console.error("PFG Load More Error:", error);
-      }
-
-      if (btn) {
-        btn.classList.remove("loading");
-        const spinner = btn.querySelector(".pfg-load-more-spinner");
-        const text = btn.querySelector(".pfg-load-more-text");
-        if (spinner) spinner.style.display = "none";
-        if (text) text.textContent = btn.dataset.loadMoreText || "Load More";
-      }
-    }
-
-    /**
-     * Reset pagination when filters change (AJAX version)
-     */
-    async resetPagination(gallery) {
-      const galleryId = gallery.dataset.galleryId;
-      const itemsPerPage = parseInt(gallery.dataset.itemsPerPage) || 12;
-
-      // Reset page counter
-      gallery.dataset.currentPage = 1;
-
-      // Check if using multi-select mode
-      const isMultiSelect = gallery.dataset.multiSelect === "true";
-      
-      // Get all active/selected filters
-      const activeFilters = gallery.querySelectorAll(
-        ".pfg-filter--active, .pfg-filter--selected"
-      );
-      
-      // Determine if we're showing "All" (no filters or just the * filter)
-      let isShowingAll = activeFilters.length === 0;
-      if (activeFilters.length === 1 && activeFilters[0].dataset.filter === "*") {
-        isShowingAll = true;
-      }
-      
-      // Build filter string (comma-separated for multi-select)
-      let filter = "*";
-      if (!isShowingAll) {
-        if (isMultiSelect) {
-          const selectedFilters = gallery.querySelectorAll(".pfg-filter--selected");
-          const filterSlugs = Array.from(selectedFilters)
-            .map(f => f.dataset.filter)
-            .filter(f => f && f !== "*");
-          filter = filterSlugs.length > 0 ? filterSlugs.join(",") : "*";
-        } else {
-          const activeFilter = gallery.querySelector(".pfg-filter--active");
-          filter = activeFilter ? activeFilter.dataset.filter || "*" : "*";
-        }
-      }
-
-      // Check pagination type
-      const paginationType = gallery.dataset.paginationType;
-      const isNumberedPagination = paginationType === "numbered";
-
-      // For numbered pagination, items are already rendered - just update display
-      // Don't use AJAX, filtering is done client-side
-      if (isNumberedPagination) {
-        const visibleItems = gallery.querySelectorAll(
-          ".pfg-item:not(.pfg-item--hidden)"
-        );
-        this.updateNumberedPagination(
-          gallery,
-          visibleItems.length,
-          itemsPerPage
-        );
-        this.goToPage(gallery, 1);
-        return;
-      }
-
-      // If showing "All" (*), check if we need to reload
-      // We need to reload if:
-      // 1. We previously loaded items with a filter (stored in data-last-load-filter)
-      // 2. Current page > 1 (we've done Load More before)
-      if (isShowingAll) {
-        const lastLoadFilter = gallery.dataset.lastLoadFilter || "*";
-        const currentPage = parseInt(gallery.dataset.currentPage) || 1;
-        
-        // If we previously loaded with a specific filter, we need to reload "All" from server
-        // because the DOM only contains items for that specific filter
-        if (lastLoadFilter !== "*" && lastLoadFilter !== "") {
-          // Clear the last load filter since we're resetting to "All"
-          gallery.dataset.lastLoadFilter = "*";
-          
-          // Don't return early - continue to AJAX reload below
-          // Set isShowingAll to false to trigger the AJAX path
-          // but keep filter as "*" for the reload
-          filter = "*";
-        } else {
-          // No filtered loads before - just show what's there
-          // Clear filtered total since we're showing all
-          delete gallery.dataset.filteredTotal;
-          
-          // For Load More: show button if there are more items
-          const totalItems = parseInt(gallery.dataset.totalItems) || 0;
-          const loadedItems = gallery.querySelectorAll(".pfg-item").length;
-          const remaining = totalItems - loadedItems;
-
-          this.updateLoadMoreCount(gallery, remaining);
-          const loadMoreBtn = gallery.querySelector(".pfg-load-more");
-          if (loadMoreBtn) {
-            loadMoreBtn.style.display = remaining > 0 ? "" : "none";
-          }
-
-          // For Numbered Pagination: update page buttons based on visible items
-          const visibleItems = gallery.querySelectorAll(
-            ".pfg-item:not(.pfg-item--hidden)"
-          );
-          this.updateNumberedPagination(
-            gallery,
-            visibleItems.length,
-            itemsPerPage
-          );
-
-          // Reset pagination view to page 1
-          this.goToPage(gallery, 1);
-
-          return;
-        }
-      }
-      
-      // Track the filter we're loading with (for detecting filtered Load More)
-      gallery.dataset.lastLoadFilter = filter;
-
-      // For filtered views with AJAX, we need to reload from server
-      // Show loading state
-      const grid = gallery.querySelector(".pfg-grid");
-      const loadMoreBtn = gallery.querySelector(".pfg-load-more");
-
-      if (loadMoreBtn) {
-        loadMoreBtn.classList.add("loading");
-      }
-
-      try {
-        const formData = new FormData();
-        formData.append("action", "pfg_load_more");
-        formData.append("gallery_id", galleryId);
-        formData.append("page", 1);
-        formData.append("items_per_page", itemsPerPage);
-        formData.append("filter", filter);
-        formData.append("filter_logic", gallery.dataset.filterLogic || "or");
-        formData.append("nonce", window.pfgData?.nonce || "");
-
-        const response = await fetch(
-          window.pfgData?.ajaxUrl || "/wp-admin/admin-ajax.php",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        const data = await response.json();
-
-        if (data.success) {
-          // Always update grid content (even if empty - 0 results is valid)
-          if (grid) {
-            grid.innerHTML = data.data.html || "";
-
-            // Check if using mosaic/packed layout and refresh it (packed-cards OR masonry)
-            const isMosaicLayout = grid.classList.contains("pfg-grid--packed-cards") ||
-              grid.classList.contains("pfg-grid--masonry");
-
-            if (isMosaicLayout && data.data.html) {
-              // Refresh mosaic layout after content replacement
-              if (
-                gallery.pfgGallery &&
-                gallery.pfgGallery.refreshMosaicLayout
-              ) {
-                setTimeout(() => {
-                  gallery.pfgGallery.refreshMosaicLayout();
-                }, 50);
-              }
-            }
-          }
-
-          // Update remaining count and button visibility
-          this.updateLoadMoreCount(gallery, data.data.remaining);
-
-          if (loadMoreBtn) {
-            loadMoreBtn.style.display = data.data.has_more ? "" : "none";
-          }
-
-          // Store filtered total for subsequent loads
-          gallery.dataset.filteredTotal = data.data.total;
-
-          // For Numbered Pagination: update page buttons based on total filtered items
-          // After AJAX, all visible items are the first page of filtered results
-          const visibleItems = grid
-            ? grid.querySelectorAll(".pfg-item").length
-            : 0;
-          const totalFiltered = data.data.total || visibleItems;
-          this.updateNumberedPagination(gallery, totalFiltered, itemsPerPage);
-        }
-      } catch (error) {
-        console.error("PFG Reset Pagination Error:", error);
-      }
-
-      if (loadMoreBtn) {
-        loadMoreBtn.classList.remove("loading");
-      }
-    }
-
-    /**
-     * Update Load More count display
-     */
-    updateLoadMoreCount(gallery, remaining) {
-      const countEl = gallery.querySelector(".pfg-load-more-count");
-      if (countEl) {
-        if (remaining > 0) {
-          countEl.textContent = `(${remaining} remaining)`;
-          countEl.style.display = "";
-        } else {
-          countEl.style.display = "none";
-        }
-      }
-    }
-
-    /**
-     * Update numbered pagination buttons
-     */
-    updateNumberedPagination(gallery, totalVisible, itemsPerPage) {
-      const paginationWrap = gallery.querySelector(".pfg-numbered-pagination");
-      if (!paginationWrap) return;
-
-      const totalPages = Math.ceil(totalVisible / itemsPerPage);
-
-      // Rebuild pagination buttons
-      paginationWrap.innerHTML = "";
-      for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "pfg-pagination-btn" + (i === 1 ? " active" : "");
-        btn.dataset.page = i;
-        btn.textContent = i;
-        paginationWrap.appendChild(btn);
-      }
-
-      // Hide pagination if only one page
-      paginationWrap.style.display = totalPages <= 1 ? "none" : "";
-    }
-
-    /**
-     * Initialize Infinite Scroll (AJAX version)
-     */
-    initInfiniteScroll() {
-      const galleries = document.querySelectorAll(
-        '.pfg-gallery-wrapper[data-pagination-type="infinite"]'
-      );
-
-      galleries.forEach((gallery) => {
-        const trigger = gallery.querySelector(".pfg-scroll-trigger");
-        const loader = gallery.querySelector(".pfg-scroll-loader");
-        if (!trigger) return;
-
-        let isLoading = false;
-
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting && !isLoading) {
-                const totalItems = parseInt(gallery.dataset.totalItems) || 0;
-                const loadedItems =
-                  gallery.querySelectorAll(".pfg-item").length;
-
-                if (loadedItems < totalItems) {
-                  isLoading = true;
-                  if (loader) loader.style.display = "";
-
-                  this.loadMoreItems(gallery, null).then(() => {
-                    isLoading = false;
-                    if (loader) loader.style.display = "none";
-
-                    const newLoadedItems =
-                      gallery.querySelectorAll(".pfg-item").length;
-                    if (newLoadedItems >= totalItems) {
-                      observer.disconnect();
-                      if (loader) loader.remove();
-                    }
-                  });
-                }
-              }
-            });
-          },
-          { rootMargin: "100px" }
-        );
-
-        observer.observe(trigger);
-      });
-    }
-  }
 
   /**
    * Initialize galleries when DOM is ready
@@ -1643,12 +919,6 @@
       container.pfgGallery = new PFGGallery(container);
       container.dataset.pfgInitialized = "true";
     });
-
-    // Initialize pagination (once)
-    if (!window.pfgPaginationInitialized) {
-      new PFGPagination();
-      window.pfgPaginationInitialized = true;
-    }
   }
 
   // Initialize on DOM ready

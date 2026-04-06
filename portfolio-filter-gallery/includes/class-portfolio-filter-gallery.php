@@ -76,7 +76,6 @@ class Portfolio_Filter_Gallery {
         require_once PFG_PLUGIN_PATH . 'public/class-pfg-renderer.php';
 
         // Integrations
-        require_once PFG_PLUGIN_PATH . 'integrations/class-pfg-woocommerce.php';
         
         // Onboarding Tour
         require_once PFG_PLUGIN_PATH . 'includes/class-pfg-onboarding-tour.php';
@@ -110,9 +109,6 @@ class Portfolio_Filter_Gallery {
 
         // Admin menus
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menu_pages' );
-
-        // Admin head CSS (Pro badge and menu icon)
-        $this->loader->add_action( 'admin_head', $plugin_admin, 'output_pro_badge_css' );
 
         // Custom columns
         $this->loader->add_filter( 'manage_awl_filter_gallery_posts_columns', $plugin_admin, 'add_shortcode_column' );

@@ -76,10 +76,6 @@ class PFG_Renderer {
         // Build filter hierarchy map (parent slug => array of child slugs)
         $filter_hierarchy = $this->build_filter_hierarchy();
 
-        // Pagination settings
-        $pagination_enabled = ! empty( $this->settings['pagination_enabled'] );
-        $pagination_type    = $this->settings['pagination_type'] ?? 'load_more';
-        $items_per_page     = absint( $this->settings['items_per_page'] ?? 12 );
 
         // Sort images based on sort_order setting
         $sort_order = $this->settings['sort_order'] ?? 'custom';
@@ -131,8 +127,10 @@ class PFG_Renderer {
         // Only apply filter logic if filters are enabled
         if ( $filters_enabled ) {
             // ALWAYS check URL param for filter (URL param always takes priority)
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only frontend URL parameter for gallery filter deep-linking; no data is modified.
             if ( isset( $_GET[ $url_param_name ] ) ) {
-                $active_filter = sanitize_key( $_GET[ $url_param_name ] );
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Same as above; value is sanitized with sanitize_key().
+                $active_filter = sanitize_key( wp_unslash( $_GET[ $url_param_name ] ) );
             } elseif ( empty( $active_filter ) && ! empty( $default_filter ) ) {
                 $active_filter = $default_filter;
             }
@@ -183,18 +181,10 @@ class PFG_Renderer {
             $wrapper_attrs['data-default-filter'] = $default_filter;
         }
 
-        // Add pagination attributes if enabled
-        if ( $pagination_enabled ) {
-            $wrapper_attrs['data-pagination']      = 'true';
-            $wrapper_attrs['data-pagination-type'] = $pagination_type;
-            $wrapper_attrs['data-items-per-page']  = $items_per_page;
-            $wrapper_attrs['data-current-page']    = 1;
-            $wrapper_attrs['data-total-items']     = count( $this->images );
-        }
 
-        // Add lightbox caption settings
-        $wrapper_attrs['data-lightbox-title'] = $this->settings['lightbox_title'] ? 'true' : 'false';
-        $wrapper_attrs['data-lightbox-description'] = $this->settings['lightbox_description'] ? 'true' : 'false';
+
+        // Add image link settings
+        $wrapper_attrs['data-image-links'] = ! empty( $this->settings['image_links'] ) ? 'true' : 'false';
 
         // Build wrapper opening tag
         echo '<div';
@@ -225,10 +215,7 @@ class PFG_Renderer {
         // Render gallery grid
         $this->render_grid( $active_filter );
 
-        // Render pagination controls
-        if ( $pagination_enabled ) {
-            $this->render_pagination( $pagination_type, $items_per_page );
-        }
+
 
         // Close main content wrapper for sidebar
         if ( $is_sidebar ) {
@@ -285,44 +272,52 @@ class PFG_Renderer {
         $filter_active_text_setting = isset( $this->settings['filter_active_text_color'] ) ? $this->settings['filter_active_text_color'] : 'auto';
         $filter_active_text = ( $filter_active_text_setting === 'auto' || empty( $filter_active_text_setting ) ) ? $this->get_contrast_color( $filter_active_bg ) : $filter_active_text_setting;
         
+        // Sanitize numeric values (columns, gap, border widths/radius).
+        $cols_xl       = absint( $this->settings['columns_xl'] );
+        $cols_lg       = absint( $this->settings['columns_lg'] );
+        $cols_md       = absint( $this->settings['columns_md'] );
+        $cols_sm       = absint( $this->settings['columns_sm'] );
+        $gap           = absint( $this->settings['gap'] );
+        $border_width  = absint( $this->settings['border_width'] );
+        $border_radius = absint( $this->settings['border_radius'] );
+
+        // Sanitize color values with the CSS-specific function.
+        $border_color       = sanitize_hex_color( $this->settings['border_color'] ) ?? '';
+        $filter_bg          = sanitize_hex_color( $filter_bg ) ?? '';
+        $filter_text        = sanitize_hex_color( $filter_text ) ?? '';
+        $filter_active_bg   = sanitize_hex_color( $filter_active_bg ) ?? '';
+        $filter_active_text = sanitize_hex_color( $filter_active_text ) ?? '';
+        $caption_bg         = sanitize_hex_color( isset( $this->settings['caption_bg_color'] ) ? $this->settings['caption_bg_color'] : '#ffffff' ) ?? '#ffffff';
+        $caption_text       = sanitize_hex_color( isset( $this->settings['caption_text_color'] ) ? $this->settings['caption_text_color'] : '#1e293b' ) ?? '#1e293b';
+
         $styles = array(
-            '--pfg-cols-xl'     => $this->settings['columns_xl'],
-            '--pfg-cols-lg'     => $this->settings['columns_lg'],
-            '--pfg-cols-md'     => $this->settings['columns_md'],
-            '--pfg-cols-sm'     => $this->settings['columns_sm'],
-            '--pfg-gap'         => $this->settings['gap'] . 'px',
-            '--pfg-border-width'=> $this->settings['border_width'] . 'px',
-            '--pfg-border-color'=> $this->settings['border_color'],
-            '--pfg-border-radius' => $this->settings['border_radius'] . 'px',
-            '--pfg-filter-bg'   => $filter_bg,
-            '--pfg-filter-text' => $filter_text,
-            '--pfg-filter-active-bg' => $filter_active_bg,
+            '--pfg-cols-xl'            => $cols_xl,
+            '--pfg-cols-lg'            => $cols_lg,
+            '--pfg-cols-md'            => $cols_md,
+            '--pfg-cols-sm'            => $cols_sm,
+            '--pfg-gap'                => $gap . 'px',
+            '--pfg-border-width'       => $border_width . 'px',
+            '--pfg-border-color'       => $border_color,
+            '--pfg-border-radius'      => $border_radius . 'px',
+            '--pfg-filter-bg'          => $filter_bg,
+            '--pfg-filter-text'        => $filter_text,
+            '--pfg-filter-active-bg'   => $filter_active_bg,
             '--pfg-filter-active-text' => $filter_active_text,
-            '--pfg-caption-bg'  => isset( $this->settings['caption_bg_color'] ) ? $this->settings['caption_bg_color'] : '#ffffff',
-            '--pfg-caption-text'=> isset( $this->settings['caption_text_color'] ) ? $this->settings['caption_text_color'] : '#1e293b',
+            '--pfg-caption-bg'         => $caption_bg,
+            '--pfg-caption-text'       => $caption_text,
         );
 
-        $css = '#' . $unique_id . ' {';
+        $css = '#' . sanitize_html_class( $unique_id ) . ' {';
         foreach ( $styles as $var => $value ) {
+            // $var is a hardcoded CSS custom property name (safe); $value is already sanitized above.
             $css .= $var . ':' . $value . ';';
         }
         $css .= '}';
 
-        // Add custom CSS if any
-        // Supports multiple targeting methods:
-        // - .pfg-gallery - targets this gallery wrapper
-        // - #pfg-gallery-{ID} - already specific to this gallery
-        // - GALLERY_ID - placeholder replaced with actual gallery ID
-        if ( ! empty( $this->settings['custom_css'] ) ) {
-            $custom_css = $this->settings['custom_css'];
-            // Replace .pfg-gallery with specific gallery ID selector
-            $custom_css = str_replace( '.pfg-gallery', '#' . $unique_id, $custom_css );
-            // Replace GALLERY_ID placeholder with actual ID number
-            $custom_css = str_replace( 'GALLERY_ID', $this->gallery_id, $custom_css );
-            $css .= PFG_Security::sanitize( $custom_css, 'css' );
-        }
-
-        echo '<style>' . $css . '</style>';
+        // Use wp_add_inline_style instead of raw <style> tag per WordPress guidelines.
+        // All values in $css are sanitized with CSS-appropriate functions above.
+        // wp_strip_all_tags() provides late escaping by stripping any injected HTML/script tags.
+        wp_add_inline_style( 'pfg-core', wp_strip_all_tags( $css ) );
     }
 
     /**
@@ -389,7 +384,7 @@ class PFG_Renderer {
     }
 
     /**
-     * Render dropdown-style filters (single-level for free version).
+     * Render dropdown-style filters (single-level hierarchy).
      *
      * @param string|null $active_filter Pre-selected filter slug.
      */
@@ -416,7 +411,7 @@ class PFG_Renderer {
             $count = $this->count_images_in_filter( $filter['id'] );
             $selected = ( $active_filter === $filter['slug'] ) ? ' selected' : '';
             
-            echo '<option value="' . esc_attr( $filter['slug'] ) . '"' . $selected . '>';
+            echo '<option value="' . esc_attr( $filter['slug'] ) . '"' . esc_attr( $selected ) . '>';
             echo esc_html( $filter['name'] );
             if ( $show_count ) {
                 echo ' (' . esc_html( $count ) . ')';
@@ -656,7 +651,7 @@ class PFG_Renderer {
         // Check if using card layout (title below image)
         $title_position = isset( $this->settings['title_position'] ) ? $this->settings['title_position'] : 'overlay';
         
-        // Add fixed-height class for grid layouts (not masonry, justified, packed, or card layout)
+        // Add fixed-height class for grid layouts (not masonry or card layout)
         $fixed_height = '';
         if ( $layout_type === 'grid' && $title_position !== 'below' ) {
             $fixed_height = ' pfg-grid--fixed-height';
@@ -665,45 +660,40 @@ class PFG_Renderer {
         // Build inline styles for layout-specific CSS variables
         $inline_styles = array();
         
-        if ( $layout_type === 'justified' ) {
-            $row_height = absint( $this->settings['justified_row_height'] ?? 200 );
-            $inline_styles[] = '--pfg-row-height: ' . $row_height . 'px';
-            
-            // Add last row handling class
-            $last_row = $this->settings['justified_last_row'] ?? 'left';
-            if ( $last_row === 'left' ) {
-                $layout_class .= ' pfg-grid--justified-last-left';
-            }
-        }
+        // Gap and border radius from settings
+        $gap = isset( $this->settings['gap'] ) ? absint( $this->settings['gap'] ) : 20;
+        $border_radius = isset( $this->settings['border_radius'] ) ? absint( $this->settings['border_radius'] ) : 0;
+        $inline_styles[] = '--pfg-gap: ' . $gap . 'px';
+        $inline_styles[] = '--pfg-border-radius: ' . $border_radius . 'px';
+        $inline_styles[] = '--pfg-radius: ' . $border_radius . 'px';
         
-        if ( $layout_type === 'packed' ) {
-            $min_size = absint( $this->settings['packed_min_size'] ?? 150 );
-            $inline_styles[] = '--pfg-packed-min: ' . $min_size . 'px';
-            
-            // Add packed-cards class for title below mode
-            if ( $title_position === 'below' ) {
-                $layout_class .= ' pfg-grid--packed-cards';
-            }
-        }
-        
-        // Add overlay color and opacity CSS variables
-        // Always output overlay color for hover overlays
-        $overlay_color = $this->settings['overlay_color'] ?? '#000000';
+
+        // Add overlay color and opacity CSS variables.
+        // Sanitize all hex colors before embedding in inline styles (escape late principle).
+        $overlay_color   = sanitize_hex_color( $this->settings['overlay_color'] ?? '#000000' ) ?? '#000000';
         $overlay_opacity = isset( $this->settings['overlay_opacity'] ) ? ( floatval( $this->settings['overlay_opacity'] ) / 100 ) : 0.7;
+        // Clamp opacity to valid 0-1 range.
+        $overlay_opacity = max( 0.0, min( 1.0, $overlay_opacity ) );
         $inline_styles[] = '--pfg-overlay-color: ' . $this->hex_to_rgba( $overlay_color, $overlay_opacity );
-        
-        // Primary color for categories in overlay
-        $primary_color = $this->settings['primary_color'] ?? '#3858e9';
+
+        // Primary color for categories in overlay.
+        $primary_color   = sanitize_hex_color( $this->settings['primary_color'] ?? '#3858e9' ) ?? '#3858e9';
         $inline_styles[] = '--pfg-primary-color: ' . $primary_color;
-        
-        // Caption/title colors for card mode (below)
+
+        // Caption/title colors for card mode (below).
         if ( ! empty( $this->settings['caption_text_color'] ) ) {
-            $inline_styles[] = '--pfg-caption-text: ' . $this->settings['caption_text_color'];
+            $caption_text = sanitize_hex_color( $this->settings['caption_text_color'] );
+            if ( $caption_text ) {
+                $inline_styles[] = '--pfg-caption-text: ' . $caption_text;
+            }
         }
-        
-        // Caption background for card mode
+
+        // Caption background for card mode.
         if ( ! empty( $this->settings['caption_bg_color'] ) ) {
-            $inline_styles[] = '--pfg-caption-bg: ' . $this->settings['caption_bg_color'];
+            $caption_bg = sanitize_hex_color( $this->settings['caption_bg_color'] );
+            if ( $caption_bg ) {
+                $inline_styles[] = '--pfg-caption-bg: ' . $caption_bg;
+            }
         }
 
         $style_attr = ! empty( $inline_styles ) ? ' style="' . esc_attr( implode( '; ', $inline_styles ) ) . '"' : '';
@@ -717,27 +707,16 @@ class PFG_Renderer {
             echo '</div>';
         }
 
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $direction is a static ' dir="rtl"' string, $style_attr is built with esc_attr() on line 716.
         echo '<div class="pfg-grid ' . esc_attr( $layout_class . $grayscale . $fixed_height ) . '"' . $direction . $style_attr . '>';
 
-        // Determine how many items to render initially
-        $pagination_enabled = ! empty( $this->settings['pagination_enabled'] );
-        $pagination_type    = $this->settings['pagination_type'] ?? 'load-more';
-        $items_per_page     = absint( $this->settings['items_per_page'] ?? 12 );
+        // Determine how many items to render
         $total_images       = count( $this->images );
-        
-        // For numbered pagination, render all items (client-side pagination)
-        // For load-more/infinite, only render first page (AJAX loads more)
-        if ( $pagination_enabled && $pagination_type !== 'numbered' ) {
-            $images_to_render = array_slice( $this->images, 0, $items_per_page );
-        } else {
-            $images_to_render = $this->images;
-        }
+        $images_to_render = $this->images;
 
         $index = 0;
         foreach ( $images_to_render as $key => $image ) {
-            // For numbered pagination, hide items after first page
-            $is_hidden = $pagination_enabled && $pagination_type === 'numbered' && $key >= $items_per_page;
-            $this->render_item( $image, $index, $active_filter, $is_hidden );
+            $this->render_item( $image, $index, $active_filter );
             $index++;
         }
 
@@ -750,9 +729,14 @@ class PFG_Renderer {
      * @param array       $image              Image data.
      * @param int         $index              Image index.
      * @param string|null $active_filter      Active filter slug.
-     * @param bool        $is_paginated_hidden Whether item is hidden for pagination.
      */
-    protected function render_item( $image, $index, $active_filter = null, $is_paginated_hidden = false ) {
+    protected function render_item( $image, $index, $active_filter = null ) {
+        // Skip if attachment no longer exists (deleted from Media Library)
+        $is_product = isset( $image['type'] ) && $image['type'] === 'product';
+        if ( ! $is_product && ! empty( $image['id'] ) && ! wp_get_attachment_url( $image['id'] ) ) {
+            return;
+        }
+
         // Get filter classes
         $filter_classes = $this->get_image_filter_classes( $image );
 
@@ -761,20 +745,12 @@ class PFG_Renderer {
         if ( $active_filter !== null ) {
             $should_show = false;
             
-            // For WooCommerce products, filters are category slugs - compare directly
-            $is_product = isset( $image['type'] ) && $image['type'] === 'product';
-            
-            if ( $is_product && ! empty( $image['filters'] ) ) {
-                // Products have slugs directly in filters array
-                $should_show = in_array( $active_filter, $image['filters'], true );
-            } else {
-                // Media library images have filter IDs that need lookup
-                foreach ( $image['filters'] as $filter_id ) {
-                    $filter = $this->get_filter_by_id( $filter_id );
-                    if ( $filter && $filter['slug'] === $active_filter ) {
-                        $should_show = true;
-                        break;
-                    }
+            // Media library images have filter IDs that need lookup
+            foreach ( $image['filters'] as $filter_id ) {
+                $filter = $this->get_filter_by_id( $filter_id );
+                if ( $filter && $filter['slug'] === $active_filter ) {
+                    $should_show = true;
+                    break;
                 }
             }
             
@@ -783,11 +759,6 @@ class PFG_Renderer {
             }
         }
         
-        // Add pagination hidden class
-        if ( $is_paginated_hidden ) {
-            $hidden_class .= ' pfg-item--paginated-hidden';
-        }
-
         // Hover effect class
         $hover_class = 'pfg-item-hover--' . esc_attr( $this->settings['hover_effect'] );
 
@@ -797,52 +768,18 @@ class PFG_Renderer {
         $size_class     = '';
         $item_style     = '';
 
-        // Get dimensions for aspect ratio - handle products differently
-        if ( isset( $image['type'] ) && $image['type'] === 'product' ) {
-            // For products, get dimensions from the product featured image
-            $product = wc_get_product( $image['id'] );
-            if ( $product ) {
-                $image_id = $product->get_image_id();
-                if ( $image_id ) {
-                    $image_meta = wp_get_attachment_metadata( $image_id );
-                    $width      = isset( $image_meta['width'] ) ? (int) $image_meta['width'] : 1;
-                    $height     = isset( $image_meta['height'] ) ? (int) $image_meta['height'] : 1;
-                } else {
-                    $width = 1;
-                    $height = 1;
-                }
-            } else {
-                $width = 1;
-                $height = 1;
-            }
-        } else {
-            // Regular images - use attachment metadata
-            $attachment_id = $image['id'];
-            $image_meta    = wp_get_attachment_metadata( $attachment_id );
-            $width         = isset( $image_meta['width'] ) ? (int) $image_meta['width'] : 1;
-            $height        = isset( $image_meta['height'] ) ? (int) $image_meta['height'] : 1;
-        }
-        $aspect_ratio = $width / max( $height, 1 );
+        // Get dimensions for aspect ratio from attachment metadata
+        $attachment_id = $image['id'];
+        $image_meta    = wp_get_attachment_metadata( $attachment_id );
+        $width         = isset( $image_meta['width'] ) ? (int) $image_meta['width'] : 1;
+        $height        = isset( $image_meta['height'] ) ? (int) $image_meta['height'] : 1;
+        $aspect_ratio  = $width / max( $height, 1 );
 
-        // Justified layout: set aspect ratio as flex-grow
-        if ( $layout_type === 'justified' ) {
-            $item_style = ' style="--item-aspect: ' . round( $aspect_ratio, 2 ) . '"';
-        }
 
-        // Packed layout: add size class based on aspect ratio
-        if ( $layout_type === 'packed' ) {
-            if ( $aspect_ratio > 1.5 ) {
-                $size_class = ' pfg-item--wide';
-            } elseif ( $aspect_ratio < 0.7 ) {
-                $size_class = ' pfg-item--tall';
-            } elseif ( $width > 1200 && $height > 1200 ) {
-                $size_class = ' pfg-item--large';
-            }
-        }
-
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $item_style is constructed from round($aspect_ratio, 2) float value.
         echo '<div class="pfg-item ' . esc_attr( $filter_classes . ' ' . $hover_class . $hidden_class . $size_class ) . '" data-id="' . esc_attr( $image['id'] ) . '"' . $item_style . '>';
 
-        // Type indicator icon (video, product, or link)
+        // Type indicator icon (video or link)
         if ( $image['type'] === 'video' && ! empty( $image['link'] ) ) {
             // Detect if it's a Vimeo video for color styling
             $is_vimeo = strpos( $image['link'], 'vimeo.com' ) !== false;
@@ -852,11 +789,6 @@ class PFG_Renderer {
             echo '<span class="pfg-item-type-icon ' . esc_attr( $video_class ) . '" title="' . esc_attr__( 'Video', 'portfolio-filter-gallery' ) . '">';
             echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>';
             echo '</span>';
-        } elseif ( ! empty( $image['product_id'] ) && class_exists( 'WooCommerce' ) ) {
-            // Product link indicator
-            echo '<span class="pfg-item-type-icon pfg-item-type-icon--product" title="' . esc_attr__( 'Product', 'portfolio-filter-gallery' ) . '">';
-            echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>';
-            echo '</span>';
         } elseif ( ! empty( $image['link'] ) && $image['type'] !== 'video' ) {
             // External link indicator
             echo '<span class="pfg-item-type-icon pfg-item-type-icon--link" title="' . esc_attr__( 'External Link', 'portfolio-filter-gallery' ) . '">';
@@ -864,123 +796,14 @@ class PFG_Renderer {
             echo '</span>';
         }
 
-        // Render image, video, or product
-        if ( isset( $image['type'] ) && $image['type'] === 'product' ) {
-            $this->render_product_item( $image, $index );
-        } elseif ( $image['type'] === 'video' && ! empty( $image['link'] ) ) {
+        // Render image or video
+        if ( $image['type'] === 'video' && ! empty( $image['link'] ) ) {
             $this->render_video_item( $image, $index );
         } else {
             $this->render_image_item( $image, $index );
         }
 
         echo '</div>';
-    }
-
-    /**
-     * Render a WooCommerce product item.
-     * Uses same HTML structure as render_image_item for consistent layouts.
-     *
-     * @param array $image Product data.
-     * @param int   $index Item index.
-     */
-    protected function render_product_item( $image, $index ) {
-        $settings = $this->settings;
-        
-        // Product-specific settings
-        $show_price      = isset( $settings['woo_show_price'] ) ? $settings['woo_show_price'] : true;
-        $show_sale_badge = isset( $settings['woo_show_sale_badge'] ) ? $settings['woo_show_sale_badge'] : true;
-        $show_title      = isset( $settings['woo_show_title'] ) ? $settings['woo_show_title'] : true;
-        $link_target     = isset( $settings['woo_link_target'] ) ? $settings['woo_link_target'] : '_self';
-        
-        // Layout settings (same as images)
-        $title_position = isset( $settings['title_position'] ) ? $settings['title_position'] : 'overlay';
-        $show_categories = ! empty( $settings['show_categories'] );
-        
-        // Product data
-        $product_data = isset( $image['product'] ) ? $image['product'] : array();
-        $is_on_sale   = ! empty( $product_data['on_sale'] );
-        $loading      = $settings['lazy_loading'] && $index > 3 ? 'lazy' : 'eager';
-        
-        // Use same structure as render_image_item - single link wrapping image
-        echo '<a href="' . esc_url( $image['link'] ) . '" target="' . esc_attr( $link_target ) . '" class="pfg-item-link">';
-        
-        // Sale badge (floating)
-        if ( $show_sale_badge && $is_on_sale ) {
-            echo '<span class="pfg-sale-badge">' . esc_html__( 'Sale!', 'portfolio-filter-gallery' ) . '</span>';
-        }
-        
-        // Product image with srcset (using image_id if available for proper WP handling)
-        if ( ! empty( $image['image_id'] ) ) {
-            $size       = $this->get_image_size();
-            $img_src    = wp_get_attachment_image_url( $image['image_id'], $size );
-            $img_srcset = wp_get_attachment_image_srcset( $image['image_id'], $size );
-            $img_sizes  = $this->calculate_sizes();
-            
-            echo '<img';
-            echo ' src="' . esc_url( $img_src ) . '"';
-            if ( $img_srcset ) {
-                echo ' srcset="' . esc_attr( $img_srcset ) . '"';
-                echo ' sizes="' . esc_attr( $img_sizes ) . '"';
-            }
-            echo ' alt="' . esc_attr( $image['title'] ) . '"';
-            echo ' loading="' . esc_attr( $loading ) . '"';
-            echo ' decoding="async"';
-            echo ' class="pfg-item-image"';
-            echo '>';
-        } else {
-            // Fallback to thumbnail URL
-            echo '<img';
-            echo ' src="' . esc_url( $image['thumbnail'] ) . '"';
-            echo ' alt="' . esc_attr( $image['title'] ) . '"';
-            echo ' loading="' . esc_attr( $loading ) . '"';
-            echo ' decoding="async"';
-            echo ' class="pfg-item-image"';
-            echo '>';
-        }
-        
-        // Overlay for overlay mode
-        if ( $title_position === 'overlay' && ( $show_title || $show_price ) ) {
-            echo '<div class="pfg-item-overlay">';
-            
-            if ( $show_title && ! empty( $image['title'] ) ) {
-                echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
-            }
-            
-            if ( $show_price && isset( $product_data['price'] ) ) {
-                echo '<span class="pfg-product-price">' . wp_kses_post( $product_data['price'] ) . '</span>';
-            }
-            
-            if ( $show_categories && ! empty( $image['filters'] ) ) {
-                echo '<div class="pfg-item-categories">' . esc_html( implode( ', ', array_slice( $image['filters'], 0, 2 ) ) ) . '</div>';
-            }
-            
-            echo '</div>';
-        }
-        
-        echo '</a>';
-        
-        // Caption below for below mode (same structure as images)
-        if ( $title_position === 'below' && ( $show_title || $show_price || ! empty( $this->settings['show_description'] ) ) ) {
-            echo '<div class="pfg-item-caption">';
-            
-            if ( $show_title && ! empty( $image['title'] ) ) {
-                echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
-            }
-            
-            if ( ! empty( $this->settings['show_description'] ) && ! empty( $image['description'] ) ) {
-                echo '<p class="pfg-item-description">' . esc_html( $image['description'] ) . '</p>';
-            }
-            
-            if ( $show_price && isset( $product_data['price'] ) ) {
-                echo '<span class="pfg-product-caption-price">' . wp_kses_post( $product_data['price'] ) . '</span>';
-            }
-            
-            if ( $show_categories && ! empty( $image['filters'] ) ) {
-                echo '<div class="pfg-item-categories">' . esc_html( implode( ', ', array_slice( $image['filters'], 0, 2 ) ) ) . '</div>';
-            }
-            
-            echo '</div>';
-        }
     }
 
     /**
@@ -1009,19 +832,10 @@ class PFG_Renderer {
         $alt        = $image['title'] ?: get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
 
         // Determine link behavior
-        $has_custom_link = ! empty( $image['link'] );
-        $has_product_link = ! empty( $image['product_id'] ) && class_exists( 'WooCommerce' );
-        $lightbox_enabled = $this->settings['lightbox'] !== 'none';
-        $show_dual_icons = ( $has_custom_link || $has_product_link ) && $lightbox_enabled;
+        $has_custom_link = ! empty( $image['link'] ) && isset( $this->settings['image_links'] ) && $this->settings['image_links'];
         
-        // Determine the link URL (priority: product_id > custom link > full image)
-        if ( $has_product_link ) {
-            $link_url = get_permalink( $image['product_id'] );
-        } elseif ( $has_custom_link ) {
-            $link_url = $image['link'];
-        } else {
-            $link_url = $full_src;
-        }
+        // Determine the link URL
+        $link_url    = $has_custom_link ? $image['link'] : '';
         $link_target = $this->settings['url_target'];
 
         // Check title position
@@ -1031,68 +845,8 @@ class PFG_Renderer {
         // Image with lazy loading
         $loading = $this->settings['lazy_loading'] && $index > 3 ? 'lazy' : 'eager';
 
-        if ( $show_dual_icons ) {
-            // Dual action mode: show both link and lightbox icons
-            echo '<div class="pfg-item-link pfg-item-link--dual">';
-            
-            // Image
-            echo '<img';
-            echo ' src="' . esc_url( $img_src ) . '"';
-            if ( $img_srcset ) {
-                echo ' srcset="' . esc_attr( $img_srcset ) . '"';
-                echo ' sizes="' . esc_attr( $img_sizes ) . '"';
-            }
-            echo ' alt="' . esc_attr( $alt ) . '"';
-            echo ' loading="' . esc_attr( $loading ) . '"';
-            echo ' decoding="async"';
-            echo ' class="pfg-item-image"';
-            echo '>';
-            
-            // Watermark overlay
-            $this->render_watermark();
-            
-            // Action buttons overlay
-            echo '<div class="pfg-item-actions">';
-            
-            // Link button
-            echo '<a href="' . esc_url( $link_url ) . '" class="pfg-action-btn pfg-action-link" target="' . esc_attr( $link_target ) . '" rel="noopener" title="' . esc_attr__( 'Open Link', 'portfolio-filter-gallery' ) . '">';
-            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
-            echo '</a>';
-            
-            // Lightbox button
-            echo '<a href="' . esc_url( $full_src ) . '" class="pfg-action-btn pfg-action-view" data-lightbox="pfg-' . esc_attr( $this->gallery_id ) . '" data-title="' . esc_attr( $image['title'] ) . '" data-description="' . esc_attr( $image['description'] ) . '" title="' . esc_attr__( 'View Image', 'portfolio-filter-gallery' ) . '">';
-            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>';
-            echo '</a>';
-            
-            echo '</div>';
-            
-            // Overlay with title/description (only if title_position is 'overlay')
-            if ( $title_position === 'overlay' && ( $this->settings['show_title'] || $this->settings['show_numbering'] || $show_categories ) ) {
-                echo '<div class="pfg-item-caption pfg-item-caption--overlay">';
-                
-                if ( $this->settings['show_numbering'] ) {
-                    echo '<span class="pfg-item-number">' . esc_html( $index + 1 ) . '</span>';
-                }
-                
-                if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
-                    echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
-                }
-                
-                if ( $show_categories ) {
-                    $filter_names = $this->get_image_filter_names( $image );
-                    if ( ! empty( $filter_names ) ) {
-                        echo '<div class="pfg-item-categories">' . esc_html( implode( ', ', $filter_names ) ) . '</div>';
-                    }
-                }
-                
-                echo '</div>';
-            }
-            
-            echo '</div>';
-        } else {
-            // Single action mode (original behavior)
-            $is_lightbox = ! $has_custom_link && ! $has_product_link && $lightbox_enabled;
-            $should_link = $has_custom_link || $has_product_link || $lightbox_enabled;
+
+        $should_link = $has_custom_link;
             
             if ( $should_link ) {
                 // Link attributes
@@ -1101,22 +855,14 @@ class PFG_Renderer {
                     'class'  => 'pfg-item-link',
                 );
 
-                if ( $is_lightbox ) {
-                    $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
-                    $link_attrs['data-title']    = esc_attr( $image['title'] );
-                    $link_attrs['data-description'] = esc_attr( $image['description'] );
-                } else {
-                    $link_attrs['target'] = esc_attr( $link_target );
-                    $link_attrs['rel']    = 'noopener';
-                }
+                $link_attrs['target'] = esc_attr( $link_target );
+                $link_attrs['rel']    = 'noopener';
 
-                // Build link attributes string
-                $link_attr_str = '';
+                echo '<a';
                 foreach ( $link_attrs as $attr => $value ) {
-                    $link_attr_str .= ' ' . $attr . '="' . $value . '"';
+                    echo ' ' . esc_attr( $attr ) . '="' . esc_attr( $value ) . '"';
                 }
-
-                echo '<a' . $link_attr_str . '>';
+                echo '>';
             } else {
                 // No link - just a div wrapper
                 echo '<div class="pfg-item-link pfg-item-link--noclick">';
@@ -1164,7 +910,7 @@ class PFG_Renderer {
             } else {
                 echo '</div>';
             }
-        }
+
 
         // Card caption below image (when title_position is 'below')
         if ( $title_position === 'below' && ( $this->settings['show_title'] || $this->settings['show_description'] || $show_categories ) ) {
@@ -1209,7 +955,7 @@ class PFG_Renderer {
             // Try lookup by ID first (media library filters)
             $filter = $this->get_filter_by_id( $filter_id );
             
-            // If not found, try by slug (WooCommerce product categories)
+            // If not found, try by slug
             if ( ! $filter ) {
                 $filter = $this->get_filter_by_slug( $filter_id );
             }
@@ -1241,9 +987,8 @@ class PFG_Renderer {
         $title_position = isset( $this->settings['title_position'] ) ? $this->settings['title_position'] : 'overlay';
         $show_categories = ! empty( $this->settings['show_categories'] );
 
-        // Video link with lightbox data attributes
-        $description = $image['description'] ?? '';
-        echo '<a href="' . esc_url( $video_url ) . '" class="pfg-item-link pfg-item-link--video" data-lightbox="pfg-' . esc_attr( $this->gallery_id ) . '" data-type="video" data-title="' . esc_attr( $image['title'] ) . '" data-description="' . esc_attr( $description ) . '">';
+        // Video link properties
+        echo '<a href="' . esc_url( $video_url ) . '" class="pfg-item-link pfg-item-link--video">';
 
         // Thumbnail image
         $loading = $this->settings['lazy_loading'] && $index > 3 ? 'lazy' : 'eager';
@@ -1310,74 +1055,8 @@ class PFG_Renderer {
      * @return array
      */
     protected function get_used_filters() {
-        // Check if this is a WooCommerce gallery
-        $source = isset( $this->settings['source'] ) ? $this->settings['source'] : 'media';
-        
-        if ( $source === 'woocommerce' && class_exists( 'PFG_WooCommerce' ) && PFG_WooCommerce::is_active() && PFG_Features::is_premium() ) {
-            return $this->get_woocommerce_category_filters();
-        }
-        
         // Regular media library filters
         return $this->get_media_library_filters();
-    }
-    
-    /**
-     * Get WooCommerce product category filters from the products in this gallery.
-     *
-     * @return array
-     */
-    protected function get_woocommerce_category_filters() {
-        // Collect all unique category slugs from products
-        $used_slugs = array();
-        foreach ( $this->images as $image ) {
-            if ( ! empty( $image['filters'] ) && is_array( $image['filters'] ) ) {
-                foreach ( $image['filters'] as $slug ) {
-                    if ( is_string( $slug ) && ! isset( $used_slugs[ $slug ] ) ) {
-                        $used_slugs[ $slug ] = true;
-                    }
-                }
-            }
-        }
-        
-        if ( empty( $used_slugs ) ) {
-            return array();
-        }
-        
-        // Get the actual WooCommerce product category terms
-        $category_terms = get_terms( array(
-            'taxonomy'   => 'product_cat',
-            'slug'       => array_keys( $used_slugs ),
-            'hide_empty' => false,
-        ) );
-        
-        if ( is_wp_error( $category_terms ) || empty( $category_terms ) ) {
-            return array();
-        }
-        
-        // Build filter array compatible with existing filter structure
-        $filters = array();
-        foreach ( $category_terms as $term ) {
-            $filters[] = array(
-                'id'     => $term->slug, // Use slug as ID for WooCommerce categories
-                'name'   => $term->name,
-                'slug'   => $term->slug,
-                'parent' => $term->parent ? $this->get_parent_term_slug( $term->parent ) : '',
-                'color'  => '', // WC categories don't have colors
-            );
-        }
-        
-        return $filters;
-    }
-    
-    /**
-     * Get parent term slug by term ID.
-     *
-     * @param int $parent_id Parent term ID.
-     * @return string Parent slug or empty string.
-     */
-    protected function get_parent_term_slug( $parent_id ) {
-        $parent_term = get_term( $parent_id, 'product_cat' );
-        return ( $parent_term && ! is_wp_error( $parent_term ) ) ? $parent_term->slug : '';
     }
     
     /**
@@ -1430,9 +1109,8 @@ class PFG_Renderer {
      * Get filter classes for an image.
      *
      * Filters can be stored as:
-     * - Slugs (after legacy migration or manual assignment)
-     * - IDs (older format requiring lookup)
-     * - Category slugs (for WooCommerce products)
+     * - Filter IDs (integers)
+     * - Filter slugs (strings)
      *
      * @param array $image Image data.
      * @return string Space-separated filter classes.
@@ -1444,18 +1122,16 @@ class PFG_Renderer {
 
         $classes = array();
         
-        // For WooCommerce products, filters already contain category slugs
-        $is_product = isset( $image['type'] ) && $image['type'] === 'product';
-        
         foreach ( $image['filters'] as $filter_value ) {
-            if ( $is_product ) {
-                // WooCommerce products have category slugs directly
-                $classes[] = 'pfg-filter-' . sanitize_html_class( $filter_value );
+            // Check if this is a slug (string-like) or an ID (numeric)
+            // After migration, filters are stored as slugs
+            // Try to find by ID first for backward compatibility
+            $filter = $this->get_filter_by_id( $filter_value );
+            if ( $filter ) {
+                $classes[] = 'pfg-filter-' . $filter['slug'];
             } else {
-                // Check if this is a slug (string-like) or an ID (numeric)
-                // After migration, filters are stored as slugs
-                // Try to find by ID first for backward compatibility
-                $filter = $this->get_filter_by_id( $filter_value );
+                // Try to find by slug (for migrated data)
+                $filter = $this->get_filter_by_slug( $filter_value );
                 if ( $filter ) {
                     $classes[] = 'pfg-filter-' . $filter['slug'];
                 } else {
@@ -1623,55 +1299,6 @@ class PFG_Renderer {
         return implode( ', ', $sizes );
     }
 
-    /**
-     * Render pagination controls (Load More, Infinite Scroll, or Numbered).
-     *
-     * @param string $type           Pagination type: load_more, infinite, numbered.
-     * @param int    $items_per_page Items per page.
-     */
-    protected function render_pagination( $type, $items_per_page ) {
-        $total_items = count( $this->images );
-        $remaining   = max( 0, $total_items - $items_per_page );
-        
-        if ( $total_items <= $items_per_page ) {
-            // No pagination needed if all items fit
-            return;
-        }
-
-        echo '<div class="pfg-pagination-wrap" data-total="' . esc_attr( $total_items ) . '">';
-
-        switch ( $type ) {
-            case 'load_more':
-                echo '<button type="button" class="pfg-load-more pfg-btn" data-load-more-text="' . esc_attr__( 'Load More', 'portfolio-filter-gallery' ) . '">';
-                echo '<span class="pfg-load-more-text">' . esc_html__( 'Load More', 'portfolio-filter-gallery' ) . '</span>';
-                echo '<span class="pfg-load-more-count">(' . esc_html( $remaining ) . ' ' . esc_html__( 'remaining', 'portfolio-filter-gallery' ) . ')</span>';
-                echo '<span class="pfg-load-more-spinner" style="display:none;"></span>';
-                echo '</button>';
-                break;
-
-            case 'infinite':
-                echo '<div class="pfg-scroll-loader" style="display:none;">';
-                echo '<div class="pfg-scroll-spinner"></div>';
-                echo '<span>' . esc_html__( 'Loading...', 'portfolio-filter-gallery' ) . '</span>';
-                echo '</div>';
-                echo '<div class="pfg-scroll-trigger"></div>';
-                break;
-
-            case 'numbered':
-                $total_pages = ceil( $total_items / $items_per_page );
-                echo '<div class="pfg-numbered-pagination">';
-                for ( $i = 1; $i <= $total_pages; $i++ ) {
-                    $active = $i === 1 ? ' active' : '';
-                    echo '<button type="button" class="pfg-pagination-btn' . esc_attr( $active ) . '" data-page="' . esc_attr( $i ) . '">';
-                    echo esc_html( $i );
-                    echo '</button>';
-                }
-                echo '</div>';
-                break;
-        }
-
-        echo '</div>';
-    }
 
     /**
      * Convert hex color to rgba with opacity.

@@ -63,6 +63,7 @@ class PFG_Setup_Wizard {
         }
         
         // Don't redirect on multisite
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- activation redirect, no data processing.
         if ( is_network_admin() || isset( $_GET['activate-multi'] ) ) {
             delete_option( self::WIZARD_REDIRECT_OPTION );
             return;
@@ -113,7 +114,8 @@ class PFG_Setup_Wizard {
      */
     public static function render_wizard() {
         // Get current step
-        $step = isset( $_GET['step'] ) ? absint( $_GET['step'] ) : 1;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only step number for display.
+        $step = isset( $_GET['step'] ) ? absint( wp_unslash( $_GET['step'] ) ) : 1;
         $total_steps = 4;
         
         // Clamp step
