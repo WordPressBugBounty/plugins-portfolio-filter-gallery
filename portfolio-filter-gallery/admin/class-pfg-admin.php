@@ -418,6 +418,8 @@ class PFG_Admin
             'image_size' => 'image_size',
             // Gallery Preloader
             'show_preloader' => 'show_preloader',
+            // Lightbox
+            'lightbox' => 'lightbox',
         );
 
         // Set each setting — access each $_POST field individually per WordPress coding standards.

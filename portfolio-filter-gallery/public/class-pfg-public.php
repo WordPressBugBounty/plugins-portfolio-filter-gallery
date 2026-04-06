@@ -66,6 +66,9 @@ class PFG_Public {
 
         // Check if any gallery needs specific features
         $needs_hover    = false;
+        
+        $global_settings = get_option( 'pfg_global_settings', array() );
+        $active_lightbox = isset( $global_settings['lightbox'] ) ? $global_settings['lightbox'] : 'built-in';
 
         foreach ( self::$galleries_on_page as $gallery_id ) {
             $gallery  = new PFG_Gallery( $gallery_id );
@@ -73,6 +76,7 @@ class PFG_Public {
 
             if ( ! empty( $settings['hover_effect'] ) && $settings['hover_effect'] !== 'none' ) {
                 $needs_hover = true;
+                break;
             }
         }
 
@@ -81,6 +85,23 @@ class PFG_Public {
             wp_enqueue_style(
                 'pfg-hover',
                 PFG_PLUGIN_URL . 'public/css/pfg-hover.css',
+                array(),
+                $this->version
+            );
+        }
+
+        // Conditionally load lightbox styles
+        if ( $active_lightbox === 'built-in' ) {
+            wp_enqueue_style(
+                'pfg-lightbox',
+                PFG_PLUGIN_URL . 'public/css/pfg-lightbox.css',
+                array(),
+                $this->version
+            );
+        } elseif ( $active_lightbox === 'ld-lightbox' ) {
+            wp_enqueue_style(
+                'ld-lightbox',
+                PFG_PLUGIN_URL . 'public/lightbox/ld-lightbox/css/lightbox.css',
                 array(),
                 $this->version
             );
@@ -108,6 +129,28 @@ class PFG_Public {
         // Enqueue the already-registered script
         wp_enqueue_script( 'pfg-gallery' );
 
+        $global_settings = get_option( 'pfg_global_settings', array() );
+        $active_lightbox = isset( $global_settings['lightbox'] ) ? $global_settings['lightbox'] : 'built-in';
+
+        // Load appropriate lightbox script
+        if ( $active_lightbox === 'built-in' ) {
+            wp_enqueue_script(
+                'pfg-lightbox',
+                PFG_PLUGIN_URL . 'public/js/pfg-lightbox.js',
+                array(),
+                $this->version,
+                true
+            );
+        } elseif ( $active_lightbox === 'ld-lightbox' ) {
+            wp_enqueue_script(
+                'ld-lightbox',
+                PFG_PLUGIN_URL . 'public/lightbox/ld-lightbox/js/lightbox.js',
+                array( 'jquery' ),
+                $this->version,
+                true
+            );
+        }
+
         // Load masonry script
         wp_localize_script(
             'pfg-gallery',
@@ -124,6 +167,7 @@ class PFG_Public {
                     'next'      => __( 'Next', 'portfolio-filter-gallery' ),
                     'close'     => __( 'Close', 'portfolio-filter-gallery' ),
                 ),
+                'lightboxLibrary' => $active_lightbox,
             )
         );
     }

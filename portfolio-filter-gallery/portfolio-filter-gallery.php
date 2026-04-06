@@ -3,7 +3,7 @@
  * Plugin Name: Portfolio Filter Gallery
  * Plugin URI: https://awplife.com/
  * Description: Create stunning filterable portfolio galleries with masonry layouts and drag-drop management.
- * Version: 2.1.2
+ * Version: 2.1.3
  * Author: A WP Life
  * Author URI: https://awplife.com/
  * License: GPLv2 or later
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * duplicate definitions if the plugin file is loaded more than once.
  */
 if ( ! defined( 'PFG_VERSION' ) ) {
-    define( 'PFG_VERSION', '2.1.2' );
+    define( 'PFG_VERSION', '2.1.3' );
 }
 if ( ! defined( 'PFG_PLUGIN_FILE' ) ) {
     define( 'PFG_PLUGIN_FILE', __FILE__ );
@@ -52,32 +52,49 @@ if ( ! defined( 'PFG_PLUGIN_DIR' ) ) {
 /**
  * The code that runs during plugin activation.
  */
-function pfg_activate() {
-    require_once PFG_PLUGIN_PATH . 'includes/class-pfg-activator.php';
-    PFG_Activator::activate();
+if ( ! function_exists( 'portfolio_filter_gallery_activate' ) ) {
+    function portfolio_filter_gallery_activate() {
+        require_once PFG_PLUGIN_PATH . 'includes/class-pfg-activator.php';
+        PFG_Activator::activate();
 
-    // Onboarding tour
-    require_once PFG_PLUGIN_PATH . 'includes/class-pfg-onboarding-tour.php';
-    PFG_Onboarding_Tour::activate();
+        // Onboarding tour
+        require_once PFG_PLUGIN_PATH . 'includes/class-pfg-onboarding-tour.php';
+        PFG_Onboarding_Tour::activate();
+    }
 }
 
 /**
  * The code that runs during plugin deactivation.
  */
-function pfg_deactivate() {
-    require_once PFG_PLUGIN_PATH . 'includes/class-pfg-deactivator.php';
-    PFG_Deactivator::deactivate();
+if ( ! function_exists( 'portfolio_filter_gallery_deactivate' ) ) {
+    function portfolio_filter_gallery_deactivate() {
+        require_once PFG_PLUGIN_PATH . 'includes/class-pfg-deactivator.php';
+        PFG_Deactivator::deactivate();
+    }
 }
 
-register_activation_hook( __FILE__, 'pfg_activate' );
-register_deactivation_hook( __FILE__, 'pfg_deactivate' );
+register_activation_hook( __FILE__, 'portfolio_filter_gallery_activate' );
+register_deactivation_hook( __FILE__, 'portfolio_filter_gallery_deactivate' );
 
 /**
  * Begins execution of the plugin.
  */
-function pfg_run() {
-    require_once PFG_PLUGIN_PATH . 'includes/class-portfolio-filter-gallery.php';
-    $plugin = new Portfolio_Filter_Gallery();
-    $plugin->run();
+if ( ! function_exists( 'portfolio_filter_gallery_run' ) ) {
+    function portfolio_filter_gallery_run() {
+        // Prevent fatal error if PRO version is already active
+        if ( class_exists( 'Portfolio_Filter_Gallery' ) ) {
+            return;
+        }
+        
+        require_once PFG_PLUGIN_PATH . 'includes/class-portfolio-filter-gallery.php';
+        
+        // Double check to be completely safe
+        if ( ! class_exists( 'Portfolio_Filter_Gallery' ) ) {
+            return;
+        }
+
+        $plugin = new Portfolio_Filter_Gallery();
+        $plugin->run();
+    }
 }
-add_action( 'plugins_loaded', 'pfg_run', 20 );
+add_action( 'plugins_loaded', 'portfolio_filter_gallery_run', 20 );

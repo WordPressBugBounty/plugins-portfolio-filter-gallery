@@ -2533,16 +2533,20 @@ jQuery(document).ready(function($) {
         var type = $(this).val();
         var $urlRow = $('.pfg-link-url-row');
         var $hint = $('.pfg-url-hint');
+        var $upgradeHint = $('.pfg-upgrade-hint');
         
         if (type === 'image') {
             $urlRow.hide();
             $hint.text('');
+            $upgradeHint.hide();
         } else if (type === 'video') {
             $urlRow.show();
             $hint.text(pfgAdmin.i18n.paste_video_url);
+            $upgradeHint.show();
         } else if (type === 'url') {
             $urlRow.show();
             $hint.text(pfgAdmin.i18n.opens_new_tab);
+            $upgradeHint.hide();
         }
     });
     

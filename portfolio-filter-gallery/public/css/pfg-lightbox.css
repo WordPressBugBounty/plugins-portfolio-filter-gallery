@@ -86,7 +86,7 @@ body.pfg-lightbox-open {
 }
 
 .pfg-lightbox-image {
-    display: block !important;
+    display: block;
     max-width: 90vw !important;
     max-height: 85vh !important;
     object-fit: contain !important;

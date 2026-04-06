@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $settings = get_option( 'pfg_global_settings', array() );
 $defaults = array(
     'disable_lazy_load'     => false,
+    'lightbox'              => 'built-in',
 );
 
 $settings = wp_parse_args( $settings, $defaults );
@@ -25,6 +26,7 @@ if ( isset( $_POST['pfg_save_global_settings'] ) ) {
         $new_settings = array(
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Using explicit typecasting for boolean fields.
             'disable_lazy_load'     => isset( $_POST['disable_lazy_load'] ) ? (bool) intval( wp_unslash( $_POST['disable_lazy_load'] ) ) : false,
+            'lightbox'              => isset( $_POST['lightbox'] ) ? sanitize_key( wp_unslash( $_POST['lightbox'] ) ) : 'built-in',
         );
 
         update_option( 'pfg_global_settings', $new_settings );
@@ -68,6 +70,31 @@ if ( isset( $_POST['pfg_save_global_settings'] ) ) {
             </div>
 
             
+            <!-- Lightbox Settings -->
+            <div class="pfg-card">
+                <div class="pfg-card-header">
+                    <h3 class="pfg-card-title"><?php esc_html_e( 'Lightbox', 'portfolio-filter-gallery' ); ?></h3>
+                </div>
+                
+                <div class="pfg-form-row">
+                    <label class="pfg-form-label">
+                        <?php esc_html_e('Lightbox Library', 'portfolio-filter-gallery'); ?>
+                        <small><?php esc_html_e('Choose how images open when clicked (Applies to all galleries)', 'portfolio-filter-gallery'); ?></small>
+                    </label>
+                    <select name="lightbox" class="pfg-select">
+                        <option value="built-in" <?php selected($settings['lightbox'] ?? 'built-in', 'built-in'); ?>>
+                            <?php esc_html_e('Built-in (Recommended)', 'portfolio-filter-gallery'); ?>
+                        </option>
+                        <option value="ld-lightbox" <?php selected($settings['lightbox'] ?? 'built-in', 'ld-lightbox'); ?>>
+                            <?php esc_html_e('LD Lightbox (Legacy)', 'portfolio-filter-gallery'); ?>
+                        </option>
+                        <option value="none" <?php selected($settings['lightbox'] ?? 'built-in', 'none'); ?>>
+                            <?php esc_html_e('None (Disabled)', 'portfolio-filter-gallery'); ?>
+                        </option>
+                    </select>
+                </div>
+            </div>
+
             <!-- System Info -->
             <div class="pfg-card">
                 <div class="pfg-card-header">

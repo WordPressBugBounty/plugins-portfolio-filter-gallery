@@ -62,7 +62,8 @@
 }
 
 .pfg-admin-subtitle {
-    color: var(--pfg-text-muted);
+    color: #ffffff;
+    opacity: 0.9;
     font-size: 14px;
     margin-top: 5px;
 }
@@ -1064,7 +1065,7 @@
     color: #fff;
 }
 .pfg-admin-title .dashicons { font-size: 28px; width: 28px; height: 28px; }
-.pfg-admin-subtitle { margin: 0; opacity: 0.9; font-size: 14px; }
+.pfg-admin-subtitle { margin: 0; opacity: 0.9; font-size: 14px; color: #ffffff; }
 
 .pfg-stat-box {
     text-align: center;
@@ -1769,7 +1770,7 @@
     color: #fff;
 }
 .pfg-admin-title .dashicons { font-size: 28px; width: 28px; height: 28px; }
-.pfg-admin-subtitle { margin: 0; opacity: 0.9; font-size: 14px; }
+.pfg-admin-subtitle { margin: 0; opacity: 0.9; font-size: 14px; color: #ffffff; }
 
 .pfg-stat-box {
     text-align: center;
@@ -3052,3 +3053,265 @@
 .pfg-pro-star-icon {
     color: #f59e0b;
 }
+/* Pro Exact Banner */
+.pfg-pro-exact-banner {
+    margin-top: 30px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #f3f3f4;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.pfg-pro-exact-banner.pfg-bg-white {
+    background: #ffffff;
+}
+
+.pfg-pro-exact-banner .pfg-pro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-header-content {
+    flex: 1;
+}
+
+.pfg-pro-exact-banner .pfg-pro-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #cea700;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-weight: 900;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.3);
+}
+
+.pfg-pro-exact-banner .pfg-pro-title {
+    margin: 0 0 8px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1c1d;
+    letter-spacing: -0.02em;
+}
+
+.pfg-pro-exact-banner .pfg-pro-desc {
+    margin: 0;
+    font-size: 14px;
+    color: #414750;
+}
+
+.pfg-pro-exact-banner .pfg-pro-features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    width: 100%;
+}
+
+.pfg-pro-exact-banner .pfg-pro-feature {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 12px 32px rgba(26,28,29,0.06);
+}
+
+.pfg-pro-exact-banner .pfg-pro-feature-img-box {
+    height: 128px;
+    margin-bottom: 16px;
+    background: #eeeeef;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.pfg-pro-exact-banner .pfg-pro-feature-img-box.pfg-feature-grids {
+    overflow: hidden;
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-feature-img-left {
+    width: 50%;
+    height: 100%;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.pfg-pro-exact-banner .pfg-pro-feature-img-left img,
+.pfg-pro-exact-banner .pfg-pro-feature-img-right-top img,
+.pfg-pro-exact-banner .pfg-pro-feature-img-right-bottom img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pfg-pro-exact-banner .pfg-pro-feature-img-right {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-feature-img-right-top,
+.pfg-pro-exact-banner .pfg-pro-feature-img-right-bottom {
+    height: 50%;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.pfg-pro-exact-banner .pfg-pro-feature-img-box.pfg-feature-pagination {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e2e3;
+    border-radius: 999px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.pfg-pro-exact-banner .pfg-pro-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 20%;
+    background: #005891;
+}
+
+.pfg-pro-exact-banner .pfg-pro-pagination-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-load-more {
+    background: #ffffff;
+    border: 1px solid #c1c7d2;
+    color: #414750;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+    pointer-events: none;
+}
+
+.pfg-pro-exact-banner .pfg-pro-load-more .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-page-text {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #717881;
+    font-weight: 600;
+}
+
+.pfg-pro-exact-banner .pfg-feature-filters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-filter-pill {
+    background: #d0e4ff;
+    color: #00497a;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.pfg-pro-exact-banner .pfg-feature-filters .dashicons {
+    color: #717881;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.pfg-pro-exact-banner .pfg-feature-more {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-more-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-more-item .dashicons {
+    color: #2271b1;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.pfg-pro-exact-banner .pfg-pro-more-item span:not(.dashicons) {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1c1d;
+}
+
+.pfg-pro-exact-banner h3 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1c1d;
+}
+
+.pfg-pro-exact-banner p {
+    margin: 0;
+    font-size: 12px;
+    color: #414750;
+    line-height: 1.5;
+}
+
+/* Button overrides to handle anchor tag hover states */
+a.pfg-btn-primary,
+button.pfg-btn-primary {
+    color: #ffffff;
+    text-decoration: none !important;
+}
+
+a.pfg-btn-primary:focus,
+a.pfg-btn-primary:hover,
+button.pfg-btn-primary:focus,
+button.pfg-btn-primary:hover {
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+

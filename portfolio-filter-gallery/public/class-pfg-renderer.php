@@ -833,9 +833,14 @@ class PFG_Renderer {
 
         // Determine link behavior
         $has_custom_link = ! empty( $image['link'] ) && isset( $this->settings['image_links'] ) && $this->settings['image_links'];
+        $lightbox_enabled = isset( $this->settings['lightbox'] ) && $this->settings['lightbox'] !== 'none';
         
         // Determine the link URL
-        $link_url    = $has_custom_link ? $image['link'] : '';
+        if ( $has_custom_link ) {
+            $link_url = $image['link'];
+        } else {
+            $link_url = $full_src;
+        }
         $link_target = $this->settings['url_target'];
 
         // Check title position
@@ -845,28 +850,38 @@ class PFG_Renderer {
         // Image with lazy loading
         $loading = $this->settings['lazy_loading'] && $index > 3 ? 'lazy' : 'eager';
 
-
-        $should_link = $has_custom_link;
+        $is_lightbox = ! $has_custom_link && $lightbox_enabled;
+        $should_link = $has_custom_link || $lightbox_enabled;
             
-            if ( $should_link ) {
-                // Link attributes
-                $link_attrs = array(
-                    'href'   => esc_url( $link_url ),
-                    'class'  => 'pfg-item-link',
-                );
+        if ( $should_link ) {
+            // Link attributes
+            $link_attrs = array(
+                'href'   => esc_url( $link_url ),
+                'class'  => 'pfg-item-link',
+            );
 
+            if ( $is_lightbox ) {
+                $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
+                if ( ! empty( $image['title'] ) ) {
+                    $link_attrs['data-title'] = esc_attr( $image['title'] );
+                }
+                if ( ! empty( $image['description'] ) ) {
+                    $link_attrs['data-description'] = esc_attr( $image['description'] );
+                }
+            } else {
                 $link_attrs['target'] = esc_attr( $link_target );
                 $link_attrs['rel']    = 'noopener';
-
-                echo '<a';
-                foreach ( $link_attrs as $attr => $value ) {
-                    echo ' ' . esc_attr( $attr ) . '="' . esc_attr( $value ) . '"';
-                }
-                echo '>';
-            } else {
-                // No link - just a div wrapper
-                echo '<div class="pfg-item-link pfg-item-link--noclick">';
             }
+
+            echo '<a';
+            foreach ( $link_attrs as $attr => $value ) {
+                echo ' ' . esc_attr( $attr ) . '="' . esc_attr( $value ) . '"';
+            }
+            echo '>';
+        } else {
+            // No link - just a div wrapper
+            echo '<div class="pfg-item-link pfg-item-link--noclick">';
+        }
 
             echo '<img';
             echo ' src="' . esc_url( $img_src ) . '"';
@@ -988,7 +1003,27 @@ class PFG_Renderer {
         $show_categories = ! empty( $this->settings['show_categories'] );
 
         // Video link properties
-        echo '<a href="' . esc_url( $video_url ) . '" class="pfg-item-link pfg-item-link--video">';
+        $lightbox_enabled = isset( $this->settings['lightbox'] ) && $this->settings['lightbox'] !== 'none';
+        $link_attrs = array(
+            'href'   => esc_url( $video_url ),
+            'class'  => 'pfg-item-link pfg-item-link--video',
+        );
+
+        if ( $lightbox_enabled ) {
+            $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
+            if ( ! empty( $image['title'] ) ) {
+                $link_attrs['data-title'] = esc_attr( $image['title'] );
+            }
+            if ( ! empty( $image['description'] ) ) {
+                $link_attrs['data-description'] = esc_attr( $image['description'] );
+            }
+        }
+
+        echo '<a';
+        foreach ( $link_attrs as $attr => $value ) {
+            echo ' ' . esc_attr( $attr ) . '="' . esc_attr( $value ) . '"';
+        }
+        echo '>';
 
         // Thumbnail image
         $loading = $this->settings['lazy_loading'] && $index > 3 ? 'lazy' : 'eager';

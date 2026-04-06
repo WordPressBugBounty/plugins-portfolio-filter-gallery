@@ -5,7 +5,7 @@ Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -222,6 +222,11 @@ Yes. The plugin is translation-ready and works with WPML and other translation p
 Visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/) for assistance. For premium support, visit the [developer website](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/).
 
 == Changelog ==
+
+= 2.1.3 =
+* Added: Enable/Disable Lightbox toggle setting in individual gallery meta boxes.
+* Improved: Pro Banner design in filter and settings pages.
+* Fixed: Lightbox setting mapping in schema for proper saving/retrieval.
 
 = 2.1.2 =
 * Fixed: JavaScript error on image edit modal (undefined variable).

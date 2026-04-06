@@ -107,6 +107,8 @@ class PFG_Gallery {
         // Template setting
         'template'             => array( 'default' => 'modern-cards', 'type' => 'key' ),
 
+        // Lightbox setting
+        'lightbox'             => array( 'default' => 'built-in', 'type' => 'key' ),
 
         // URL Deep Linking
         'deep_linking'         => array( 'default' => false, 'type' => 'bool' ),

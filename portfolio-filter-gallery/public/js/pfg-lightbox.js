@@ -281,8 +281,9 @@
          * Load image
          */
         loadImage(src) {
-            this.video.style.display = 'none';
+            // Clear any playing video first
             this.video.innerHTML = '';
+            this.video.style.display = 'none';
             this.image.style.display = '';
 
             const img = new Image();
@@ -302,7 +303,12 @@
          * Load video
          */
         loadVideo(url) {
+            // Hide image and clear its src to free memory
             this.image.style.display = 'none';
+            this.image.src = '';
+            
+            // Clear any previous video iframe before loading new one
+            this.video.innerHTML = '';
             this.video.style.display = '';
 
             const embedUrl = this.getVideoEmbedUrl(url);

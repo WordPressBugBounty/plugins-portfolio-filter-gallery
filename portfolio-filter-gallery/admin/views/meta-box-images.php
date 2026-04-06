@@ -452,7 +452,11 @@ $filter_tree = pfg_build_filter_tree_for_images( $filters );
                     <label class="pfg-form-label"><?php esc_html_e( 'URL', 'portfolio-filter-gallery' ); ?></label>
                     <div class="pfg-video-url-wrap">
                         <input type="text" id="pfg-modal-link" class="pfg-input" placeholder="https://" inputmode="url">
-                        <small class="pfg-url-hint"></small>
+                        <small class="pfg-url-hint" style="display: block;"></small>
+                        <small class="pfg-upgrade-hint" style="display: none; color: #f56e28; margin-top: 5px;">
+                            <?php esc_html_e( 'Need to fetch YouTube/Vimeo poster?', 'portfolio-filter-gallery' ); ?> 
+                            <a href="https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/" target="_blank" style="color: #f56e28; text-decoration: underline; font-weight: bold;"><?php esc_html_e( 'Upgrade here', 'portfolio-filter-gallery' ); ?></a>
+                        </small>
                         <button type="button" id="pfg-revert-thumb" class="pfg-btn pfg-btn-secondary" style="margin-top: 8px; margin-left: 8px; display: none;">
                             <span class="dashicons dashicons-undo" style="margin-right: 5px;"></span>
                             <?php esc_html_e( 'Revert to Original', 'portfolio-filter-gallery' ); ?>
