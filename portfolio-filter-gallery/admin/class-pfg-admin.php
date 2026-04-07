@@ -420,6 +420,8 @@ class PFG_Admin
             'show_preloader' => 'show_preloader',
             // Lightbox
             'lightbox' => 'lightbox',
+            'show_lightbox_title' => 'show_lightbox_title',
+            'show_lightbox_description' => 'show_lightbox_description',
         );
 
         // Set each setting — access each $_POST field individually per WordPress coding standards.
@@ -799,6 +801,10 @@ class PFG_Admin
             if ($key === 'title') {
                 $new_columns['shortcode'] = __('Shortcode', 'portfolio-filter-gallery');
                 $new_columns['images'] = __('Images', 'portfolio-filter-gallery');
+                $new_columns['layout'] = __('Layout', 'portfolio-filter-gallery');
+                $new_columns['filters'] = __('Filters', 'portfolio-filter-gallery');
+                $new_columns['source'] = __('Source', 'portfolio-filter-gallery');
+                $new_columns['lightbox'] = __('Lightbox', 'portfolio-filter-gallery');
             }
         }
 
@@ -823,6 +829,62 @@ class PFG_Admin
                 $images = $gallery->get_images();
                 echo '<span class="pfg-image-count">' . esc_html(count($images)) . '</span>';
                 break;
+
+            case 'layout':
+                $gallery_settings = get_post_meta($post_id, '_pfg_settings', true);
+                if ( empty( $gallery_settings ) ) {
+                    $gallery_settings = get_post_meta($post_id, 'pfg_settings', true);
+                }
+                $layout = isset($gallery_settings['layout_type']) ? ucfirst($gallery_settings['layout_type']) : 'Grid';
+                $columns = isset($gallery_settings['columns_xl']) ? $gallery_settings['columns_xl'] : '4';
+                echo '<strong>' . esc_html($layout) . '</strong><br>';
+                echo '<small>' . esc_html($columns) . ' cols</small>';
+                break;
+
+            case 'filters':
+                $gallery_settings = get_post_meta($post_id, '_pfg_settings', true);
+                if ( empty( $gallery_settings ) ) {
+                    $gallery_settings = get_post_meta($post_id, 'pfg_settings', true);
+                }
+                $style = isset($gallery_settings['filters_style']) ? ucfirst($gallery_settings['filters_style']) : 'Buttons';
+                
+                $gallery = new PFG_Gallery($post_id);
+                $images = $gallery->get_images();
+                $categories = array();
+                foreach ( $images as $image ) {
+                    if ( ! empty( $image['filters'] ) ) {
+                        $cats = is_array( $image['filters'] ) ? $image['filters'] : explode( ',', $image['filters'] );
+                        foreach ( $cats as $c ) {
+                            if ( ! empty( trim( $c ) ) ) {
+                                $categories[] = trim( $c );
+                            }
+                        }
+                    }
+                }
+                $filters = array_unique( array_filter( $categories ) );
+                
+                echo '<strong>' . esc_html(count($filters)) . '</strong><br>';
+                echo '<small>' . esc_html($style) . '</small>';
+                break;
+
+            case 'source':
+                echo '<span class="pfg-badge pfg-badge-blue">Media</span>';
+                break;
+
+            case 'lightbox':
+                $gallery_settings = get_post_meta($post_id, '_pfg_settings', true);
+                if ( empty( $gallery_settings ) ) {
+                    $gallery_settings = get_post_meta($post_id, 'pfg_settings', true);
+                }
+                if (isset($gallery_settings['lightbox']) && $gallery_settings['lightbox'] === 'none') {
+                    echo esc_html__('None', 'portfolio-filter-gallery');
+                } else {
+                    $global_settings = get_option('pfg_global_settings', array());
+                    $active_lightbox = isset($global_settings['lightbox']) ? $global_settings['lightbox'] : 'built-in';
+                    echo esc_html($active_lightbox === 'ld-lightbox' ? 'LD Lightbox' : 'Built-in');
+                }
+                break;
+
         }
     }
 

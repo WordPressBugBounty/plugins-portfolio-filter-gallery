@@ -92,6 +92,9 @@ if ( isset( $_POST['pfg_save_global_settings'] ) ) {
                             <?php esc_html_e('None (Disabled)', 'portfolio-filter-gallery'); ?>
                         </option>
                     </select>
+                    <p class="description" style="color: #d63638; margin-top: 5px;">
+                        <?php esc_html_e('Note: LD Lightbox does not support Video playback. Please use the Built-in lightbox for videos.', 'portfolio-filter-gallery'); ?>
+                    </p>
                 </div>
             </div>
 

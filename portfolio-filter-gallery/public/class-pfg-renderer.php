@@ -149,6 +149,8 @@ class PFG_Renderer {
             'data-filter-hierarchy'=> wp_json_encode( $filter_hierarchy ),
             'data-url-param'       => $url_param_name, // Always pass for JS compatibility
             'data-version'         => PFG_VERSION,
+            'data-lightbox-title'  => ( ! isset( $this->settings['show_lightbox_title'] ) || $this->settings['show_lightbox_title'] ) ? 'true' : 'false',
+            'data-lightbox-description' => ! empty( $this->settings['show_lightbox_description'] ) ? 'true' : 'false',
         );
 
         // Add preloader class if enabled
@@ -261,9 +263,8 @@ class PFG_Renderer {
      * @param string $unique_id Unique gallery container ID.
      */
     protected function output_styles( $unique_id ) {
-        // Get filter background colors
-        $filter_bg = isset( $this->settings['primary_color'] ) ? $this->settings['primary_color'] : ( $this->settings['filter_bg_color'] ?? '#94a3b8' );
-        $filter_active_bg = isset( $this->settings['filter_active_color'] ) ? $this->settings['filter_active_color'] : ( $this->settings['primary_color'] ?? '#3858e9' );
+        $filter_bg = ! empty( $this->settings['primary_color'] ) ? $this->settings['primary_color'] : ( ! empty( $this->settings['filter_bg_color'] ) ? $this->settings['filter_bg_color'] : '#3858e9' );
+        $filter_active_bg = ! empty( $this->settings['filter_active_color'] ) ? $this->settings['filter_active_color'] : $filter_bg;
         
         // Get filter text colors - use specified or auto-calculate based on background luminance
         $filter_text_setting = isset( $this->settings['filter_text_color'] ) ? $this->settings['filter_text_color'] : 'auto';
@@ -314,10 +315,14 @@ class PFG_Renderer {
         }
         $css .= '}';
 
-        // Use wp_add_inline_style instead of raw <style> tag per WordPress guidelines.
-        // All values in $css are sanitized with CSS-appropriate functions above.
-        // wp_strip_all_tags() provides late escaping by stripping any injected HTML/script tags.
-        wp_add_inline_style( 'pfg-core', wp_strip_all_tags( $css ) );
+        // Since shortcodes run after wp_enqueue_scripts, adding inline styles to 'pfg-core'
+        // fails because 'pfg-core' has already been printed in the head.
+        // We register a dummy handle for this specific gallery instance and enqueue it,
+        // so WordPress outputs these dynamic styles in the footer.
+        $handle = sanitize_html_class( $unique_id ) . '-style';
+        wp_register_style( $handle, false );
+        wp_enqueue_style( $handle );
+        wp_add_inline_style( $handle, wp_strip_all_tags( $css ) );
     }
 
     /**
@@ -780,20 +785,22 @@ class PFG_Renderer {
         echo '<div class="pfg-item ' . esc_attr( $filter_classes . ' ' . $hover_class . $hidden_class . $size_class ) . '" data-id="' . esc_attr( $image['id'] ) . '"' . $item_style . '>';
 
         // Type indicator icon (video or link)
-        if ( $image['type'] === 'video' && ! empty( $image['link'] ) ) {
-            // Detect if it's a Vimeo video for color styling
-            $is_vimeo = strpos( $image['link'], 'vimeo.com' ) !== false;
-            $video_class = $is_vimeo ? 'pfg-item-type-icon--video pfg-item-type-icon--vimeo' : 'pfg-item-type-icon--video';
-            
-            // Video indicator
-            echo '<span class="pfg-item-type-icon ' . esc_attr( $video_class ) . '" title="' . esc_attr__( 'Video', 'portfolio-filter-gallery' ) . '">';
-            echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>';
-            echo '</span>';
-        } elseif ( ! empty( $image['link'] ) && $image['type'] !== 'video' ) {
-            // External link indicator
-            echo '<span class="pfg-item-type-icon pfg-item-type-icon--link" title="' . esc_attr__( 'External Link', 'portfolio-filter-gallery' ) . '">';
-            echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
-            echo '</span>';
+        if ( empty( $this->settings['hide_type_icons'] ) ) {
+            if ( $image['type'] === 'video' && ! empty( $image['link'] ) ) {
+                // Detect if it's a Vimeo video for color styling
+                $is_vimeo = strpos( $image['link'], 'vimeo.com' ) !== false;
+                $video_class = $is_vimeo ? 'pfg-item-type-icon--video pfg-item-type-icon--vimeo' : 'pfg-item-type-icon--video';
+                
+                // Video indicator
+                echo '<span class="pfg-item-type-icon ' . esc_attr( $video_class ) . '" title="' . esc_attr__( 'Video', 'portfolio-filter-gallery' ) . '">';
+                echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>';
+                echo '</span>';
+            } elseif ( ! empty( $image['link'] ) && $image['type'] !== 'video' ) {
+                // External link indicator
+                echo '<span class="pfg-item-type-icon pfg-item-type-icon--link" title="' . esc_attr__( 'External Link', 'portfolio-filter-gallery' ) . '">';
+                echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+                echo '</span>';
+            }
         }
 
         // Render image or video
@@ -829,10 +836,10 @@ class PFG_Renderer {
             $full_src   = wp_get_attachment_image_url( $attachment_id, 'full' );
         }
         $img_sizes  = $this->calculate_sizes();
-        $alt        = $image['title'] ?: get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
+        $alt        = ! empty( $image['alt'] ) ? $image['alt'] : ( ! empty( $image['title'] ) ? $image['title'] : get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) );
 
         // Determine link behavior
-        $has_custom_link = ! empty( $image['link'] ) && isset( $this->settings['image_links'] ) && $this->settings['image_links'];
+        $has_custom_link = ! empty( $image['link'] ) && ( ! isset( $image['type'] ) || $image['type'] === 'url' );
         $lightbox_enabled = isset( $this->settings['lightbox'] ) && $this->settings['lightbox'] !== 'none';
         
         // Determine the link URL
@@ -862,10 +869,14 @@ class PFG_Renderer {
 
             if ( $is_lightbox ) {
                 $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
-                if ( ! empty( $image['title'] ) ) {
+                
+                $show_lb_title = ! isset( $this->settings['show_lightbox_title'] ) || $this->settings['show_lightbox_title'];
+                $show_lb_desc = ! empty( $this->settings['show_lightbox_description'] );
+                
+                if ( $show_lb_title && ! empty( $image['title'] ) ) {
                     $link_attrs['data-title'] = esc_attr( $image['title'] );
                 }
-                if ( ! empty( $image['description'] ) ) {
+                if ( $show_lb_desc && ! empty( $image['description'] ) ) {
                     $link_attrs['data-description'] = esc_attr( $image['description'] );
                 }
             } else {
@@ -996,7 +1007,7 @@ class PFG_Renderer {
 
         // Get thumbnail
         $img_src = wp_get_attachment_image_url( $thumbnail_id, $size );
-        $alt     = $image['title'] ?: get_post_meta( $thumbnail_id, '_wp_attachment_image_alt', true );
+        $alt     = ! empty( $image['alt'] ) ? $image['alt'] : ( ! empty( $image['title'] ) ? $image['title'] : get_post_meta( $thumbnail_id, '_wp_attachment_image_alt', true ) );
 
         // Check title position
         $title_position = isset( $this->settings['title_position'] ) ? $this->settings['title_position'] : 'overlay';
@@ -1010,12 +1021,22 @@ class PFG_Renderer {
         );
 
         if ( $lightbox_enabled ) {
-            $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
-            if ( ! empty( $image['title'] ) ) {
-                $link_attrs['data-title'] = esc_attr( $image['title'] );
-            }
-            if ( ! empty( $image['description'] ) ) {
-                $link_attrs['data-description'] = esc_attr( $image['description'] );
+            $global_settings = get_option( 'pfg_global_settings', array() );
+            $active_lightbox = isset( $global_settings['lightbox'] ) ? $global_settings['lightbox'] : 'built-in';
+            
+            // LD Lightbox strictly does not support videos. If selected, bypass lightbox integration for videos.
+            if ( $active_lightbox !== 'ld-lightbox' ) {
+                $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
+                $link_attrs['data-type'] = 'video';
+                if ( ! empty( $image['title'] ) ) {
+                    $link_attrs['data-title'] = esc_attr( $image['title'] );
+                }
+                if ( ! empty( $image['description'] ) ) {
+                    $link_attrs['data-description'] = esc_attr( $image['description'] );
+                }
+            } else {
+                $link_attrs['target'] = esc_attr( isset( $this->settings['url_target'] ) ? $this->settings['url_target'] : '_blank' );
+                $link_attrs['rel']    = 'noopener';
             }
         }
 

@@ -3,7 +3,7 @@
  * Plugin Name: Portfolio Filter Gallery
  * Plugin URI: https://awplife.com/
  * Description: Create stunning filterable portfolio galleries with masonry layouts and drag-drop management.
- * Version: 2.1.3
+ * Version: 2.1.4
  * Author: A WP Life
  * Author URI: https://awplife.com/
  * License: GPLv2 or later
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * duplicate definitions if the plugin file is loaded more than once.
  */
 if ( ! defined( 'PFG_VERSION' ) ) {
-    define( 'PFG_VERSION', '2.1.3' );
+    define( 'PFG_VERSION', '2.1.4' );
 }
 if ( ! defined( 'PFG_PLUGIN_FILE' ) ) {
     define( 'PFG_PLUGIN_FILE', __FILE__ );

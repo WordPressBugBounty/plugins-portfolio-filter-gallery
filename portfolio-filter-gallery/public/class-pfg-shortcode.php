@@ -178,6 +178,21 @@ class PFG_Shortcode {
             true
         );
 
+        // Lightbox styles and scripts
+        $global_settings = get_option( 'pfg_global_settings', array() );
+        $active_lightbox = isset( $global_settings['lightbox'] ) ? $global_settings['lightbox'] : 'built-in';
+        $lightbox_enabled = isset( $settings['lightbox'] ) && $settings['lightbox'] !== 'none';
+
+        if ( $lightbox_enabled ) {
+            if ( $active_lightbox === 'built-in' ) {
+                wp_enqueue_style( 'pfg-lightbox', PFG_PLUGIN_URL . 'public/css/pfg-lightbox.css', array(), $version );
+                wp_enqueue_script( 'pfg-lightbox', PFG_PLUGIN_URL . 'public/js/pfg-lightbox.js', array(), $version, true );
+            } elseif ( $active_lightbox === 'ld-lightbox' ) {
+                wp_enqueue_style( 'ld-lightbox', PFG_PLUGIN_URL . 'public/lightbox/ld-lightbox/css/lightbox.css', array(), $version );
+                wp_enqueue_script( 'ld-lightbox', PFG_PLUGIN_URL . 'public/lightbox/ld-lightbox/js/lightbox.js', array( 'jquery' ), $version, true );
+            }
+        }
+
         // Localize script
         wp_localize_script(
             'pfg-gallery',
@@ -194,6 +209,7 @@ class PFG_Shortcode {
                     'next'      => __( 'Next', 'portfolio-filter-gallery' ),
                     'close'     => __( 'Close', 'portfolio-filter-gallery' ),
                 ),
+                'lightboxLibrary' => $active_lightbox,
             )
         );
     }

@@ -91,7 +91,7 @@ class PFG_Public_Ajax {
         $full_src   = wp_get_attachment_image_url( $attachment_id, 'full' );
         $alt        = $image['title'] ?: get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
 
-        $has_custom_link = ! empty( $image['link'] ) && isset( $settings['image_links'] ) && $settings['image_links'];
+        $has_custom_link = ! empty( $image['link'] ) && ( ! isset( $image['type'] ) || $image['type'] === 'url' );
         $show_dual_icons = false;
 
         $link_url    = $has_custom_link ? $image['link'] : 'javascript:void(0);';

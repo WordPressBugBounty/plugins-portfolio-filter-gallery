@@ -5,7 +5,7 @@ Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.3
+Stable tag: 2.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -223,6 +223,14 @@ Visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-
 
 == Changelog ==
 
+= 2.1.4 =
+* Fixed: Support for external links in images.
+* Fixed: Advanced columns controls for responsive grid/masonry layouts.
+* Fixed: Filter button colors settings (primary, active, text colors).
+* Fixed: Lightbox content mapping for title and description.
+* Fixed: Lightbox description properly mapping to the gallery wrapper data attribute.
+* Security: Ensure all new settings follow WordPress core guidelines with proper escaping (esc_attr, esc_html, esc_url) and sanitization (sanitize_hex_color, absint, sanitize_key).
+
 = 2.1.3 =
 * Added: Enable/Disable Lightbox toggle setting in individual gallery meta boxes.
 * Improved: Pro Banner design in filter and settings pages.
@@ -400,6 +408,9 @@ Portfolio Filter Gallery works on all modern browsers:
 This plugin uses standard WordPress libraries. No external third-party libraries are bundled.
 
 == Upgrade Notice ==
+
+= 2.1.4 =
+Bug fix release. Fixed an issue where the lightbox description was not displaying when enabled.
 
 = 2.1.2 =
 Bug fix release. Fixed JavaScript errors in the image editor modal and improved admin JS security.

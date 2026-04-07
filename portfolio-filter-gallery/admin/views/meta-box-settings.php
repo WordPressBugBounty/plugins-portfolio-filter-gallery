@@ -46,6 +46,10 @@ if (class_exists('PFG_Templates')) {
                 <span class="dashicons dashicons-art"></span>
                 <?php esc_html_e('Styling', 'portfolio-filter-gallery'); ?>
             </button>
+            <button type="button" class="pfg-tab" data-tab="pfg-tab-lightbox">
+                <span class="dashicons dashicons-format-image"></span>
+                <?php esc_html_e('Lightbox', 'portfolio-filter-gallery'); ?>
+            </button>
             <button type="button" class="pfg-tab" data-tab="pfg-tab-advanced">
                 <span class="dashicons dashicons-admin-tools"></span>
                 <?php esc_html_e('Advanced', 'portfolio-filter-gallery'); ?>
@@ -571,19 +575,19 @@ if (class_exists('PFG_Templates')) {
 
         </div>
 
-        <!-- Advanced Tab -->
-        <div id="pfg-tab-advanced" class="pfg-tab-content">
-            <!-- Display & Behavior Section -->
-            <h4 class="pfg-form-section-title" style="margin-top: 20px;">
-                <span class="dashicons dashicons-visibility" style="margin-right: 5px;"></span>
-                <?php esc_html_e('Display & Behavior', 'portfolio-filter-gallery'); ?>
+        <!-- Lightbox Tab -->
+        <div id="pfg-tab-lightbox" class="pfg-tab-content">
+            <!-- Lightbox Settings -->
+            <h4 class="pfg-form-section-title" style="margin-top: 0;">
+                <span class="dashicons dashicons-format-image" style="margin-right: 5px;"></span>
+                <?php esc_html_e('Lightbox Settings', 'portfolio-filter-gallery'); ?>
             </h4>
 
             <!-- Enable Lightbox -->
             <div class="pfg-form-row">
                 <label class="pfg-form-label">
                     <?php esc_html_e('Enable Lightbox', 'portfolio-filter-gallery'); ?>
-                    <small><?php esc_html_e('Turn lightbox on or off for this specific gallery. Global Library is used when ON.', 'portfolio-filter-gallery'); ?></small>
+                    <small><?php esc_html_e('Open images in a popup overlay when clicked', 'portfolio-filter-gallery'); ?></small>
                 </label>
                 <label class="pfg-toggle">
                     <input type="hidden" name="pfg_settings[lightbox]" value="none">
@@ -591,6 +595,45 @@ if (class_exists('PFG_Templates')) {
                     <span class="pfg-toggle-slider"></span>
                 </label>
             </div>
+
+            <!-- Lightbox Content Section -->
+            <h4 class="pfg-form-section-title" style="margin-top: 20px;">
+                <span class="dashicons dashicons-editor-justify" style="margin-right: 5px;"></span>
+                <?php esc_html_e('Lightbox Content', 'portfolio-filter-gallery'); ?>
+            </h4>
+
+            <!-- Show Title in Lightbox -->
+            <div class="pfg-form-row">
+                <label class="pfg-form-label">
+                    <?php esc_html_e('Show Title in Lightbox', 'portfolio-filter-gallery'); ?>
+                    <small><?php esc_html_e('Display image title in the lightbox popup', 'portfolio-filter-gallery'); ?></small>
+                </label>
+                <label class="pfg-toggle">
+                    <input type="checkbox" name="pfg_settings[show_lightbox_title]" value="1" <?php checked($settings['show_lightbox_title'] ?? true); ?>>
+                    <span class="pfg-toggle-slider"></span>
+                </label>
+            </div>
+
+            <!-- Show Description in Lightbox -->
+            <div class="pfg-form-row">
+                <label class="pfg-form-label">
+                    <?php esc_html_e('Show Description in Lightbox', 'portfolio-filter-gallery'); ?>
+                    <small><?php esc_html_e('Display image description/caption in the lightbox popup', 'portfolio-filter-gallery'); ?></small>
+                </label>
+                <label class="pfg-toggle">
+                    <input type="checkbox" name="pfg_settings[show_lightbox_description]" value="1" <?php checked($settings['show_lightbox_description'] ?? false); ?>>
+                    <span class="pfg-toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Advanced Tab -->
+        <div id="pfg-tab-advanced" class="pfg-tab-content">
+            <!-- Display & Behavior Section -->
+            <h4 class="pfg-form-section-title" style="margin-top: 0;">
+                <span class="dashicons dashicons-visibility" style="margin-right: 5px;"></span>
+                <?php esc_html_e('Display & Behavior', 'portfolio-filter-gallery'); ?>
+            </h4>
 
             <!-- Sort Order -->
             <div class="pfg-form-row">

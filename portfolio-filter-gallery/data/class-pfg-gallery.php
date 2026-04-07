@@ -109,6 +109,8 @@ class PFG_Gallery {
 
         // Lightbox setting
         'lightbox'             => array( 'default' => 'built-in', 'type' => 'key' ),
+        'show_lightbox_title'  => array( 'default' => true, 'type' => 'bool' ),
+        'show_lightbox_description' => array( 'default' => false, 'type' => 'bool' ),
 
         // URL Deep Linking
         'deep_linking'         => array( 'default' => false, 'type' => 'bool' ),
@@ -317,11 +319,6 @@ class PFG_Gallery {
         return $sanitized;
     }
 
-    /**
-     * Get gallery images.
-     *
-     * @return array Array of image data.
-     */
     public function get_images() {
         $images_meta = get_post_meta( $this->id, '_pfg_images', true );
 
@@ -337,7 +334,23 @@ class PFG_Gallery {
             return array();
         }
 
-        return is_array( $images_meta ) ? $images_meta : array();
+        if ( is_array( $images_meta ) ) {
+            // Apply late migration for link types if they were broken in 2.1.x
+            foreach ( $images_meta as &$image ) {
+                if ( ( ! isset( $image['type'] ) || $image['type'] === 'image' ) && ! empty( $image['link'] ) ) {
+                    // Check if it looks like a video link
+                    if ( strpos( $image['link'], 'youtube.com' ) !== false || strpos( $image['link'], 'youtu.be' ) !== false || strpos( $image['link'], 'vimeo.com' ) !== false ) {
+                        $image['type'] = 'video';
+                    } else {
+                        // Otherwise it's an external URL
+                        $image['type'] = 'url';
+                    }
+                }
+            }
+            return $images_meta;
+        }
+
+        return array();
     }
 
     /**
