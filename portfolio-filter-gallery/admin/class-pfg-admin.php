@@ -422,6 +422,7 @@ class PFG_Admin
             'lightbox' => 'lightbox',
             'show_lightbox_title' => 'show_lightbox_title',
             'show_lightbox_description' => 'show_lightbox_description',
+            'show_dual_icons' => 'show_dual_icons',
         );
 
         // Set each setting — access each $_POST field individually per WordPress coding standards.
@@ -508,13 +509,19 @@ class PFG_Admin
                         $filters = array();
                     }
 
+                    $type = isset($image['type']) ? sanitize_key($image['type']) : 'image';
+                    $link = isset($image['link']) ? esc_url_raw($image['link']) : '';
+                    if ( 'image' === $type ) {
+                        $link = '';
+                    }
+
                     $images[] = array(
                         'id' => absint($image['id']),
                         'title' => isset($image['title']) ? sanitize_text_field($image['title']) : '',
                         'alt' => isset($image['alt']) ? sanitize_text_field($image['alt']) : '',
                         'description' => isset($image['description']) ? sanitize_textarea_field($image['description']) : '',
-                        'link' => isset($image['link']) ? esc_url_raw($image['link']) : '',
-                        'type' => isset($image['type']) ? sanitize_key($image['type']) : 'image',
+                        'link' => $link,
+                        'type' => $type,
                         'filters' => $filters,
                         'product_id' => isset($image['product_id']) ? absint($image['product_id']) : 0,
                         'product_name' => isset($image['product_name']) ? sanitize_text_field($image['product_name']) : '',
@@ -561,13 +568,19 @@ class PFG_Admin
                     continue;
                 }
 
+                $type = isset($image['type']) ? sanitize_key($image['type']) : 'image';
+                $link = isset($image['link']) ? esc_url_raw($image['link']) : '';
+                if ( 'image' === $type ) {
+                    $link = '';
+                }
+
                 $images[] = array(
                     'id' => absint($image['id']),
                     'title' => isset($image['title']) ? sanitize_text_field($image['title']) : '',
                     'alt' => isset($image['alt']) ? sanitize_text_field($image['alt']) : '',
                     'description' => isset($image['description']) ? sanitize_textarea_field($image['description']) : '',
-                    'link' => isset($image['link']) ? esc_url_raw($image['link']) : '',
-                    'type' => isset($image['type']) ? sanitize_key($image['type']) : 'image',
+                    'link' => $link,
+                    'type' => $type,
                     'filters' => isset($image['filters']) ? array_filter(array_map('sanitize_text_field', explode(',', $image['filters']))) : array(),
                     'product_id' => isset($image['product_id']) ? absint($image['product_id']) : 0,
                     'product_name' => isset($image['product_name']) ? sanitize_text_field($image['product_name']) : '',

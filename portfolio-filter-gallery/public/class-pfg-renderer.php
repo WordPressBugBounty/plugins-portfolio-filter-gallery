@@ -859,83 +859,144 @@ class PFG_Renderer {
 
         $is_lightbox = ! $has_custom_link && $lightbox_enabled;
         $should_link = $has_custom_link || $lightbox_enabled;
+
+        $show_dual_icons = $has_custom_link && $lightbox_enabled && ! empty( $this->settings['show_dual_icons'] );
+
+        if ( $show_dual_icons ) {
+            // Dual action mode: show both link and lightbox icons
+            echo '<div class="pfg-item-link pfg-item-link--dual">';
             
-        if ( $should_link ) {
-            // Link attributes
-            $link_attrs = array(
-                'href'   => esc_url( $link_url ),
-                'class'  => 'pfg-item-link',
-            );
-
-            if ( $is_lightbox ) {
-                $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
-                
-                $show_lb_title = ! isset( $this->settings['show_lightbox_title'] ) || $this->settings['show_lightbox_title'];
-                $show_lb_desc = ! empty( $this->settings['show_lightbox_description'] );
-                
-                if ( $show_lb_title && ! empty( $image['title'] ) ) {
-                    $link_attrs['data-title'] = esc_attr( $image['title'] );
-                }
-                if ( $show_lb_desc && ! empty( $image['description'] ) ) {
-                    $link_attrs['data-description'] = esc_attr( $image['description'] );
-                }
-            } else {
-                $link_attrs['target'] = esc_attr( $link_target );
-                $link_attrs['rel']    = 'noopener';
-            }
-
-            echo '<a';
-            foreach ( $link_attrs as $attr => $value ) {
-                echo ' ' . esc_attr( $attr ) . '="' . esc_attr( $value ) . '"';
-            }
-            echo '>';
-        } else {
-            // No link - just a div wrapper
-            echo '<div class="pfg-item-link pfg-item-link--noclick">';
-        }
-
-            echo '<img';
-            echo ' src="' . esc_url( $img_src ) . '"';
+            // Image
+            echo '<img src="' . esc_url( $img_src ) . '"';
             if ( $img_srcset ) {
-                echo ' srcset="' . esc_attr( $img_srcset ) . '"';
-                echo ' sizes="' . esc_attr( $img_sizes ) . '"';
+                echo ' srcset="' . esc_attr( $img_srcset ) . '" sizes="' . esc_attr( $img_sizes ) . '"';
             }
-            echo ' alt="' . esc_attr( $alt ) . '"';
-            echo ' loading="' . esc_attr( $loading ) . '"';
-            echo ' decoding="async"';
-            echo ' class="pfg-item-image"';
-            echo '>';
+            echo ' alt="' . esc_attr( $alt ) . '" loading="' . esc_attr( $loading ) . '" decoding="async" class="pfg-item-image">';
             
             // Watermark overlay
             $this->render_watermark();
-
+            
+            // Action buttons overlay
+            echo '<div class="pfg-item-actions">';
+            
+            // Link button
+            echo '<a href="' . esc_url( $link_url ) . '" class="pfg-action-btn pfg-action-link" target="' . esc_attr( $link_target ) . '" rel="noopener" title="' . esc_attr__( 'Open Link', 'portfolio-filter-gallery' ) . '">';
+            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+            echo '</a>';
+            
+            // Lightbox button
+            echo '<a href="' . esc_url( $full_src ) . '" class="pfg-action-btn pfg-action-view" data-lightbox="pfg-' . esc_attr( $this->gallery_id ) . '"';
+            $show_lb_title = ! isset( $this->settings['show_lightbox_title'] ) || $this->settings['show_lightbox_title'];
+            $show_lb_desc = ! empty( $this->settings['show_lightbox_description'] );
+            if ( $show_lb_title && ! empty( $image['title'] ) ) {
+                echo ' data-title="' . esc_attr( $image['title'] ) . '"';
+            }
+            if ( $show_lb_desc && ! empty( $image['description'] ) ) {
+                echo ' data-description="' . esc_attr( nl2br( $image['description'] ) ) . '"';
+            }
+            echo ' title="' . esc_attr__( 'View Image', 'portfolio-filter-gallery' ) . '">';
+            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>';
+            echo '</a>';
+            
+            echo '</div>';
+            
             // Overlay with title/description (only if title_position is 'overlay')
             if ( $title_position === 'overlay' && ( $this->settings['show_title'] || $this->settings['show_numbering'] || $show_categories ) ) {
                 echo '<div class="pfg-item-caption pfg-item-caption--overlay">';
-                
                 if ( $this->settings['show_numbering'] ) {
                     echo '<span class="pfg-item-number">' . esc_html( $index + 1 ) . '</span>';
                 }
-                
                 if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
                     echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
                 }
-                
                 if ( $show_categories ) {
                     $filter_names = $this->get_image_filter_names( $image );
                     if ( ! empty( $filter_names ) ) {
                         echo '<div class="pfg-item-categories">' . esc_html( implode( ', ', $filter_names ) ) . '</div>';
                     }
                 }
-                
                 echo '</div>';
+            }
+            
+            echo '</div>';
+        } else {
+            if ( $should_link ) {
+                // Link attributes
+                $link_attrs = array(
+                    'href'   => esc_url( $link_url ),
+                    'class'  => 'pfg-item-link',
+                );
+
+                if ( $is_lightbox ) {
+                    $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
+                    
+                    $show_lb_title = ! isset( $this->settings['show_lightbox_title'] ) || $this->settings['show_lightbox_title'];
+                    $show_lb_desc = ! empty( $this->settings['show_lightbox_description'] );
+                    
+                    if ( $show_lb_title && ! empty( $image['title'] ) ) {
+                        $link_attrs['data-title'] = esc_attr( $image['title'] );
+                    }
+                    if ( $show_lb_desc && ! empty( $image['description'] ) ) {
+                        $link_attrs['data-description'] = esc_attr( nl2br( $image['description'] ) );
+                    }
+                } else {
+                    $link_attrs['target'] = esc_attr( $link_target );
+                    $link_attrs['rel']    = 'noopener';
+                }
+
+                echo '<a';
+                foreach ( $link_attrs as $attr => $value ) {
+                    echo ' ' . esc_attr( $attr ) . '="' . esc_attr( $value ) . '"';
+                }
+                echo '>';
+            } else {
+                // No link - just a div wrapper
+                echo '<div class="pfg-item-link pfg-item-link--noclick">';
             }
 
-            if ( $should_link ) {
-                echo '</a>';
-            } else {
-                echo '</div>';
-            }
+                echo '<img';
+                echo ' src="' . esc_url( $img_src ) . '"';
+                if ( $img_srcset ) {
+                    echo ' srcset="' . esc_attr( $img_srcset ) . '"';
+                    echo ' sizes="' . esc_attr( $img_sizes ) . '"';
+                }
+                echo ' alt="' . esc_attr( $alt ) . '"';
+                echo ' loading="' . esc_attr( $loading ) . '"';
+                echo ' decoding="async"';
+                echo ' class="pfg-item-image"';
+                echo '>';
+                
+                // Watermark overlay
+                $this->render_watermark();
+
+                // Overlay with title/description (only if title_position is 'overlay')
+                if ( $title_position === 'overlay' && ( $this->settings['show_title'] || $this->settings['show_numbering'] || $show_categories ) ) {
+                    echo '<div class="pfg-item-caption pfg-item-caption--overlay">';
+                    
+                    if ( $this->settings['show_numbering'] ) {
+                        echo '<span class="pfg-item-number">' . esc_html( $index + 1 ) . '</span>';
+                    }
+                    
+                    if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
+                        echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
+                    }
+                    
+                    if ( $show_categories ) {
+                        $filter_names = $this->get_image_filter_names( $image );
+                        if ( ! empty( $filter_names ) ) {
+                            echo '<div class="pfg-item-categories">' . esc_html( implode( ', ', $filter_names ) ) . '</div>';
+                        }
+                    }
+                    
+                    echo '</div>';
+                }
+
+                if ( $should_link ) {
+                    echo '</a>';
+                } else {
+                    echo '</div>';
+                }
+        }
 
 
         // Card caption below image (when title_position is 'below')
@@ -1031,8 +1092,9 @@ class PFG_Renderer {
                 if ( ! empty( $image['title'] ) ) {
                     $link_attrs['data-title'] = esc_attr( $image['title'] );
                 }
-                if ( ! empty( $image['description'] ) ) {
-                    $link_attrs['data-description'] = esc_attr( $image['description'] );
+                $show_lb_desc = ! empty( $this->settings['show_lightbox_description'] );
+                if ( $show_lb_desc && ! empty( $image['description'] ) ) {
+                    $link_attrs['data-description'] = esc_attr( nl2br( $image['description'] ) );
                 }
             } else {
                 $link_attrs['target'] = esc_attr( isset( $this->settings['url_target'] ) ? $this->settings['url_target'] : '_blank' );

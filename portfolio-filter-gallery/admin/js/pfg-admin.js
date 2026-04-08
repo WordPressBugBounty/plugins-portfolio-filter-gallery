@@ -1737,13 +1737,24 @@ jQuery(document).ready(function($) {
             // Find this image in master array
             for (var i = 0; i < masterImagesArray.length; i++) {
                 if (parseInt(masterImagesArray[i].id, 10) === imageId) {
-                    // Update from hidden inputs
-                    masterImagesArray[i].title = $item.find('input[name$="[title]"]').val() || masterImagesArray[i].title;
-                    masterImagesArray[i].alt = $item.find('input[name$="[alt]"]').val() || masterImagesArray[i].alt;
-                    masterImagesArray[i].description = $item.find('input[name$="[description]"]').val() || masterImagesArray[i].description;
-                    masterImagesArray[i].link = $item.find('input[name$="[link]"]').val() || masterImagesArray[i].link;
-                    masterImagesArray[i].type = $item.find('input[name$="[type]"]').val() || masterImagesArray[i].type;
-                    masterImagesArray[i].filters = $item.find('input[name$="[filters]"]').val() || masterImagesArray[i].filters;
+                    // Update from hidden inputs - explicit undefined check to allow empty strings
+                    var newTitle = $item.find('input[name$="[title]"]').val();
+                    if (newTitle !== undefined) masterImagesArray[i].title = newTitle;
+                    
+                    var newAlt = $item.find('input[name$="[alt]"]').val();
+                    if (newAlt !== undefined) masterImagesArray[i].alt = newAlt;
+                    
+                    var newDesc = $item.find('input[name$="[description]"]').val();
+                    if (newDesc !== undefined) masterImagesArray[i].description = newDesc;
+                    
+                    var newLink = $item.find('input[name$="[link]"]').val();
+                    if (newLink !== undefined) masterImagesArray[i].link = newLink;
+                    
+                    var newType = $item.find('input[name$="[type]"]').val();
+                    if (newType !== undefined) masterImagesArray[i].type = newType;
+                    
+                    var newFilters = $item.find('input[name$="[filters]"]').val();
+                    if (newFilters !== undefined) masterImagesArray[i].filters = newFilters;
                     break;
                 }
             }
@@ -2349,6 +2360,11 @@ jQuery(document).ready(function($) {
         var description = $('#pfg-modal-description').val();
         var type = $('#pfg-modal-type').val();
         var link = $('#pfg-modal-link').val();
+
+        if (type === 'image') {
+            link = '';
+            $('#pfg-modal-link').val('');
+        }
         
         // Get selected filters
         var filters = [];

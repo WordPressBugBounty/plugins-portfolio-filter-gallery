@@ -5,7 +5,7 @@ Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.4
+Stable tag: 2.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -223,13 +223,18 @@ Visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-
 
 == Changelog ==
 
+= 2.1.5 =
+* Added: Dual action overlay buttons (Link + Lightbox view) for gallery items.
+* Fixed: Lightbox missing description issue and restored support for line breaks in text.
+* Fixed: Issue where images reverted to "External Link".
+* Fixed: Filter category disappearing/removing bug when unchecked in gallery settings.
+
 = 2.1.4 =
 * Fixed: Support for external links in images.
 * Fixed: Advanced columns controls for responsive grid/masonry layouts.
 * Fixed: Filter button colors settings (primary, active, text colors).
 * Fixed: Lightbox content mapping for title and description.
 * Fixed: Lightbox description properly mapping to the gallery wrapper data attribute.
-* Security: Ensure all new settings follow WordPress core guidelines with proper escaping (esc_attr, esc_html, esc_url) and sanitization (sanitize_hex_color, absint, sanitize_key).
 
 = 2.1.3 =
 * Added: Enable/Disable Lightbox toggle setting in individual gallery meta boxes.

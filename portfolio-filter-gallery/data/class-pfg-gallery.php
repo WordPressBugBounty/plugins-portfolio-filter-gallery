@@ -111,6 +111,7 @@ class PFG_Gallery {
         'lightbox'             => array( 'default' => 'built-in', 'type' => 'key' ),
         'show_lightbox_title'  => array( 'default' => true, 'type' => 'bool' ),
         'show_lightbox_description' => array( 'default' => false, 'type' => 'bool' ),
+        'show_dual_icons'      => array( 'default' => false, 'type' => 'bool' ),
 
         // URL Deep Linking
         'deep_linking'         => array( 'default' => false, 'type' => 'bool' ),

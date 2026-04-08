@@ -263,8 +263,8 @@
             }
 
             // Update caption based on settings
-            this.title.textContent = showTitle ? titleText : '';
-            this.description.textContent = showDesc ? descText : '';
+            this.title.innerHTML = showTitle ? titleText : '';
+            this.description.innerHTML = showDesc ? descText : '';
             
             // Hide caption container if both are empty
             const captionEl = this.lightbox.querySelector('.pfg-lightbox-caption');

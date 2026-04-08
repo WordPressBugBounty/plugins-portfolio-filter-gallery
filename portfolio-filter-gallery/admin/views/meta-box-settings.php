@@ -602,6 +602,18 @@ if (class_exists('PFG_Templates')) {
                 <?php esc_html_e('Lightbox Content', 'portfolio-filter-gallery'); ?>
             </h4>
 
+            <!-- Dual Action Icons -->
+            <div class="pfg-form-row">
+                <label class="pfg-form-label">
+                    <?php esc_html_e('Dual Action Icons', 'portfolio-filter-gallery'); ?>
+                    <small><?php esc_html_e('Show both Lightbox and Link icons on hover if an image has a custom link', 'portfolio-filter-gallery'); ?></small>
+                </label>
+                <label class="pfg-toggle">
+                    <input type="checkbox" name="pfg_settings[show_dual_icons]" value="1" <?php checked($settings['show_dual_icons'] ?? false); ?>>
+                    <span class="pfg-toggle-slider"></span>
+                </label>
+            </div>
+
             <!-- Show Title in Lightbox -->
             <div class="pfg-form-row">
                 <label class="pfg-form-label">

@@ -1045,12 +1045,18 @@ class PFG_Ajax_Handler
                 $filters = array();
             }
 
+            $type = isset($image['type']) ? sanitize_key($image['type']) : 'image';
+            $link = isset($image['link']) ? esc_url_raw($image['link']) : '';
+            if ( 'image' === $type ) {
+                $link = '';
+            }
+
             $sanitized_images[] = array(
                 'id' => absint($image['id']),
                 'title' => isset($image['title']) ? sanitize_text_field($image['title']) : '',
                 'description' => isset($image['description']) ? sanitize_textarea_field($image['description']) : '',
-                'link' => isset($image['link']) ? esc_url_raw($image['link']) : '',
-                'type' => isset($image['type']) ? sanitize_key($image['type']) : 'image',
+                'link' => $link,
+                'type' => $type,
                 'filters' => $filters,
                 'product_id' => isset($image['product_id']) ? absint($image['product_id']) : 0,
                 'product_name' => isset($image['product_name']) ? sanitize_text_field($image['product_name']) : '',
