@@ -126,6 +126,23 @@ $filter_tree = pfg_build_filter_tree($all_filters);
                 <h3><?php esc_html_e('Add New Filter', 'portfolio-filter-gallery'); ?></h3>
             </div>
 
+            <?php
+            $limit_reached = (count($all_filters) >= 6);
+            ?>
+            <div id="pfg-filter-limit-notice" class="pfg-notice pfg-notice-warning" style="margin-top: 15px; <?php echo $limit_reached ? '' : 'display: none;'; ?>">
+                <div class="pfg-notice-icon">
+                    <span class="dashicons dashicons-warning"></span>
+                </div>
+                <div class="pfg-notice-content">
+                    <div class="pfg-notice-title">
+                        <?php echo esc_html__('Filter Limit Reached', 'portfolio-filter-gallery'); ?>
+                    </div>
+                    <p class="pfg-notice-text" style="margin: 0; line-height: 1.4;">
+                        <?php esc_html_e('You have reached the limit of 6 filters. Please delete some filters to add new ones.', 'portfolio-filter-gallery'); ?>
+                    </p>
+                </div>
+            </div>
+
             <form id="pfg-add-filter-form" class="pfg-add-form">
                 <?php wp_nonce_field('pfg_admin_action', 'pfg_filter_nonce'); ?>
 
@@ -135,7 +152,7 @@ $filter_tree = pfg_build_filter_tree($all_filters);
                     <label><?php esc_html_e('Filter Name', 'portfolio-filter-gallery'); ?></label>
                     <input type="text" name="filter_name" class="pfg-input pfg-input-lg"
                         placeholder="<?php esc_attr_e('e.g., Web Design, Photography, Branding', 'portfolio-filter-gallery'); ?>"
-                        required>
+                        required <?php disabled($limit_reached); ?>>
                 </div>
 
                 <div class="pfg-form-row-2col">
@@ -143,7 +160,7 @@ $filter_tree = pfg_build_filter_tree($all_filters);
                         <label>
                             <?php esc_html_e('Parent Filter', 'portfolio-filter-gallery'); ?>
                         </label>
-                        <select name="parent_id" class="pfg-select">
+                        <select name="parent_id" class="pfg-select" <?php disabled($limit_reached); ?>>
                             <option value=""><?php esc_html_e('— Top Level —', 'portfolio-filter-gallery'); ?>
                             </option>
                             <?php
@@ -157,14 +174,14 @@ $filter_tree = pfg_build_filter_tree($all_filters);
                         <label><?php esc_html_e('Color Tag', 'portfolio-filter-gallery'); ?></label>
                         <div class="pfg-color-picker-wrap pfg-add-color-picker">
                             <input type="color" name="filter_color" class="pfg-color-input-hidden" id="add-filter-color"
-                                value="#3858e9">
+                                value="#3858e9" <?php disabled($limit_reached); ?>>
                             <label for="add-filter-color" class="pfg-color-label" style="background-color: #3858e9;"
                                 title="<?php esc_attr_e('Click to change color', 'portfolio-filter-gallery'); ?>"></label>
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="pfg-btn pfg-btn-primary pfg-btn-lg pfg-btn-full">
+                <button type="submit" class="pfg-btn pfg-btn-primary pfg-btn-lg pfg-btn-full" <?php disabled($limit_reached); ?>>
                     <span class="dashicons dashicons-plus"></span>
                     <?php esc_html_e('Add Filter', 'portfolio-filter-gallery'); ?>
                 </button>
@@ -321,10 +338,14 @@ $filter_tree = pfg_build_filter_tree($all_filters);
                     </table>
                 </div>
 
-                <div class="pfg-panel-footer">
+                <div class="pfg-panel-footer" style="display: flex; flex-direction: column; gap: 8px;">
                     <span class="pfg-footer-hint">
                         <span class="dashicons dashicons-info"></span>
                         <?php esc_html_e('Changes are saved automatically', 'portfolio-filter-gallery'); ?>
+                    </span>
+                    <span class="pfg-footer-guideline-note" style="font-size: 12px; color: var(--pfg-text-muted); display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                        <span class="dashicons dashicons-warning" style="font-size: 14px; width: 14px; height: 14px; color: var(--pfg-warning);"></span>
+                        <?php esc_html_e('Note: This is a free version limited to a maximum of 6 filters.', 'portfolio-filter-gallery'); ?>
                     </span>
                 </div>
             <?php endif; ?>

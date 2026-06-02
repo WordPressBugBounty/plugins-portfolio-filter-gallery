@@ -169,6 +169,9 @@ class PFG_Ajax_Handler
 
         $filters = get_option('pfg_filters', array());
 
+        if (count($filters) >= 6) {
+            wp_send_json_error(array('message' => __('Filter creation limit reached. You can create a maximum of 6 filters in the free version.', 'portfolio-filter-gallery')), 400);
+        }
 
         // Generate unique ID - handle non-Latin characters
         $id_base = sanitize_key($name);

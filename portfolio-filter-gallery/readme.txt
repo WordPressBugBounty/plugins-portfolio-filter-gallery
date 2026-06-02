@@ -3,9 +3,9 @@ Contributors: awordpresslife, razipathhan, hanif0991, muhammadshahid, fkfaisalkh
 Donate link: https://paypal.me/awplife
 Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
 Requires at least: 5.8
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.6
+Stable tag: 2.1.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -222,6 +222,11 @@ Yes. The plugin is translation-ready and works with WPML and other translation p
 Visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/) for assistance. For premium support, visit the [developer website](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/).
 
 == Changelog ==
+
+= 2.1.7 =
+* Date: 2 June, 2026
+* Perfectly working with new WordPress version 7.0
+* filter bug fixed in gallery.
 
 = 2.1.6 =
 * Added: Bulk selection capability using "Shift + Click" for faster image management.
