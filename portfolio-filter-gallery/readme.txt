@@ -5,7 +5,7 @@ Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.7
+Stable tag: 2.1.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -223,6 +223,12 @@ Visit the [Support Forum](https://wordpress.org/support/plugin/portfolio-filter-
 
 == Changelog ==
 
+= 2.1.8 =
+* Date: 27 June, 2026
+* Added: Right Click Protection integration in individual gallery Layout settings.
+* Added: Right Click Protection details in documentation page.
+* Improved: Version bump to 2.1.8.
+
 = 2.1.7 =
 * Date: 2 June, 2026
 * Perfectly working with new WordPress version 7.0
@@ -423,6 +429,9 @@ Portfolio Filter Gallery works on all modern browsers:
 This plugin uses standard WordPress libraries. No external third-party libraries are bundled.
 
 == Upgrade Notice ==
+
+= 2.1.8 =
+Recommended update. Added Right Click Protection integration in Layout settings and documented it in Docs.
 
 = 2.1.4 =
 Bug fix release. Fixed an issue where the lightbox description was not displaying when enabled.

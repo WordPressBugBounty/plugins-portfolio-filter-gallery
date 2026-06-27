@@ -157,6 +157,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                 
                 <h3><?php esc_html_e( 'Gap / Spacing', 'portfolio-filter-gallery' ); ?></h3>
                 <p><?php esc_html_e( 'Control the spacing between images in pixels.', 'portfolio-filter-gallery' ); ?></p>
+
+                <h3><?php esc_html_e( 'Right Click Protection', 'portfolio-filter-gallery' ); ?></h3>
+                <p><?php esc_html_e( 'Uses real-time system checks to verify if the "Right Click Disable OR Ban" plugin is active. Enable it from the settings to prevent visitors from right-clicking or dragging your images to protect your graphics.', 'portfolio-filter-gallery' ); ?></p>
             </section>
             
 

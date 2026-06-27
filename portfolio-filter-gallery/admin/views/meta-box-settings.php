@@ -300,6 +300,58 @@ if (class_exists('PFG_Templates')) {
                 </label>
             </div>
 
+            <!-- Separator -->
+            <hr class="pfg-form-separator">
+            
+            <!-- Right Click Protection -->
+            <div class="pfg-form-row">
+                <label class="pfg-form-label">
+                    <?php esc_html_e('Right Click Protection', 'portfolio-filter-gallery'); ?>
+                    <small><?php esc_html_e('If you want to disable right click and image dragging on your site, we have a dedicated plugin for it. Just install and use it.', 'portfolio-filter-gallery'); ?></small>
+                </label>
+                <div class="pfg-form-field">
+                    <?php
+                    $rcb_plugin = 'right-click-disable-or-ban/right-click-disable-or-ban.php';
+                    if ( ! function_exists( 'is_plugin_active' ) ) {
+                        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+                    }
+                    $is_rcb_installed = file_exists(WP_PLUGIN_DIR . '/' . $rcb_plugin);
+                    $is_rcb_active = $is_rcb_installed && is_plugin_active($rcb_plugin);
+
+                    if ($is_rcb_active) : ?>
+                        <div class="rcb-status-container" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px; background: #e0f2fe; color: #0369a1; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                                <span class="dashicons dashicons-shield" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                <?php esc_html_e('Active & Protecting', 'portfolio-filter-gallery'); ?>
+                            </div>
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=right-click-disable-or-ban-free')); ?>" class="pfg-btn pfg-btn-secondary">
+                                <span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e('Configure Protection Settings', 'portfolio-filter-gallery'); ?>
+                            </a>
+                        </div>
+                    <?php elseif ($is_rcb_installed) : ?>
+                        <div class="rcb-status-container" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px; background: #ffedd5; color: #c2410c; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                                <span class="dashicons dashicons-warning" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                <?php esc_html_e('Installed (Inactive)', 'portfolio-filter-gallery'); ?>
+                            </div>
+                            <a href="<?php echo esc_url(wp_nonce_url(self_admin_url('plugins.php?action=activate&plugin=' . $rcb_plugin), 'activate-plugin_' . $rcb_plugin)); ?>" class="pfg-btn pfg-btn-primary">
+                                <span class="dashicons dashicons-yes-alt"></span> <?php esc_html_e('Activate Right Click Ban', 'portfolio-filter-gallery'); ?>
+                            </a>
+                        </div>
+                    <?php else : ?>
+                        <div class="rcb-status-container" style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                                <span class="dashicons dashicons-info" style="font-size: 16px; width: 16px; height: 16px; margin: 0;"></span>
+                                <?php esc_html_e('Recommended Plugin', 'portfolio-filter-gallery'); ?>
+                            </div>
+                            <a href="<?php echo esc_url(wp_nonce_url(self_admin_url('update.php?action=install-plugin&plugin=right-click-disable-or-ban'), 'install-plugin_right-click-disable-or-ban')); ?>" class="pfg-btn pfg-btn-primary">
+                                <span class="dashicons dashicons-download"></span> <?php esc_html_e('Install Free Right Click Ban Plugin', 'portfolio-filter-gallery'); ?>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
         </div>
 
         <!-- Filters Tab -->
