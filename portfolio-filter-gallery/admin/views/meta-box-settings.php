@@ -264,6 +264,18 @@ if (class_exists('PFG_Templates')) {
                 </select>
             </div>
 
+            <!-- Show Image Numbering -->
+            <div class="pfg-form-row">
+                <label class="pfg-form-label">
+                    <?php esc_html_e('Show Image Numbering', 'portfolio-filter-gallery'); ?>
+                    <small><?php esc_html_e('Display the image sequence number on gallery items', 'portfolio-filter-gallery'); ?></small>
+                </label>
+                <label class="pfg-toggle">
+                    <input type="checkbox" name="pfg_settings[show_numbering]" value="1" <?php checked($settings['show_numbering'] ?? false); ?>>
+                    <span class="pfg-toggle-slider"></span>
+                </label>
+            </div>
+
             <!-- Show Title Overlay -->
             <div class="pfg-form-row">
                 <label class="pfg-form-label">

@@ -723,6 +723,7 @@ class PFG_Ajax_Handler
         foreach ($images as &$image) {
             if ($image['id'] === $image_id) {
                 $image['title'] = PFG_Security::get_post('title', $image['title'], 'text');
+                $image['alt'] = PFG_Security::get_post('alt', isset($image['alt']) ? $image['alt'] : '', 'text');
                 $image['description'] = PFG_Security::get_post('description', $image['description'], 'textarea');
                 $image['link'] = PFG_Security::get_post('link', $image['link'], 'url');
                 $image['type'] = PFG_Security::get_post('type', $image['type'], 'key');
@@ -730,7 +731,7 @@ class PFG_Ajax_Handler
                 // Use PFG_Security wrapper to extract and sanitize Unicode filter slugs without causing PHPCS warnings.
                 $filters = PFG_Security::get_post('filters', null, 'array');
                 if ($filters !== null) {
-                    $image['filters'] = $filters;
+                    $image['filters'] = array_filter($filters);
                 }
 
                 break;

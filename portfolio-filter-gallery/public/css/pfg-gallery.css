@@ -1701,8 +1701,222 @@
 .pfg-item-description {
   margin-top: 8px;
   font-size: 14px;
+  filter: grayscale(0%);
+}
+
+/* Subtle */
+.pfg-item-hover--subtle:hover .pfg-item-image {
+  transform: scale(1.02);
+}
+
+/* Overlay zoom */
+.pfg-item-hover--overlay-zoom .pfg-item-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pfg-overlay-bg);
+  opacity: 0;
+  transition: opacity var(--pfg-transition);
+}
+
+.pfg-item-hover--overlay-zoom:hover .pfg-item-link::after {
+  opacity: 1;
+}
+
+.pfg-item-hover--overlay-zoom:hover .pfg-item-image {
+  transform: scale(1.1);
+}
+
+/* Slide in */
+.pfg-item-hover--slide-in .pfg-item-overlay {
+  transform: translateX(-100%);
+  opacity: 1;
+  background: var(--pfg-overlay-bg);
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pfg-item-hover--slide-in:hover .pfg-item-overlay {
+  transform: translateX(0);
+}
+
+/* ==========================================================================
+   Error & Empty States
+   ========================================================================== */
+
+.pfg-error,
+.pfg-empty {
+  padding: 40px 20px;
+  text-align: center;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+}
+
+.pfg-empty {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   Animation for filtering - Removed CSS animations, now controlled by JavaScript
+   ========================================================================== */
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+.pfg-filter:focus-visible,
+.pfg-item-link:focus-visible {
+  outline: 2px solid var(--pfg-filter-bg);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pfg-item,
+  .pfg-item-image,
+  .pfg-item-overlay,
+  .pfg-filter,
+  .pfg-video-play {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Print styles
+   ========================================================================== */
+
+@media print {
+  .pfg-filters,
+  .pfg-search,
+  .pfg-item-overlay,
+  .pfg-video-play {
+    display: none;
+  }
+
+  .pfg-grid {
+    display: block;
+  }
+
+  .pfg-item {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+}
+
+
+
+
+/* ==========================================================================
+   Watermark Overlay
+   ========================================================================== */
+
+.pfg-watermark {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  padding: 8px 12px;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Watermark text styling */
+.pfg-watermark-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Watermark image styling */
+.pfg-watermark-image {
+  max-width: 80px;
+  max-height: 40px;
+  width: auto;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Position variants */
+.pfg-watermark--top-left {
+  top: 10px;
+  left: 10px;
+}
+
+.pfg-watermark--top-center {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.pfg-watermark--top-right {
+  top: 10px;
+  right: 10px;
+}
+
+.pfg-watermark--center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pfg-watermark--bottom-left {
+  bottom: 10px;
+  left: 10px;
+}
+
+.pfg-watermark--bottom-center {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.pfg-watermark--bottom-right {
+  bottom: 10px;
+  right: 10px;
+}
+
+/* Ensure proper positioning context for watermark */
+.pfg-item-link {
+  position: relative;
+}
+
+.pfg-item-link--dual {
+  position: relative;
+}
+
+/* Description below image */
+.pfg-item-description {
+  margin-top: 8px;
+  font-size: 14px;
   color: var(--pfg-caption-text, #64748b);
   line-height: 1.5;
   padding: 0 4px;
 }
 
+/* Image Numbering Badge */
+.pfg-item-number {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pfg-primary-color, var(--pfg-filter-bg, #3858e9));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  line-height: 1.2;
+  pointer-events: none;
+}

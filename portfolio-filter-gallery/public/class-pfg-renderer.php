@@ -784,6 +784,10 @@ class PFG_Renderer {
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $item_style is constructed from round($aspect_ratio, 2) float value.
         echo '<div class="pfg-item ' . esc_attr( $filter_classes . ' ' . $hover_class . $hidden_class . $size_class ) . '" data-id="' . esc_attr( $image['id'] ) . '"' . $item_style . '>';
 
+        if ( ! empty( $this->settings['show_numbering'] ) ) {
+            echo '<span class="pfg-item-number">' . esc_html( $index + 1 ) . '</span>';
+        }
+
         // Type indicator icon (video or link)
         if ( empty( $this->settings['hide_type_icons'] ) ) {
             if ( $image['type'] === 'video' && ! empty( $image['link'] ) ) {
@@ -901,11 +905,8 @@ class PFG_Renderer {
             echo '</div>';
             
             // Overlay with title/description (only if title_position is 'overlay')
-            if ( $title_position === 'overlay' && ( $this->settings['show_title'] || $this->settings['show_numbering'] || $show_categories ) ) {
+            if ( $title_position === 'overlay' && ( $this->settings['show_title'] || $show_categories ) ) {
                 echo '<div class="pfg-item-caption pfg-item-caption--overlay">';
-                if ( $this->settings['show_numbering'] ) {
-                    echo '<span class="pfg-item-number">' . esc_html( $index + 1 ) . '</span>';
-                }
                 if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
                     echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
                 }
@@ -970,12 +971,8 @@ class PFG_Renderer {
                 $this->render_watermark();
 
                 // Overlay with title/description (only if title_position is 'overlay')
-                if ( $title_position === 'overlay' && ( $this->settings['show_title'] || $this->settings['show_numbering'] || $show_categories ) ) {
+                if ( $title_position === 'overlay' && ( $this->settings['show_title'] || $show_categories ) ) {
                     echo '<div class="pfg-item-caption pfg-item-caption--overlay">';
-                    
-                    if ( $this->settings['show_numbering'] ) {
-                        echo '<span class="pfg-item-number">' . esc_html( $index + 1 ) . '</span>';
-                    }
                     
                     if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
                         echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
@@ -1002,10 +999,6 @@ class PFG_Renderer {
         // Card caption below image (when title_position is 'below')
         if ( $title_position === 'below' && ( $this->settings['show_title'] || $this->settings['show_description'] || $show_categories ) ) {
             echo '<div class="pfg-item-caption">';
-            
-            if ( $this->settings['show_numbering'] ) {
-                echo '<span class="pfg-item-number">' . esc_html( $index + 1 ) . '</span>';
-            }
             
             if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
                 echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
@@ -1143,10 +1136,6 @@ class PFG_Renderer {
         // Card caption below image (when title_position is 'below')
         if ( $title_position === 'below' && ( $this->settings['show_title'] || $this->settings['show_description'] || $show_categories ) ) {
             echo '<div class="pfg-item-caption">';
-            
-            if ( $this->settings['show_numbering'] ) {
-                echo '<span class="pfg-item-number">' . esc_html( $index + 1 ) . '</span>';
-            }
             
             if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
                 echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';

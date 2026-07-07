@@ -385,6 +385,7 @@ class PFG_Admin
             'show_logic_toggle' => 'show_logic_toggle',
             'show_filter_colors' => 'show_filter_colors',
             'hover_effect' => 'hover_effect',
+            'show_numbering' => 'show_numbering',
             'show_title_overlay' => 'show_title',
             'border_radius' => 'border_radius',
             'overlay_color' => 'overlay_color',

@@ -2197,6 +2197,11 @@ jQuery(document).ready(function ($) {
         if (imageCount > CHUNK_THRESHOLD) {
             // Remove all hidden pfg_images inputs to stay under max_input_vars
             $('input[name^="pfg_images["]').remove();
+
+            // For large galleries, all changes (add, delete, reorder, metadata)
+            // are saved immediately via AJAX. We can safely skip saving on form submit.
+            $('#pfg-images-json').val('__UNCHANGED__');
+            return true;
         }
 
         // If nothing was modified, skip image saving entirely
@@ -2398,8 +2403,8 @@ jQuery(document).ready(function ($) {
         currentImageItem.find('input[name$="[link]"]').val(link);
         currentImageItem.find('input[name$="[filters]"]').val(filters.join(','));
 
-        // Mark metadata as modified for smart save
-        markMetadataModified();
+        // Mark metadata as modified for smart save (bypassed since we save in real-time)
+        // markMetadataModified();
 
 
 
@@ -2519,9 +2524,66 @@ jQuery(document).ready(function ($) {
     $(document).on('click', '.pfg-modal-save', function () {
         saveCurrentChanges();
 
-        // Close modal
-        $('#pfg-image-modal').fadeOut(200);
-        currentImageItem = null;
+        var $btn = $(this);
+        var originalText = $btn.text();
+
+        // Disable button and show saving status
+        $btn.prop('disabled', true).text(pfgAdmin.i18n.saving || 'Saving...');
+
+        // Find current image id
+        var imageId = currentImageItem ? parseInt(currentImageItem.find('input[name$="[id]"]').val(), 10) : null;
+        if (!imageId) {
+            $('#pfg-image-modal').fadeOut(200);
+            $btn.prop('disabled', false).text(originalText);
+            currentImageItem = null;
+            return;
+        }
+
+        // Gather data from modal inputs
+        var title = $('#pfg-modal-title').val() || '';
+        var alt = $('#pfg-modal-alt').val() || '';
+        var description = $('#pfg-modal-description').val() || '';
+        var type = $('#pfg-modal-type').val() || 'image';
+        var link = $('#pfg-modal-link').val() || '';
+
+        var filters = [];
+        $('#pfg-modal-filters input[type="checkbox"]:checked').each(function () {
+            filters.push($(this).val());
+        });
+
+        $.ajax({
+            url: pfgAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'pfg_update_image',
+                security: pfgAdmin.nonce,
+                gallery_id: pfgAdmin.galleryId,
+                image_id: imageId,
+                title: title,
+                alt: alt,
+                description: description,
+                type: type,
+                link: link,
+                filters: filters.length ? filters : [''] // ensure key is sent even if empty
+            },
+            success: function (response) {
+                if (response.success) {
+                    $btn.text(pfgAdmin.i18n.saved || 'Saved!');
+                    setTimeout(function() {
+                        $('#pfg-image-modal').fadeOut(200);
+                        $btn.prop('disabled', false).text(originalText);
+                        currentImageItem = null;
+                    }, 500);
+                } else {
+                    alert(response.data ? response.data.message : 'Error saving image.');
+                    $btn.prop('disabled', false).text(originalText);
+                }
+            },
+            error: function () {
+                alert(pfgAdmin.i18n.error || 'Error saving image.');
+                $btn.prop('disabled', false).text(originalText);
+            }
+        });
     });
 
     // Delete image
