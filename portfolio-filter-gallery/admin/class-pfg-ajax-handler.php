@@ -489,8 +489,13 @@ class PFG_Ajax_Handler
         }
 
         $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in PFG_Security::verify_ajax_nonce above.
-        $image_ids = isset($_POST['image_ids']) ? array_map('absint', wp_unslash((array) $_POST['image_ids'])) : array();
+        $image_ids_raw = isset($_POST['image_ids']) ? $_POST['image_ids'] : '';
+        if (is_string($image_ids_raw) && strpos($image_ids_raw, '[') === 0) {
+            $image_ids = json_decode(wp_unslash($image_ids_raw), true);
+            $image_ids = is_array($image_ids) ? array_map('absint', $image_ids) : array();
+        } else {
+            $image_ids = is_array($image_ids_raw) ? array_map('absint', $image_ids_raw) : array();
+        }
 
         if (empty($gallery_id) || empty($image_ids)) {
             wp_send_json_error(array('message' => __('Gallery ID and images are required.', 'portfolio-filter-gallery')), 400);
@@ -672,8 +677,13 @@ class PFG_Ajax_Handler
         }
 
         $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in PFG_Security::verify_ajax_nonce above.
-        $order = isset($_POST['order']) ? array_map('absint', wp_unslash((array) $_POST['order'])) : array();
+        $order_raw = isset($_POST['order']) ? wp_unslash($_POST['order']) : '';
+        if (is_string($order_raw) && strpos($order_raw, '[') === 0) {
+            $order = json_decode($order_raw, true);
+            $order = is_array($order) ? array_map('absint', $order) : array();
+        } else {
+            $order = is_array($order_raw) ? array_map('absint', $order_raw) : array();
+        }
 
         if (empty($gallery_id) || empty($order)) {
             wp_send_json_error(array('message' => __('Gallery ID and order data are required.', 'portfolio-filter-gallery')), 400);

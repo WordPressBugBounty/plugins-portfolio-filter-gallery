@@ -60,6 +60,24 @@ class PFG_Admin
         // Duplicate gallery feature
         add_filter('post_row_actions', array($this, 'add_duplicate_action'), 10, 2);
         add_action('admin_action_pfg_duplicate_gallery', array($this, 'duplicate_gallery'));
+
+        // Force classic editor for gallery custom post type
+        add_filter('use_block_editor_for_post_type', array($this, 'disable_gutenberg_for_cpt'), 10, 2);
+    }
+
+    /**
+     * Disable Gutenberg editor for the gallery custom post type.
+     *
+     * @param bool   $use_block_editor Current status.
+     * @param string $post_type        Post type.
+     * @return bool
+     */
+    public function disable_gutenberg_for_cpt($use_block_editor, $post_type)
+    {
+        if ($post_type === 'awl_filter_gallery') {
+            return false;
+        }
+        return $use_block_editor;
     }
 
     /**

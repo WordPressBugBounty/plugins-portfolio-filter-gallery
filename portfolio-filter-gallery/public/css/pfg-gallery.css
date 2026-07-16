@@ -541,6 +541,11 @@
 .pfg-filters--flat .pfg-filter--selected {
   background: var(--pfg-filter-active-bg, var(--pfg-filter-bg));
   color: var(--pfg-filter-active-text, var(--pfg-filter-text));
+  padding-right: 22px !important;
+}
+
+.pfg-filters--flat .pfg-filter--selected::after {
+  content: none !important;
 }
 
 /* Multi-select mode - selected filters */

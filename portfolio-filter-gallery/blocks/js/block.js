@@ -2,7 +2,7 @@
  * Portfolio Filter Gallery - Gutenberg Block
  * 
  * @package Portfolio_Filter_Gallery
- * @version 2.0.0
+ * @version 2.2.0
  */
 
 (function() {
@@ -37,6 +37,9 @@
     var Placeholder = components.Placeholder;
     var __ = i18n.__;
 
+    // Use wp.serverSideRender or fallbacks
+    var ServerSideRender = wp.serverSideRender || (wp.components ? wp.components.ServerSideRender : null) || (wp.editor ? wp.editor.ServerSideRender : null);
+
     // Get data passed from PHP
     var data = pfgBlockData;
     var galleries = data.galleries || [];
@@ -65,16 +68,6 @@
         });
     }
 
-    // Find gallery by id
-    function findGallery(id) {
-        for (var i = 0; i < galleries.length; i++) {
-            if (galleries[i].id === id) {
-                return galleries[i];
-            }
-        }
-        return null;
-    }
-
     /**
      * Register the block
      */
@@ -99,15 +92,15 @@
             },
             columnsOverride: {
                 type: 'number',
-                default: 0  // 0 = use gallery default
+                default: 0
             },
             hoverEffectOverride: {
                 type: 'string',
-                default: ''  // '' = use gallery default
+                default: ''
             },
             showFiltersOverride: {
                 type: 'string',
-                default: ''  // '' = use gallery default, 'true'/'false' = override
+                default: ''
             }
         },
 
@@ -140,11 +133,8 @@
                 { label: __('Show Filters', 'portfolio-filter-gallery'), value: 'true' },
                 { label: __('Hide Filters', 'portfolio-filter-gallery'), value: 'false' }
             ];
-            
-            // Find selected gallery
-            var selectedGallery = findGallery(galleryId);
 
-            // If no gallery selected, show placeholder
+            // If no gallery selected, show placeholder/selector
             if (!galleryId) {
                 return createElement(Fragment, null,
                     createElement(InspectorControls, null,
@@ -174,18 +164,42 @@
                                     onChange: function(value) {
                                         setAttributes({ galleryId: parseInt(value, 10) });
                                     }
-                                })
+                                  })
                                 : createElement(Button, {
                                     variant: 'primary',
                                     href: 'post-new.php?post_type=awl_filter_gallery',
                                     target: '_blank'
-                                }, strings.createGallery)
+                                  }, strings.createGallery)
                         )
                     )
                 );
             }
 
-            // Gallery selected - show preview
+            // Gallery selected - show live preview using ServerSideRender if available
+            var previewElement;
+            if (ServerSideRender) {
+                previewElement = createElement(ServerSideRender, {
+                    block: 'portfolio-filter-gallery/gallery',
+                    attributes: attributes
+                });
+                
+                // Re-initialize gallery JS dynamically on DOM changes inside editor
+                setTimeout(function() {
+                    if (typeof window.pfgInitGalleries === 'function') {
+                        window.pfgInitGalleries();
+                    }
+                }, 1000);
+            } else {
+                // Fallback static preview
+                previewElement = createElement('div', { className: 'pfg-block-gallery-preview' },
+                    createElement('div', { className: 'pfg-block-gallery-icon' },
+                        createElement('span', { className: 'dashicons dashicons-format-gallery' })
+                    ),
+                    createElement('p', null, __('Gallery Selected', 'portfolio-filter-gallery')),
+                    createElement('small', null, strings.previewNote)
+                );
+            }
+
             return createElement(Fragment, null,
                 createElement(InspectorControls, null,
                     createElement(PanelBody, { title: __('Gallery Settings', 'portfolio-filter-gallery') },
@@ -211,7 +225,6 @@
                             style: { marginTop: '10px' }
                         }, strings.editGallery)
                     ),
-                    // Quick Settings Panel
                     createElement(PanelBody, { 
                         title: __('Quick Settings', 'portfolio-filter-gallery'),
                         initialOpen: false
@@ -254,20 +267,7 @@
                         blockIcon,
                         createElement('span', null, strings.title)
                     ),
-                    showTitle && selectedGallery && createElement('h3', { 
-                        className: 'pfg-block-gallery-title' 
-                    }, selectedGallery.title),
-                    createElement('div', { className: 'pfg-block-gallery-preview' },
-                        createElement('div', { className: 'pfg-block-gallery-icon' },
-                            createElement('span', { className: 'dashicons dashicons-format-gallery' })
-                        ),
-                        createElement('p', null, 
-                            selectedGallery 
-                                ? selectedGallery.title 
-                                : __('Gallery', 'portfolio-filter-gallery')
-                        ),
-                        createElement('small', null, strings.previewNote)
-                    )
+                    previewElement
                 )
             );
         },

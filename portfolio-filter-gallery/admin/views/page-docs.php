@@ -25,6 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <a href="#layout-settings" class="pfg-doc-link"><?php esc_html_e( 'Layout Settings', 'portfolio-filter-gallery' ); ?></a>
 
                 <a href="#shortcode" class="pfg-doc-link"><?php esc_html_e( 'Using Shortcodes', 'portfolio-filter-gallery' ); ?></a>
+                <a href="#page-builders" class="pfg-doc-link"><?php esc_html_e( 'Gutenberg & Elementor', 'portfolio-filter-gallery' ); ?></a>
                 <a href="#hover-effects" class="pfg-doc-link"><?php esc_html_e( 'Hover Effects', 'portfolio-filter-gallery' ); ?></a>
                 <a href="#faq" class="pfg-doc-link"><?php esc_html_e( 'FAQ', 'portfolio-filter-gallery' ); ?></a>
                 <a href="#support" class="pfg-doc-link"><?php esc_html_e( 'Support', 'portfolio-filter-gallery' ); ?></a>
@@ -182,6 +183,41 @@ if ( ! defined( 'ABSPATH' ) ) {
                 
                 <h3><?php esc_html_e( 'PHP Usage', 'portfolio-filter-gallery' ); ?></h3>
                 <code class="pfg-code-block">&lt;?php echo do_shortcode( '[pfg id="123"]' ); ?&gt;</code>
+            </section>
+            
+            <!-- Page Builders -->
+            <section id="page-builders" class="pfg-doc-section">
+                <h2><?php esc_html_e( 'Gutenberg & Elementor Integration', 'portfolio-filter-gallery' ); ?></h2>
+                <p><?php esc_html_e( 'Portfolio Filter Gallery offers seamless, native integration with the WordPress Block Editor (Gutenberg) and Elementor Page Builder, allowing you to insert galleries and see live previews without dealing with shortcodes.', 'portfolio-filter-gallery' ); ?></p>
+                
+                <h3><?php esc_html_e( 'Gutenberg Block Editor', 'portfolio-filter-gallery' ); ?></h3>
+                <p><?php esc_html_e( 'To display a gallery using the block editor:', 'portfolio-filter-gallery' ); ?></p>
+                <ol>
+                    <li><?php esc_html_e( 'Open a page or post in editing mode.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><?php esc_html_e( 'Click the "+" button to insert a new block and search for "Portfolio Filter Gallery".', 'portfolio-filter-gallery' ); ?></li>
+                    <li><?php esc_html_e( 'Select the block to add it to your layout.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><?php esc_html_e( 'In the block settings panel on the right, select your desired gallery from the dropdown list.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><?php esc_html_e( 'The block will fetch a live, fully-styled server-side preview of the gallery directly within your editor screen.', 'portfolio-filter-gallery' ); ?></li>
+                </ol>
+                
+                <h3><?php esc_html_e( 'Elementor Page Builder', 'portfolio-filter-gallery' ); ?></h3>
+                <p><?php esc_html_e( 'To display a gallery using Elementor:', 'portfolio-filter-gallery' ); ?></p>
+                <ol>
+                    <li><?php esc_html_e( 'Click "Edit with Elementor" on any page or post.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><?php esc_html_e( 'In the left sidebar search bar, type "Portfolio Filter Gallery".', 'portfolio-filter-gallery' ); ?></li>
+                    <li><?php esc_html_e( 'Drag the widget onto your section layout canvas.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><?php esc_html_e( 'In the Content tab of the widget settings, choose a gallery from the "Select Gallery" dropdown.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><?php esc_html_e( 'The preview iframe will render your gallery, filter buttons, and animations instantly.', 'portfolio-filter-gallery' ); ?></li>
+                </ol>
+
+                <h3><?php esc_html_e( 'Layout Overrides (Optional)', 'portfolio-filter-gallery' ); ?></h3>
+                <p><?php esc_html_e( 'Both the Gutenberg block and Elementor widget provide direct option overrides in their settings panel. This allows you to fine-tune the gallery layout specifically for that page without modifying the global gallery settings:', 'portfolio-filter-gallery' ); ?></p>
+                <ul>
+                    <li><strong><?php esc_html_e( 'Override Columns', 'portfolio-filter-gallery' ); ?></strong> - <?php esc_html_e( 'Force a different column count (1 to 6 columns) for the gallery on this specific page.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><strong><?php esc_html_e( 'Override Hover Effect', 'portfolio-filter-gallery' ); ?></strong> - <?php esc_html_e( 'Choose a different hover animation to override the default style.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><strong><?php esc_html_e( 'Override Show Filters', 'portfolio-filter-gallery' ); ?></strong> - <?php esc_html_e( 'Show or hide the category filter buttons specifically for this placement.', 'portfolio-filter-gallery' ); ?></li>
+                    <li><strong><?php esc_html_e( 'Show Gallery Title', 'portfolio-filter-gallery' ); ?></strong> - <?php esc_html_e( 'Toggle the display of the gallery title header above the grid.', 'portfolio-filter-gallery' ); ?></li>
+                </ul>
             </section>
             
             <!-- Hover Effects -->

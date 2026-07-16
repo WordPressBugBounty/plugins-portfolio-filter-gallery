@@ -347,7 +347,7 @@ function escapeHtml(str) {
                     action: 'pfg_upload_images',
                     security: pfgAdmin.nonce,
                     gallery_id: pfgAdmin.galleryId,
-                    image_ids: imageIds
+                    image_ids: JSON.stringify(imageIds)
                 },
                 beforeSend: function () {
                     $grid.addClass('pfg-loading');
@@ -433,13 +433,27 @@ function escapeHtml(str) {
          * Update image order
          */
         updateImageOrder: function () {
-            const order = [];
+            const domOrder = [];
 
             $('.pfg-image-item').each(function () {
-                order.push($(this).data('id'));
+                domOrder.push($(this).data('id'));
             });
 
+            // 1. Update master array first to reflect the partial/full reorder
+            if (typeof window.pfgReorderMasterArray === 'function') {
+                window.pfgReorderMasterArray(domOrder);
+            }
 
+            // 2. Now get the full reordered list of IDs from the updated master array
+            let fullOrder = [];
+            if (typeof window.pfgGetMasterImages === 'function') {
+                const master = window.pfgGetMasterImages();
+                fullOrder = master.map(function (img) { return parseInt(img.id, 10); });
+            } else {
+                fullOrder = domOrder;
+            }
+
+            // 3. Send the full order to the server as a JSON-serialized string to bypass max_input_vars limit
             $.ajax({
                 url: pfgAdmin.ajaxUrl,
                 type: 'POST',
@@ -447,15 +461,9 @@ function escapeHtml(str) {
                     action: 'pfg_reorder_images',
                     security: pfgAdmin.nonce,
                     gallery_id: pfgAdmin.galleryId,
-                    order: order
+                    order: JSON.stringify(fullOrder)
                 }
             });
-
-            // Reorder master array to ensure save works correctly
-            if (typeof window.pfgReorderMasterArray === 'function') {
-                window.pfgReorderMasterArray(order);
-            } else {
-            }
 
             // Mark images as modified for chunked save
             if (typeof window.pfgMarkImagesModified === 'function') {
@@ -2018,7 +2026,7 @@ jQuery(document).ready(function ($) {
     // ========================================
     // CHUNKED SAVE CONFIGURATION
     // ========================================
-    var CHUNK_SIZE = 50;           // Images per chunk
+    var CHUNK_SIZE = 250;           // Images per chunk
     var CHUNK_THRESHOLD = 100;     // Use chunked save above this count
     var structurallyModified = false; // Add/delete/reorder - requires full save
     var metadataModified = false;     // Title/description/filters - can use standard save
@@ -2184,6 +2192,9 @@ jQuery(document).ready(function ($) {
 
         // If chunked save already completed, just mark and let form submit
         if (chunkedSaveCompleted) {
+            if (imageCount > CHUNK_THRESHOLD) {
+                $('input[name^="pfg_images["]').remove();
+            }
             $('#pfg-images-json').val('__CHUNKED_SAVE__');
             return true;
         }
@@ -2191,63 +2202,57 @@ jQuery(document).ready(function ($) {
         // Check if any modifications were made
         var anyModification = structurallyModified || metadataModified;
 
-        // CRITICAL FIX: For large galleries (over threshold), we MUST remove hidden image inputs
-        // BEFORE form submit to avoid exceeding PHP's max_input_vars limit (typically 1000).
-        // With 440 images × 8 inputs = 3500+ inputs, which truncates settings data!
-        if (imageCount > CHUNK_THRESHOLD) {
-            // Remove all hidden pfg_images inputs to stay under max_input_vars
+        // Fast path for large galleries with no changes
+        if (imageCount > CHUNK_THRESHOLD && !anyModification) {
             $('input[name^="pfg_images["]').remove();
-
-            // For large galleries, all changes (add, delete, reorder, metadata)
-            // are saved immediately via AJAX. We can safely skip saving on form submit.
+            console.log('PFG: Large gallery with no changes - stripped inputs and skipped save');
             $('#pfg-images-json').val('__UNCHANGED__');
             return true;
         }
 
-        // If nothing was modified, skip image saving entirely
-        if (!anyModification) {
-            $('#pfg-images-json').val('__UNCHANGED__');
-            return true;
-        }
-
-        // For smaller galleries or metadata-only changes, use standard JSON save
-        // Only use chunked save for STRUCTURAL changes on LARGE galleries
-        if (imageCount <= CHUNK_THRESHOLD || !structurallyModified) {
-            // Standard JSON save - fast for metadata changes
+        // Save logic
+        if (imageCount <= CHUNK_THRESHOLD) {
+            // Small galleries: Standard JSON save
             $('#pfg-images-json').val(JSON.stringify(imagesData));
             return true;
-        }
+        } else {
+            // Large galleries (imageCount > CHUNK_THRESHOLD) with changes:
+            if (!structurallyModified) {
+                // Metadata-only changes (e.g. bulk filter updates): Standard JSON save is fast and safe
+                // because it sends all data in 1 input variable, but we MUST strip hidden inputs to stay under max_input_vars.
+                $('input[name^="pfg_images["]').remove();
+                $('#pfg-images-json').val(JSON.stringify(imagesData));
+                console.log('PFG: Large gallery with metadata-only changes - stripped inputs and saved via JSON');
+                return true;
+            } else {
+                // Structural changes (e.g. WooCommerce product import): Use chunked AJAX save
+                if (!chunkedSaveInProgress) {
+                    e.preventDefault();
+                    chunkedSaveInProgress = true;
 
-        // Large gallery with structural changes - use chunked save
+                    showProgressModal();
+                    updateProgress(0, imageCount, pfgAdmin.i18n.starting_save);
 
-        // Prevent form submit - we'll submit after chunked save
-        if (!chunkedSaveInProgress) {
-            e.preventDefault();
-            chunkedSaveInProgress = true;
+                    saveImagesChunked(imagesData)
+                        .then(function () {
+                            updateProgress(imageCount, imageCount, pfgAdmin.i18n.complete_save);
+                            chunkedSaveCompleted = true;
 
-            showProgressModal();
-            updateProgress(0, imageCount, pfgAdmin.i18n.starting_save);
+                            // Strip hidden inputs before final submit to stay under max_input_vars
+                            $('input[name^="pfg_images["]').remove();
 
-            saveImagesChunked(imagesData)
-                .then(function () {
-                    updateProgress(imageCount, imageCount, pfgAdmin.i18n.complete_save);
-                    chunkedSaveCompleted = true;
+                            setTimeout(function () {
+                                $('form#post').submit();
+                            }, 500);
+                        })
+                        .catch(function (error) {
+                            showProgressError(error);
+                            chunkedSaveInProgress = false;
+                        });
 
-                    // CRITICAL FIX: Remove all hidden pfg_images inputs from DOM to avoid
-                    // exceeding PHP's max_input_vars limit (which would truncate settings data)
-                    $('input[name^="pfg_images["]').remove();
-
-                    // Now submit the form normally
-                    setTimeout(function () {
-                        $('form#post').submit();
-                    }, 500);
-                })
-                .catch(function (error) {
-                    showProgressError(error);
-                    chunkedSaveInProgress = false;
-                });
-
-            return false;
+                    return false;
+                }
+            }
         }
 
         return true;

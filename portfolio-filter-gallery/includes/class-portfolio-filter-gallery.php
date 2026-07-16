@@ -145,15 +145,24 @@ class Portfolio_Filter_Gallery {
         // Register shortcodes
         $this->loader->add_action( 'init', $shortcode, 'register' );
 
-        // Gutenberg block - DISABLED
-        // Block registration was causing page creation interference and the block
-        // lacks live preview, making it no more useful than a shortcode.
-        // @see class-pfg-block.php for implementation if re-enabling
-        /*
+        // Gutenberg block
         require_once PFG_PLUGIN_PATH . 'blocks/class-pfg-block.php';
         $block = new PFG_Block();
         $block->init();
-        */
+
+        // Elementor integration
+        add_action( 'elementor/widgets/register', function( $widgets_manager ) {
+            require_once PFG_PLUGIN_PATH . 'includes/class-pfg-elementor-widget.php';
+            $widgets_manager->register( new PFG_Elementor_Widget() );
+        } );
+        add_action( 'elementor/widgets/widgets_registered', function( $widgets_manager ) {
+            if ( ! class_exists( 'PFG_Elementor_Widget' ) ) {
+                require_once PFG_PLUGIN_PATH . 'includes/class-pfg-elementor-widget.php';
+            }
+            if ( method_exists( $widgets_manager, 'register_widget_type' ) ) {
+                $widgets_manager->register_widget_type( new PFG_Elementor_Widget() );
+            }
+        } );
     }
 
     /**

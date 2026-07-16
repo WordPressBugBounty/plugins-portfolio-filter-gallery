@@ -38,48 +38,58 @@ class PFG_Block {
     }
 
     /**
-     * Register the block.
+     * Register the block and its editor assets on init.
      */
     public function register_block() {
-        // Register block using metadata from block.json if exists
-        if ( file_exists( PFG_PLUGIN_PATH . 'blocks/block.json' ) ) {
-            register_block_type( PFG_PLUGIN_PATH . 'blocks/block.json', array(
-                'render_callback' => array( $this, 'render_block' ),
-            ) );
-        } else {
-            // Fallback manual registration
-            register_block_type( $this->namespace . '/' . $this->block_name, array(
-                'editor_script'   => 'pfg-block-editor',
-                'editor_style'    => 'pfg-block-editor-style',
-                'render_callback' => array( $this, 'render_block' ),
-                'attributes'      => array(
-                    'galleryId' => array(
-                        'type'    => 'number',
-                        'default' => 0,
-                    ),
-                    'showTitle' => array(
-                        'type'    => 'boolean',
-                        'default' => false,
-                    ),
-                    'className' => array(
-                        'type'    => 'string',
-                        'default' => '',
-                    ),
-                    'columnsOverride' => array(
-                        'type'    => 'number',
-                        'default' => 0,
-                    ),
-                    'hoverEffectOverride' => array(
-                        'type'    => 'string',
-                        'default' => '',
-                    ),
-                    'showFiltersOverride' => array(
-                        'type'    => 'string',
-                        'default' => '',
-                    ),
+        // Register the block editor script first so it's registered on init
+        wp_register_script(
+            'pfg-block-editor',
+            PFG_PLUGIN_URL . 'blocks/js/block.js',
+            array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-i18n', 'wp-block-editor', 'wp-server-side-render' ),
+            PFG_VERSION,
+            true
+        );
+
+        // Register editor styles on init
+        wp_register_style(
+            'pfg-block-editor-style',
+            PFG_PLUGIN_URL . 'blocks/css/editor.css',
+            array( 'wp-edit-blocks' ),
+            PFG_VERSION
+        );
+
+        // Register block type pointing to editor script and style
+        register_block_type( $this->namespace . '/' . $this->block_name, array(
+            'editor_script'   => 'pfg-block-editor',
+            'editor_style'    => 'pfg-block-editor-style',
+            'render_callback' => array( $this, 'render_block' ),
+            'attributes'      => array(
+                'galleryId' => array(
+                    'type'    => 'number',
+                    'default' => 0,
                 ),
-            ) );
-        }
+                'showTitle' => array(
+                    'type'    => 'boolean',
+                    'default' => false,
+                ),
+                'className' => array(
+                    'type'    => 'string',
+                    'default' => '',
+                ),
+                'columnsOverride' => array(
+                    'type'    => 'number',
+                    'default' => 0,
+                ),
+                'hoverEffectOverride' => array(
+                    'type'    => 'string',
+                    'default' => '',
+                ),
+                'showFiltersOverride' => array(
+                    'type'    => 'string',
+                    'default' => '',
+                ),
+            ),
+        ) );
     }
 
     /**
@@ -89,7 +99,6 @@ class PFG_Block {
         global $post_type;
         
         // Don't load block editor assets when editing gallery posts (they have their own editor)
-        // This prevents conflicts with the gallery post type editor
         if ( $post_type === 'awl_filter_gallery' ) {
             return;
         }
@@ -103,18 +112,31 @@ class PFG_Block {
         // Get all galleries for the dropdown
         $galleries = $this->get_galleries();
 
-        // Editor script - register with error handling
-        if ( ! wp_script_is( 'pfg-block-editor', 'registered' ) ) {
-            wp_register_script(
-                'pfg-block-editor',
-                PFG_PLUGIN_URL . 'blocks/js/block.js',
-                array( 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n', 'wp-block-editor' ),
-                PFG_VERSION,
-                true
-            );
-        }
+        // Enqueue the main public gallery assets so the block preview inside the editor matches frontend
+        wp_enqueue_style( 'pfg-gallery-public', PFG_PLUGIN_URL . 'public/css/pfg-gallery.css', array(), PFG_VERSION );
+        wp_enqueue_style( 'pfg-hover-public', PFG_PLUGIN_URL . 'public/css/pfg-hover.css', array(), PFG_VERSION );
+        wp_enqueue_style( 'pfg-lightbox-public', PFG_PLUGIN_URL . 'public/css/pfg-lightbox.css', array(), PFG_VERSION );
+        wp_enqueue_script( 'pfg-gallery-public-js', PFG_PLUGIN_URL . 'public/js/pfg-gallery.js', array( 'jquery' ), PFG_VERSION, true );
+        wp_localize_script(
+            'pfg-gallery-public-js',
+            'pfgData',
+            array(
+                'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+                'nonce'          => wp_create_nonce( 'pfg_public_nonce' ),
+                'analyticsNonce' => wp_create_nonce( 'pfg_analytics_nonce' ),
+                'i18n'           => array(
+                    'all'       => __( 'All', 'portfolio-filter-gallery' ),
+                    'loading'   => __( 'Loading...', 'portfolio-filter-gallery' ),
+                    'noResults' => __( 'No items found.', 'portfolio-filter-gallery' ),
+                    'prev'      => __( 'Previous', 'portfolio-filter-gallery' ),
+                    'next'      => __( 'Next', 'portfolio-filter-gallery' ),
+                    'close'     => __( 'Close', 'portfolio-filter-gallery' ),
+                ),
+                'lightboxLibrary' => 'built-in',
+            )
+        );
 
-        // Pass galleries to script
+        // Pass galleries to the already registered block script
         wp_localize_script( 'pfg-block-editor', 'pfgBlockData', array(
             'galleries'    => $galleries,
             'pluginUrl'    => PFG_PLUGIN_URL,
@@ -131,17 +153,6 @@ class PFG_Block {
                 'previewNote'    => __( 'Gallery will be displayed on the frontend.', 'portfolio-filter-gallery' ),
             ),
         ) );
-
-        // Enqueue the script
-        wp_enqueue_script( 'pfg-block-editor' );
-
-        // Editor styles
-        wp_enqueue_style(
-            'pfg-block-editor-style',
-            PFG_PLUGIN_URL . 'blocks/css/editor.css',
-            array( 'wp-edit-blocks' ),
-            PFG_VERSION
-        );
     }
 
     /**
@@ -186,7 +197,7 @@ class PFG_Block {
         foreach ( $shortcode_atts as $key => $value ) {
             $shortcode_parts[] = sprintf( '%s="%s"', $key, esc_attr( $value ) );
         }
-        $shortcode = '[PFG ' . implode( ' ', $shortcode_parts ) . ']';
+        $shortcode = '[portfolio_gallery ' . implode( ' ', $shortcode_parts ) . ']';
         
         // Output
         $output = '';
@@ -216,7 +227,7 @@ class PFG_Block {
     private function get_galleries() {
         $galleries = array();
         
-        $query = new WP_Query( array(
+        $posts = get_posts( array(
             'post_type'      => 'awl_filter_gallery',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
@@ -224,15 +235,13 @@ class PFG_Block {
             'order'          => 'ASC',
         ) );
 
-        if ( $query->have_posts() ) {
-            while ( $query->have_posts() ) {
-                $query->the_post();
+        if ( ! empty( $posts ) && is_array( $posts ) ) {
+            foreach ( $posts as $p ) {
                 $galleries[] = array(
-                    'id'    => get_the_ID(),
-                    'title' => get_the_title(),
+                    'id'    => $p->ID,
+                    'title' => $p->post_title,
                 );
             }
-            wp_reset_postdata();
         }
 
         return $galleries;
