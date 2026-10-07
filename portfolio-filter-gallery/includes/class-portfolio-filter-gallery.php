@@ -72,7 +72,6 @@ class Portfolio_Filter_Gallery {
         // Public classes
         require_once PFG_PLUGIN_PATH . 'public/class-pfg-public.php';
         require_once PFG_PLUGIN_PATH . 'public/class-pfg-shortcode.php';
-        require_once PFG_PLUGIN_PATH . 'public/class-pfg-public-ajax.php';
         require_once PFG_PLUGIN_PATH . 'public/class-pfg-renderer.php';
 
         // Integrations
@@ -88,7 +87,7 @@ class Portfolio_Filter_Gallery {
      */
     private function set_locale() {
         $plugin_i18n = new PFG_i18n();
-        $this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+        $this->loader->add_action( 'init', $plugin_i18n, 'load_plugin_textdomain' );
     }
 
     /**
@@ -114,6 +113,9 @@ class Portfolio_Filter_Gallery {
         $this->loader->add_filter( 'manage_awl_filter_gallery_posts_columns', $plugin_admin, 'add_shortcode_column' );
         $this->loader->add_action( 'manage_awl_filter_gallery_posts_custom_column', $plugin_admin, 'render_column_content', 10, 2 );
 
+        // Force classic editor for gallery custom post type
+        $this->loader->add_filter( 'use_block_editor_for_post_type', $plugin_admin, 'disable_gutenberg_for_cpt', 10, 2 );
+
         // AJAX handlers
         $ajax_handler->register_actions();
         
@@ -127,10 +129,6 @@ class Portfolio_Filter_Gallery {
     private function define_public_hooks() {
         $plugin_public = new PFG_Public( $this->get_plugin_name(), $this->get_version() );
         $shortcode     = new PFG_Shortcode();
-        $public_ajax   = new PFG_Public_Ajax();
-
-        // Register public AJAX handlers
-        $public_ajax->register_actions();
 
         // Public assets - loaded late to allow conditional loading
         $this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles', 20 );
@@ -151,18 +149,24 @@ class Portfolio_Filter_Gallery {
         $block->init();
 
         // Elementor integration
-        add_action( 'elementor/widgets/register', function( $widgets_manager ) {
-            require_once PFG_PLUGIN_PATH . 'includes/class-pfg-elementor-widget.php';
-            $widgets_manager->register( new PFG_Elementor_Widget() );
-        } );
-        add_action( 'elementor/widgets/widgets_registered', function( $widgets_manager ) {
-            if ( ! class_exists( 'PFG_Elementor_Widget' ) ) {
-                require_once PFG_PLUGIN_PATH . 'includes/class-pfg-elementor-widget.php';
+        $register_elementor_widget = function( $widgets_manager ) {
+            static $registered = false;
+            if ( $registered ) {
+                return;
             }
-            if ( method_exists( $widgets_manager, 'register_widget_type' ) ) {
+            $registered = true;
+
+            require_once PFG_PLUGIN_PATH . 'includes/class-pfg-elementor-widget.php';
+
+            if ( method_exists( $widgets_manager, 'register' ) ) {
+                $widgets_manager->register( new PFG_Elementor_Widget() );
+            } elseif ( method_exists( $widgets_manager, 'register_widget_type' ) ) {
                 $widgets_manager->register_widget_type( new PFG_Elementor_Widget() );
             }
-        } );
+        };
+
+        add_action( 'elementor/widgets/register', $register_elementor_widget );
+        add_action( 'elementor/widgets/widgets_registered', $register_elementor_widget );
     }
 
     /**

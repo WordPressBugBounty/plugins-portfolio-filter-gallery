@@ -144,7 +144,7 @@ class PFG_Migrator {
     /**
      * Migrate all galleries to new format.
      */
-    protected function migrate_galleries() {
+    public function migrate_galleries() {
         $galleries = get_posts( array(
             'post_type'      => 'awl_filter_gallery',
             'posts_per_page' => 50,

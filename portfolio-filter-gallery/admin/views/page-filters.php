@@ -10,6 +10,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (!current_user_can('manage_options')) {
+    wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'portfolio-filter-gallery'));
+}
+
 
 
 // Get filters - check new format first, then legacy
@@ -380,18 +384,15 @@ $filter_tree = pfg_build_filter_tree($all_filters);
             <!-- Feature 1: Grids -->
             <div class="pfg-pro-feature">
                 <div class="pfg-pro-feature-img-box pfg-feature-grids">
-                    <div class="pfg-pro-feature-img-left">
-                        <img
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS_MUHbPy4VbiOOXnlmXUy1SrqiePKTzy-zW4P3QHOwkx-SzqGw6t9xRVr8k4UM77OFlSCaJZURrvMDMBXbgXwHWSXXjOV8jUyuEBne6wH7OlRN1AjWgWkjasZtfYdtOb1Lh9VU1UDrQ8wxonxbOXSj0v7mlxiCrUnZf0bOVXLFzLF79RNUBMpoZuQOJSMRs12qL1lPghZUqBGppG8n_4OsDPP4tdlAiFjwH06QcVdd1Ik2cS3_i5RbCleek8zi_oYdXVb_DaCesxm" />
+                    <div class="pfg-pro-feature-img-left" style="background: linear-gradient(135deg, #3858e9 0%, #6366f1 100%); display: flex; align-items: center; justify-content: center; color: #fff; border-radius: 6px;">
+                        <span class="dashicons dashicons-images-alt2" style="font-size: 28px; width: 28px; height: 28px;"></span>
                     </div>
                     <div class="pfg-pro-feature-img-right">
-                        <div class="pfg-pro-feature-img-right-top">
-                            <img
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU1K0w7mvOAOItvENUrK2OtvYFJWPctxUtevnPivG4ce-COmDloniB_T9wXh-X5Roino7fqIMz09b3G4_b4pXArzdKNs_Mi0z4rVCG9W9HzaDe-_J1YdWO90eHqcL3mCkf_HogW9DATI37QynTDqC52u8V6yJJVjrr19MGBBT-PIJSRFr1TINuSCcEruNA2lK8UNzBH7jA7H2Uw_luxnsIpNfSjNmAZFkDvC3EHbZSTVdALOORLl1Eb8uy1ygvrRURuhgcgqyOTe4D" />
+                        <div class="pfg-pro-feature-img-right-top" style="background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); display: flex; align-items: center; justify-content: center; color: #fff; border-radius: 6px;">
+                            <span class="dashicons dashicons-grid-view" style="font-size: 20px; width: 20px; height: 20px;"></span>
                         </div>
-                        <div class="pfg-pro-feature-img-right-bottom">
-                            <img
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWo7K-p80QD1mZBchN5H2kje6s3Buhpd5RhQ1Za1jBxRUbb2BhT_-QP9h3RwY0pCzdNBvKfFyYVxjmDgtWxFp7j2pveeG8B9HX2c5PwJwvaAavUYatJeAz49l5MTPN-_aPWuyIsKW90KbCZsiFAa94Nn9cibuWMmEOJny_cfRquXkLmPJ3-j6IWuV1k2MvseDjJYionbdqUE5IEGoiN7PU_U4vlYmkEU1Ouc_iRuncxd7Wv0ZkU0rdNCyK6Drvp9g6CEQEZ2a77Izi" />
+                        <div class="pfg-pro-feature-img-right-bottom" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); display: flex; align-items: center; justify-content: center; color: #fff; border-radius: 6px;">
+                            <span class="dashicons dashicons-format-gallery" style="font-size: 20px; width: 20px; height: 20px;"></span>
                         </div>
                     </div>
                 </div>

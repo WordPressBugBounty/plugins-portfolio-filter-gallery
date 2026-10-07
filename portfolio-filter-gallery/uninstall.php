@@ -29,6 +29,11 @@ delete_option( 'pfg_tour_completed' );
 delete_option( 'pfg_show_tour' );
 delete_option( 'pfg_wizard_completed' );
 delete_option( 'pfg_wizard_redirect' );
+delete_option( 'pfg_filters' );
+delete_option( 'pfg_first_installed_version' );
+delete_option( 'pfg_migrated_version' );
+delete_option( 'awl_portfolio_filter_gallery_categories' );
+delete_option( 'awl_pfg_plugin_install_date' );
 
 // Clean up transients.
 global $wpdb;
@@ -44,3 +49,17 @@ $wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, Word
 		$wpdb->esc_like( '_transient_timeout_pfg_' ) . '%'
 	)
 );
+
+// Clean up backup files directory.
+$upload_dir = wp_upload_dir();
+$backup_dir = $upload_dir['basedir'] . '/pfg-backups';
+if ( is_dir( $backup_dir ) ) {
+	global $wp_filesystem;
+	if ( empty( $wp_filesystem ) ) {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		WP_Filesystem();
+	}
+	if ( $wp_filesystem ) {
+		$wp_filesystem->delete( $backup_dir, true );
+	}
+}

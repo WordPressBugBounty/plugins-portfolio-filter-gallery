@@ -42,28 +42,6 @@ class PFG_Admin
         $this->version = $version;
     }
 
-    /**
-     * Initialize hooks for admin functionality.
-     */
-    public function init()
-    {
-        // Register meta boxes
-        add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
-
-        // Register save hook
-        add_action('save_post', array($this, 'save_post'), 10, 2);
-
-        // Enqueue scripts and styles
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_styles'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
-
-        // Duplicate gallery feature
-        add_filter('post_row_actions', array($this, 'add_duplicate_action'), 10, 2);
-        add_action('admin_action_pfg_duplicate_gallery', array($this, 'duplicate_gallery'));
-
-        // Force classic editor for gallery custom post type
-        add_filter('use_block_editor_for_post_type', array($this, 'disable_gutenberg_for_cpt'), 10, 2);
-    }
 
     /**
      * Disable Gutenberg editor for the gallery custom post type.
@@ -742,7 +720,7 @@ class PFG_Admin
             'edit.php?post_type=awl_filter_gallery',
             __('Filters', 'portfolio-filter-gallery'),
             __('Filters', 'portfolio-filter-gallery'),
-            'edit_posts',
+            'manage_options',
             'pfg-filters',
             array($this, 'render_filters_page')
         );
@@ -790,6 +768,9 @@ class PFG_Admin
      */
     public function render_filters_page()
     {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'portfolio-filter-gallery'));
+        }
         $filters = $this->get_filters();
         include PFG_PLUGIN_PATH . 'admin/views/page-filters.php';
     }
@@ -918,106 +899,5 @@ class PFG_Admin
                 break;
 
         }
-    }
-
-    /**
-     * Add duplicate action link to gallery row actions.
-     *
-     * @param array   $actions Existing row actions.
-     * @param WP_Post $post    The post object.
-     * @return array Modified row actions.
-     */
-    public function add_duplicate_action($actions, $post)
-    {
-        if ($post->post_type !== 'awl_filter_gallery') {
-            return $actions;
-        }
-
-        if (!current_user_can('edit_posts')) {
-            return $actions;
-        }
-
-        $duplicate_url = wp_nonce_url(
-            admin_url('admin.php?action=pfg_duplicate_gallery&gallery_id=' . $post->ID),
-            'pfg_duplicate_gallery_' . $post->ID
-        );
-
-        $actions['duplicate'] = sprintf(
-            '<a href="%s" title="%s" style="color: #2271b1;"><span class="dashicons dashicons-admin-page" style="font-size: 14px; vertical-align: text-bottom;"></span> %s</a>',
-            esc_url($duplicate_url),
-            esc_attr__('Duplicate this gallery', 'portfolio-filter-gallery'),
-            esc_html__('Duplicate', 'portfolio-filter-gallery')
-        );
-
-        return $actions;
-    }
-
-    /**
-     * Handle gallery duplication.
-     */
-    public function duplicate_gallery()
-    {
-        // Verify request
-        if (!isset($_GET['gallery_id']) || !isset($_GET['_wpnonce'])) {
-            wp_die(esc_html__('Invalid request.', 'portfolio-filter-gallery'));
-        }
-
-        $gallery_id = absint(wp_unslash($_GET['gallery_id']));
-
-        // Verify nonce
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'pfg_duplicate_gallery_' . $gallery_id)) {
-            wp_die(esc_html__('Security check failed.', 'portfolio-filter-gallery'));
-        }
-
-        // Check permissions
-        if (!current_user_can('edit_posts')) {
-            wp_die(esc_html__('You do not have permission to duplicate galleries.', 'portfolio-filter-gallery'));
-        }
-
-        // Get original gallery
-        $original = get_post($gallery_id);
-        if (!$original || $original->post_type !== 'awl_filter_gallery') {
-            wp_die(esc_html__('Gallery not found.', 'portfolio-filter-gallery'));
-        }
-
-        // Create duplicate post
-        $new_gallery = array(
-            'post_title' => sprintf(
-                /* translators: %s: Original gallery title */
-                __('%s (Copy)', 'portfolio-filter-gallery'),
-                $original->post_title
-            ),
-            'post_status' => 'draft',
-            'post_type' => 'awl_filter_gallery',
-            'post_author' => get_current_user_id(),
-            'post_content' => $original->post_content,
-            'post_excerpt' => $original->post_excerpt,
-        );
-
-        $new_id = wp_insert_post($new_gallery);
-
-        if (is_wp_error($new_id)) {
-            wp_die(esc_html__('Failed to duplicate gallery.', 'portfolio-filter-gallery'));
-        }
-
-        // Copy all post meta
-        $meta_keys = get_post_custom_keys($gallery_id);
-        if (!empty($meta_keys)) {
-            foreach ($meta_keys as $meta_key) {
-                // Skip internal WordPress meta
-                if (strpos($meta_key, '_edit_') === 0) {
-                    continue;
-                }
-
-                $meta_values = get_post_meta($gallery_id, $meta_key);
-                foreach ($meta_values as $meta_value) {
-                    add_post_meta($new_id, $meta_key, $meta_value);
-                }
-            }
-        }
-
-        // Redirect to edit the new gallery
-        wp_safe_redirect(admin_url('post.php?action=edit&post=' . $new_id));
-        exit;
     }
 }

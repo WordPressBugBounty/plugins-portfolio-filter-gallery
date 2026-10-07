@@ -1,52 +1,42 @@
-=== Portfolio Filter Gallery - Photo Gallery & Video Gallery ===
+=== Portfolio Filter Gallery - Photo Gallery ===
 Contributors: awordpresslife, razipathhan, hanif0991, muhammadshahid, fkfaisalkhan007, sharikkhan007, zishlife, FARAZFRANK
 Donate link: https://paypal.me/awplife
 Tags: portfolio, gallery, portfolio gallery, photo gallery, video gallery
 Requires at least: 5.8
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Create filterable portfolio galleries. Supports photo, and video with category filters, masonry layouts, Gutenberg block and Elementor widget.
+Create filterable portfolio galleries with photos, videos, category filters in masonry layouts. Supports Gutenberg blocks and Elementor widgets.
 
 == Description ==
 
-**Portfolio Filter Gallery** is a powerful and easy-to-use WordPress gallery plugin designed for photographers, designers, agencies, and anyone who needs to display their work in an organized, professional way. Whether you are building a photography portfolio, a design showcase, or a simple image gallery, this plugin gives you the tools to present your content beautifully.
+**Portfolio Filter Gallery** is a powerful and easy-to-use **photo gallery** plugin. It lets you sort images and videos into categories. Users can click buttons to filter and find what they need.
 
-The plugin lets you organize images and videos into filter categories so visitors can browse your work by topic, project type, or any grouping you choose. Instead of scrolling through dozens of images, your visitors simply click a filter button to narrow down what they see. It is a practical way to keep large galleries manageable and user-friendly.
+Designed for photographers, designers, agencies, and anyone who needs to display their work in an organized, professional way. Whether you are building a photography portfolio, a design showcase, or a simple image gallery, this plugin gives you the tools to present your content beautifully.
+
 
 = Live Demos =
 
-* [See Pro Features](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
-* [Portfolio Filter Gallery Pro Demo](https://awplife.com/demo/portfolio-filter-gallery-premium/)
-
-= Documentation and Support =
-
-* [Getting Started Guide](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-new-wordpress-plugin/)
-* [Community Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/)
+* [Video Gallery](https://awplife.com/demo/portfolio-filter-gallery-premium/video-gallery/)
+* [Plugin Features](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
+* [Gallery Demo](https://awplife.com/demo/portfolio-filter-gallery-premium/)
+* [Buy Portfolio Filter Gallery Pro](https://awplife.com/account/signup/portfolio-filter-gallery)
 
 = Video Tutorials =
 https://www.youtube.com/watch?v=VpcdUM-47OU
+ 
+= What This Plugin Does =
 
-= Works with Gutenberg and Elementor =
+The core function of Portfolio Filter Gallery is to let you build galleries where users can click filter buttons to view specific categories of work. Instead of scrolling through an entire page of images, a visitor can select "Web Design" or "Photography" and see only those items.
 
-Starting from version 2.2.0, Portfolio Filter Gallery includes a dedicated Gutenberg block and a native Elementor widget. You no longer need to copy and paste shortcodes when working with these editors.
+The plugin includes a dedicated page for managing filter categories. You create your filters once, then assign them to individual images or videos as you build your gallery. This separation keeps your workflow clean and organized.
 
-**Gutenberg Block Editor** - Search for "Portfolio Filter Gallery" in the block inserter, pick your gallery from the dropdown, and see a live preview right inside the editor. The block renders your actual gallery with all its filters, layout, and styling so you know exactly what the published page will look like.
+= Elementor or Gutenberg = 
 
-**Elementor Page Builder** - Drag the "Portfolio Filter Gallery" widget from the Elementor panel into your layout. Select a gallery, toggle options, and watch the gallery appear in the Elementor canvas in real time. No shortcode pasting, no guesswork.
-
-Both integrations include optional overrides for columns, hover effects, and filter visibility, giving you per-page control without changing your original gallery settings.
-
-For page builders like WPBakery, Divi, and Beaver Builder, you can still use the standard shortcode in any text or HTML block.
-
-= Why Portfolio Filter Gallery =
-
-Building a gallery in WordPress should not be complicated. This plugin keeps the setup straightforward: create your filter categories, upload your images, assign filters, and publish. The admin interface uses drag-and-drop ordering, bulk selection, and a clean layout that stays manageable even with hundreds of images.
-
-On the frontend, galleries load with smooth CSS3 animations and adapt to any screen size. The masonry layout fits images of different dimensions together naturally, while the grid layout gives you a uniform, structured look. Both layouts work well on desktop, tablet, and mobile.
+Includes a dedicated Gutenberg block and Elementor widget with live canvas previews—select your gallery directly from the editor without copying shortcodes.
 
 = Who This Plugin Is For =
 
@@ -130,7 +120,6 @@ The [premium version](https://awplife.com/wordpress-plugins/portfolio-filter-gal
 * Ascending and descending sort controls
 * Shuffle button for randomized display order
 * Image watermark overlay for copyright protection
-* Right-click protection to discourage image downloads
 * Pagination and load more for large galleries
 * Lightbox with navigation, captions, and deep linking
 
@@ -148,27 +137,17 @@ The shortcode format is:
 
 Replace 123 with the ID shown in your gallery editor.
 
-= Photo Gallery Masonry Layout =
-
-The masonry layout arranges images in a column-based grid where each image retains its original aspect ratio. Tall and wide images sit next to each other without awkward gaps or forced cropping. This layout works especially well for photography portfolios and design showcases where images come in varying dimensions.
-
-The masonry grid recalculates on window resize, so it looks good on any screen. Filter transitions are animated with CSS3, keeping the experience smooth and responsive.
-
-= Custom Links on Gallery Items =
-
-Every gallery item can have a custom link. This is useful when you want to direct visitors to a project detail page, a client website, or a product listing. You can set each link to open in the same tab or a new tab depending on how you want your navigation to work.
-
 == Screenshots ==
 
-1. Portfolio Filter Gallery - 3 column layout with numbering and titles
-2. Portfolio Filter Gallery - Full width without spacing
-3. Portfolio Filter Gallery - 2 column layout
-4. Portfolio Filter Gallery - Grayscale hover effect on thumbnails
-5. Portfolio Filter Gallery - Masonry layout
-6. Adding filter categories in Portfolio Gallery
+1. 3 column layout with numbering and titles
+2. Full width without spacing
+3. 2 column layout
+4. Grayscale hover effect on thumbnails
+5. Masonry layout
+6. Adding filter categories 
 7. Filtering images by category
 8. Gallery editor with image upload area and shortcode
-9. Portfolio Filter Gallery settings panel
+9. Settings panel
 
 == Installation ==
 
@@ -251,6 +230,25 @@ Yes. The plugin is fully translation-ready with a standard text domain. It works
 Visit the [WordPress Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/) for community help. The development team monitors the forum and typically responds within one business day. Premium users can access priority support through the [developer website](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/).
 
 == Changelog ==
+
+= 2.2.1 =
+* Date: 07 October, 2026
+* Security: Fixed contributor-level authorization flaws across all gallery AJAX endpoints by enforcing per-object capability checks (`edit_post`), post-type verification, and explicit `upload_files` requirements.
+* Security: Restricted all site-wide filter management AJAX actions and admin views to users with administrator privileges (`manage_options`).
+* Security: Enforced per-object authorization (`delete_post`) on video thumbnail deletion to prevent unauthorized cross-user attachment deletion.
+* Security: Hardened lightbox script against unsafe HTML injection by enforcing textContent assignment for title attributes.
+* Fixed: Resolved fatal error in WP-Cron background migration routine by updating method visibility.
+* Fixed: Prevented image 'alt' tag data loss during chunked AJAX saves in the gallery editor.
+* Fixed: Filter slug matching logic in frontend renderer to properly match both slugs and numeric IDs.
+* Fixed: Prevented unwanted database write operations on frontend gallery views.
+* Fixed: Resolved Elementor widget double-registration warning and added support for modern Elementor registration API.
+* Fixed: Loaded bundled translation files on the 'init' hook for reliable localization.
+* Fixed: Standardized frontend asset handles and optimized script/style registration timing to prevent FOUC.
+* Fixed: Corrected missing template preview asset paths in gallery layout settings.
+* Compliance: Removed remote asset dependencies and external image hotlinking in accordance with WordPress.org guidelines.
+* Improved: Comprehensive uninstallation routine to cleanly remove all options, post meta, terms, and backup files.
+* Improved: Pruned deprecated setup wizard, unused WooCommerce view, and redundant AJAX endpoints.
+* Improved: Added PRO indicator badges to description settings in gallery settings and media edit modals.
 
 = 2.2.0 =
 * Date: 16 July, 2026
@@ -392,13 +390,6 @@ This is a major update with a completely redesigned interface. Your existing gal
 
 == Other Notes ==
 
-= Shortcode Reference =
-
-To display a gallery on any page or post, use the following shortcode:
-`[Portfolio_Gallery id="123"]`
-
-Replace 123 with the ID of your gallery. You can find the ID in the gallery editor or in the gallery list table.
-
 = Browser Support =
 
 Portfolio Filter Gallery is tested and works on all modern browsers:
@@ -420,7 +411,6 @@ Portfolio Filter Gallery is tested and works on all modern browsers:
 = Getting Help =
 
 * [WordPress Support Forum](https://wordpress.org/support/plugin/portfolio-filter-gallery/)
-* [Premium Support and Documentation](https://awplife.com/wordpress-plugins/portfolio-filter-gallery-wordpress-plugin/)
 * [Video Tutorials on YouTube](https://www.youtube.com/watch?v=6rvJ9NN_kA0)
 
 = Third-Party Libraries =
@@ -428,6 +418,9 @@ Portfolio Filter Gallery is tested and works on all modern browsers:
 This plugin uses standard WordPress libraries. No external third-party libraries are bundled.
 
 == Upgrade Notice ==
+
+= 2.2.1 =
+Critical security and maintenance update. Resolves missing object-level authorization across gallery and filter AJAX handlers, prevents cross-user attachment deletion, fixes cron migration fatal error, prevents image alt attribute loss, and improves WordPress.org guideline compliance.
 
 = 2.2.0 =
 Recommended update. Adds native Gutenberg block and Elementor widget with live editor previews. Fixes a data loss issue when reordering large galleries and improves save performance.

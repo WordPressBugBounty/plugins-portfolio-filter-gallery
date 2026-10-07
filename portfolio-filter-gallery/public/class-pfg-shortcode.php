@@ -128,7 +128,10 @@ class PFG_Shortcode {
             $settings = $this->apply_template( $template_to_apply, $settings );
         }
 
-        // Enqueue assets directly (since shortcode runs after wp_enqueue_scripts)
+        // Register gallery on page
+        PFG_Public::register_gallery_on_page( $gallery_id );
+
+        // Enqueue assets directly (fallback if not already enqueued in head)
         $this->enqueue_assets( $gallery );
 
         // Start output buffering

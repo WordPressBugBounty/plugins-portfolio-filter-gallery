@@ -432,7 +432,11 @@ $filter_tree = pfg_build_filter_tree_for_images( $filters );
                 </div>
                 
                 <div class="pfg-form-row">
-                    <label class="pfg-form-label"><?php esc_html_e( 'Description', 'portfolio-filter-gallery' ); ?></label>
+                    <label class="pfg-form-label">
+                        <?php esc_html_e( 'Description', 'portfolio-filter-gallery' ); ?>
+                        <span class="pfg-badge-pro">PRO</span>
+                        <small><?php esc_html_e( 'Displaying descriptions is available in the Pro version', 'portfolio-filter-gallery' ); ?></small>
+                    </label>
                     <textarea id="pfg-modal-description" class="pfg-textarea" rows="3"></textarea>
                 </div>
                 

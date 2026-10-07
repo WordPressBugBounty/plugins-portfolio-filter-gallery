@@ -1985,6 +1985,7 @@ jQuery(document).ready(function ($) {
             data: {
                 action: 'pfg_get_thumbnails',
                 nonce: '' + pfgAdmin.nonce + '',
+                gallery_id: pfgAdmin.galleryId || 0,
                 image_ids: ids
             },
             success: function (response) {
@@ -2329,6 +2330,7 @@ jQuery(document).ready(function ($) {
                 data: {
                     action: 'pfg_get_attachment_url',
                     attachment_id: originalId,
+                    gallery_id: pfgAdmin.galleryId || 0,
                     nonce: '' + pfgAdmin.nonce + ''
                 },
                 success: function (response) {
@@ -2669,6 +2671,7 @@ jQuery(document).ready(function ($) {
                 data: {
                     action: 'pfg_delete_video_thumbnail',
                     nonce: '' + pfgAdmin.nonce + '',
+                    gallery_id: pfgAdmin.galleryId || 0,
                     attachment_id: currentThumbId
                 },
                 complete: function () {

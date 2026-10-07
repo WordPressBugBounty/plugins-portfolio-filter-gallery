@@ -25,7 +25,6 @@ class PFG_Templates {
             'minimal-grid' => array(
                 'name'        => __( 'Minimal Grid', 'portfolio-filter-gallery' ),
                 'description' => __( 'Clean, minimal grid layout with subtle hover effects.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/minimal-grid.jpg',
                 'settings'    => array(
                     'layout_type'    => 'grid',
                     'columns_xl'     => 4,
@@ -44,7 +43,6 @@ class PFG_Templates {
             'masonry-portfolio' => array(
                 'name'        => __( 'Masonry Portfolio', 'portfolio-filter-gallery' ),
                 'description' => __( 'Pinterest-style masonry layout perfect for portfolios.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/masonry-portfolio.jpg',
                 'settings'    => array(
                     'layout_type'    => 'masonry',
                     'columns_xl'     => 4,
@@ -63,7 +61,6 @@ class PFG_Templates {
             'instagram-style' => array(
                 'name'        => __( 'Instagram Style', 'portfolio-filter-gallery' ),
                 'description' => __( 'Square grid with minimal spacing, like Instagram.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/instagram.jpg',
                 'settings'    => array(
                     'layout_type'    => 'grid',
                     'columns_xl'     => 4,
@@ -82,7 +79,6 @@ class PFG_Templates {
             'modern-cards' => array(
                 'name'        => __( 'Modern Cards', 'portfolio-filter-gallery' ),
                 'description' => __( 'Card-style layout with title and category below image.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/modern-cards.jpg',
                 'settings'    => array(
                     'layout_type'    => 'masonry',
                     'columns_xl'     => 3,
@@ -103,7 +99,6 @@ class PFG_Templates {
             'elegant-gallery' => array(
                 'name'        => __( 'Elegant Gallery', 'portfolio-filter-gallery' ),
                 'description' => __( 'Grayscale to color effect with elegant hover.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/elegant-gallery.jpg',
                 'settings'    => array(
                     'layout_type'    => 'grid',
                     'columns_xl'     => 4,
@@ -123,7 +118,6 @@ class PFG_Templates {
             'full-width' => array(
                 'name'        => __( 'Full Width', 'portfolio-filter-gallery' ),
                 'description' => __( 'Large images with 2-column layout.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/full-width.jpg',
                 'settings'    => array(
                     'layout_type'    => 'grid',
                     'columns_xl'     => 2,
@@ -142,7 +136,6 @@ class PFG_Templates {
             'tight-grid' => array(
                 'name'        => __( 'Tight Grid', 'portfolio-filter-gallery' ),
                 'description' => __( 'No-gap grid for a seamless look.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/tight-grid.jpg',
                 'settings'    => array(
                     'layout_type'    => 'grid',
                     'columns_xl'     => 5,
@@ -161,7 +154,6 @@ class PFG_Templates {
             'creative-agency' => array(
                 'name'        => __( 'Creative Agency', 'portfolio-filter-gallery' ),
                 'description' => __( 'Bold design with animated hover effects.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/creative-agency.jpg',
                 'settings'    => array(
                     'layout_type'    => 'masonry',
                     'columns_xl'     => 3,
@@ -181,7 +173,6 @@ class PFG_Templates {
             'photography' => array(
                 'name'        => __( 'Photography', 'portfolio-filter-gallery' ),
                 'description' => __( 'Optimized for photographers with dark overlay.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/photography.jpg',
                 'settings'    => array(
                     'layout_type'    => 'masonry',
                     'columns_xl'     => 4,
@@ -200,7 +191,6 @@ class PFG_Templates {
             'minimalist' => array(
                 'name'        => __( 'Minimalist', 'portfolio-filter-gallery' ),
                 'description' => __( 'Super clean with lots of white space.', 'portfolio-filter-gallery' ),
-                'preview'     => PFG_PLUGIN_URL . 'assets/templates/minimalist.jpg',
                 'settings'    => array(
                     'layout_type'    => 'grid',
                     'columns_xl'     => 3,

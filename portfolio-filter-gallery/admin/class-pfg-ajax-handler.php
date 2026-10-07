@@ -37,10 +37,6 @@ class PFG_Ajax_Handler
         add_action('wp_ajax_pfg_reorder_images', array($this, 'reorder_images'));
         add_action('wp_ajax_pfg_update_image', array($this, 'update_image'));
 
-        // Gallery actions
-        add_action('wp_ajax_pfg_save_gallery', array($this, 'save_gallery'));
-        add_action('wp_ajax_pfg_duplicate_gallery', array($this, 'duplicate_gallery'));
-
         // Migration actions
         add_action('wp_ajax_pfg_run_migration', array($this, 'run_migration'));
         add_action('wp_ajax_pfg_restore_backup', array($this, 'restore_backup'));
@@ -70,30 +66,61 @@ class PFG_Ajax_Handler
 
 
     /**
+     * Verify gallery existence, post type, and user edit capability.
+     * Enforces per-object authorization for gallery-scoped actions.
+     *
+     * @param int $gallery_id The gallery post ID.
+     * @return WP_Post The validated gallery post object.
+     */
+    protected function verify_gallery_access($gallery_id)
+    {
+        $gallery_id = absint($gallery_id);
+
+        if (!$gallery_id) {
+            wp_send_json_error(array('message' => __('Gallery ID is required.', 'portfolio-filter-gallery')), 400);
+        }
+
+        $gallery_post = get_post($gallery_id);
+        if (!$gallery_post || $gallery_post->post_type !== 'awl_filter_gallery') {
+            wp_send_json_error(array('message' => __('Gallery not found.', 'portfolio-filter-gallery')), 404);
+        }
+
+        if (!current_user_can('edit_post', $gallery_id)) {
+            wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
+        }
+
+        return $gallery_post;
+    }
+
+    /**
      * Get attachment URL by ID.
      */
     public function get_attachment_url()
     {
-        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (empty($nonce) || !wp_verify_nonce($nonce, 'pfg_admin_action')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'portfolio-filter-gallery')), 403);
-        }
-
-        // Missing Capability check fixed required by WP.org
-        if (!current_user_can('edit_posts')) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
-        }
+        PFG_Security::verify_ajax_nonce('admin_action');
 
         $attachment_id = PFG_Security::get_post('attachment_id', 0, 'int');
 
         if (!$attachment_id) {
-            wp_send_json_error(array('message' => __('No attachment ID provided.', 'portfolio-filter-gallery')));
+            wp_send_json_error(array('message' => __('No attachment ID provided.', 'portfolio-filter-gallery')), 400);
+        }
+
+        $attachment = get_post($attachment_id);
+        if (!$attachment || $attachment->post_type !== 'attachment') {
+            wp_send_json_error(array('message' => __('Attachment not found.', 'portfolio-filter-gallery')), 404);
+        }
+
+        $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
+        if ($gallery_id) {
+            $this->verify_gallery_access($gallery_id);
+        } elseif (!current_user_can('edit_post', $attachment_id) && !current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
         }
 
         $url = wp_get_attachment_image_url($attachment_id, 'medium');
 
         if (!$url) {
-            wp_send_json_error(array('message' => __('Attachment not found.', 'portfolio-filter-gallery')));
+            wp_send_json_error(array('message' => __('Attachment not found.', 'portfolio-filter-gallery')), 404);
         }
 
         wp_send_json_success(array('url' => $url));
@@ -105,26 +132,28 @@ class PFG_Ajax_Handler
      */
     public function delete_video_thumbnail()
     {
-        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (empty($nonce) || !wp_verify_nonce($nonce, 'pfg_admin_action')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'portfolio-filter-gallery')), 403);
-        }
-
-        if (!current_user_can('delete_posts')) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
-        }
+        PFG_Security::verify_ajax_nonce('admin_action');
 
         $attachment_id = isset($_POST['attachment_id']) ? absint(wp_unslash($_POST['attachment_id'])) : 0;
 
         if (!$attachment_id) {
-            wp_send_json_error(array('message' => __('No attachment ID provided.', 'portfolio-filter-gallery')));
+            wp_send_json_error(array('message' => __('No attachment ID provided.', 'portfolio-filter-gallery')), 400);
         }
 
         // Check if this attachment is a video thumbnail created by our plugin
-        // We only delete attachments that have name starting with 'video-thumbnail-'
         $attachment = get_post($attachment_id);
         if (!$attachment || $attachment->post_type !== 'attachment') {
-            wp_send_json_error(array('message' => __('Attachment not found.', 'portfolio-filter-gallery')));
+            wp_send_json_error(array('message' => __('Attachment not found.', 'portfolio-filter-gallery')), 404);
+        }
+
+        // Per-object authorization: caller must be authorized to delete this specific attachment
+        if (!current_user_can('delete_post', $attachment_id)) {
+            wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
+        }
+
+        $gallery_id = isset($_POST['gallery_id']) ? absint(wp_unslash($_POST['gallery_id'])) : 0;
+        if ($gallery_id) {
+            $this->verify_gallery_access($gallery_id);
         }
 
         // Verify it's a video thumbnail (by filename pattern)
@@ -144,7 +173,7 @@ class PFG_Ajax_Handler
         if ($deleted) {
             wp_send_json_success(array('deleted' => true, 'message' => __('Thumbnail deleted.', 'portfolio-filter-gallery')));
         } else {
-            wp_send_json_error(array('message' => __('Failed to delete thumbnail.', 'portfolio-filter-gallery')));
+            wp_send_json_error(array('message' => __('Failed to delete thumbnail.', 'portfolio-filter-gallery')), 500);
         }
     }
 
@@ -155,7 +184,7 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
+        if (!PFG_Security::can_manage_filters()) {
             wp_send_json_error(array('message' => __('You do not have permission to manage filters.', 'portfolio-filter-gallery')), 403);
         }
 
@@ -234,7 +263,7 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_delete_galleries()) {
+        if (!PFG_Security::can_manage_filters()) {
             wp_send_json_error(array('message' => __('You do not have permission to delete filters.', 'portfolio-filter-gallery')), 403);
         }
 
@@ -275,7 +304,7 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_delete_galleries()) {
+        if (!PFG_Security::can_manage_filters()) {
             wp_send_json_error(array('message' => __('You do not have permission to delete filters.', 'portfolio-filter-gallery')), 403);
         }
 
@@ -297,7 +326,7 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
+        if (!PFG_Security::can_manage_filters()) {
             wp_send_json_error(array('message' => __('You do not have permission to manage filters.', 'portfolio-filter-gallery')), 403);
         }
 
@@ -335,7 +364,7 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
+        if (!PFG_Security::can_manage_filters()) {
             wp_send_json_error(array('message' => __('You do not have permission to manage filters.', 'portfolio-filter-gallery')), 403);
         }
 
@@ -373,7 +402,7 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
+        if (!PFG_Security::can_manage_filters()) {
             wp_send_json_error(array('message' => __('You do not have permission to manage filters.', 'portfolio-filter-gallery')), 403);
         }
 
@@ -407,7 +436,7 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
+        if (!PFG_Security::can_manage_filters()) {
             wp_send_json_error(array('message' => __('You do not have permission to manage filters.', 'portfolio-filter-gallery')), 403);
         }
 
@@ -441,7 +470,7 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
+        if (!PFG_Security::can_manage_filters()) {
             wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
         }
 
@@ -484,11 +513,13 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
-            wp_send_json_error(array('message' => __('You do not have permission to upload images.', 'portfolio-filter-gallery')), 403);
+        if (!PFG_Security::can_upload_files()) {
+            wp_send_json_error(array('message' => __('You do not have permission to upload files.', 'portfolio-filter-gallery')), 403);
         }
 
         $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
+        $this->verify_gallery_access($gallery_id);
+
         $image_ids_raw = isset($_POST['image_ids']) ? $_POST['image_ids'] : '';
         if (is_string($image_ids_raw) && strpos($image_ids_raw, '[') === 0) {
             $image_ids = json_decode(wp_unslash($image_ids_raw), true);
@@ -497,8 +528,8 @@ class PFG_Ajax_Handler
             $image_ids = is_array($image_ids_raw) ? array_map('absint', $image_ids_raw) : array();
         }
 
-        if (empty($gallery_id) || empty($image_ids)) {
-            wp_send_json_error(array('message' => __('Gallery ID and images are required.', 'portfolio-filter-gallery')), 400);
+        if (empty($image_ids)) {
+            wp_send_json_error(array('message' => __('Images are required.', 'portfolio-filter-gallery')), 400);
         }
 
         $gallery = new PFG_Gallery($gallery_id);
@@ -549,15 +580,12 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
-            wp_send_json_error(array('message' => __('You do not have permission to upload images.', 'portfolio-filter-gallery')), 403);
+        if (!PFG_Security::can_upload_files()) {
+            wp_send_json_error(array('message' => __('You do not have permission to upload files.', 'portfolio-filter-gallery')), 403);
         }
 
         $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
-
-        if (empty($gallery_id)) {
-            wp_send_json_error(array('message' => __('Gallery ID is required.', 'portfolio-filter-gallery')), 400);
-        }
+        $this->verify_gallery_access($gallery_id);
 
         // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified in PFG_Security::verify_ajax_nonce above, files validated by wp_check_filetype below.
         if (empty($_FILES['files'])) {
@@ -637,15 +665,13 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
-            wp_send_json_error(array('message' => __('You do not have permission to remove images.', 'portfolio-filter-gallery')), 403);
-        }
-
         $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
+        $this->verify_gallery_access($gallery_id);
+
         $image_id = PFG_Security::get_post('image_id', 0, 'int');
 
-        if (empty($gallery_id) || empty($image_id)) {
-            wp_send_json_error(array('message' => __('Gallery ID and image ID are required.', 'portfolio-filter-gallery')), 400);
+        if (empty($image_id)) {
+            wp_send_json_error(array('message' => __('Image ID is required.', 'portfolio-filter-gallery')), 400);
         }
 
         $gallery = new PFG_Gallery($gallery_id);
@@ -672,11 +698,9 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
-            wp_send_json_error(array('message' => __('You do not have permission to reorder images.', 'portfolio-filter-gallery')), 403);
-        }
-
         $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
+        $this->verify_gallery_access($gallery_id);
+
         $order_raw = isset($_POST['order']) ? wp_unslash($_POST['order']) : '';
         if (is_string($order_raw) && strpos($order_raw, '[') === 0) {
             $order = json_decode($order_raw, true);
@@ -685,8 +709,8 @@ class PFG_Ajax_Handler
             $order = is_array($order_raw) ? array_map('absint', $order_raw) : array();
         }
 
-        if (empty($gallery_id) || empty($order)) {
-            wp_send_json_error(array('message' => __('Gallery ID and order data are required.', 'portfolio-filter-gallery')), 400);
+        if (empty($order)) {
+            wp_send_json_error(array('message' => __('Order data is required.', 'portfolio-filter-gallery')), 400);
         }
 
         $gallery = new PFG_Gallery($gallery_id);
@@ -716,15 +740,13 @@ class PFG_Ajax_Handler
     {
         PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!PFG_Security::can_manage_galleries()) {
-            wp_send_json_error(array('message' => __('You do not have permission to update images.', 'portfolio-filter-gallery')), 403);
-        }
-
         $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
+        $this->verify_gallery_access($gallery_id);
+
         $image_id = PFG_Security::get_post('image_id', 0, 'int');
 
-        if (empty($gallery_id) || empty($image_id)) {
-            wp_send_json_error(array('message' => __('Gallery ID and image ID are required.', 'portfolio-filter-gallery')), 400);
+        if (empty($image_id)) {
+            wp_send_json_error(array('message' => __('Image ID is required.', 'portfolio-filter-gallery')), 400);
         }
 
         $gallery = new PFG_Gallery($gallery_id);
@@ -752,99 +774,6 @@ class PFG_Ajax_Handler
 
         wp_send_json_success(array(
             'message' => __('Image updated successfully.', 'portfolio-filter-gallery'),
-        ));
-    }
-
-    /**
-     * Save gallery via AJAX.
-     */
-    public function save_gallery()
-    {
-        PFG_Security::verify_ajax_nonce('admin_action');
-
-        $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
-
-        if (empty($gallery_id)) {
-            wp_send_json_error(array('message' => __('Gallery ID is required.', 'portfolio-filter-gallery')), 400);
-        }
-
-        if (!PFG_Security::can_edit_gallery($gallery_id)) {
-            wp_send_json_error(array('message' => __('You do not have permission to edit this gallery.', 'portfolio-filter-gallery')), 403);
-        }
-
-        $gallery = new PFG_Gallery($gallery_id);
-        $schema = PFG_Gallery::get_schema();
-
-        foreach ($schema as $key => $config) {
-            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce verified in PFG_Security::verify_ajax_nonce above.
-            if (isset($_POST[$key])) {
-                // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- nonce verified in PFG_Security::verify_ajax_nonce above, sanitized below.
-                $value = PFG_Security::sanitize(wp_unslash($_POST[$key]), $config['type']);
-                $gallery->set_setting($key, $value);
-            } elseif ($config['type'] === 'bool') {
-                // Unchecked checkboxes don't send values, so explicitly set to false
-                $gallery->set_setting($key, false);
-            }
-        }
-
-        $gallery->save();
-
-        wp_send_json_success(array(
-            'message' => __('Gallery saved successfully.', 'portfolio-filter-gallery'),
-        ));
-    }
-
-    /**
-     * Duplicate a gallery.
-     */
-    public function duplicate_gallery()
-    {
-        PFG_Security::verify_ajax_nonce('admin_action');
-
-        $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
-
-        if (empty($gallery_id)) {
-            wp_send_json_error(array('message' => __('Gallery ID is required.', 'portfolio-filter-gallery')), 400);
-        }
-
-        if (!PFG_Security::can_manage_galleries()) {
-            wp_send_json_error(array('message' => __('You do not have permission to duplicate galleries.', 'portfolio-filter-gallery')), 403);
-        }
-
-        $original = get_post($gallery_id);
-
-        if (!$original) {
-            wp_send_json_error(array('message' => __('Gallery not found.', 'portfolio-filter-gallery')), 404);
-        }
-
-        // Create duplicate post
-        $new_id = wp_insert_post(array(
-            'post_type' => 'awl_filter_gallery',
-            'post_title' => $original->post_title . ' ' . __('(Copy)', 'portfolio-filter-gallery'),
-            'post_status' => 'publish',
-        ));
-
-        if (is_wp_error($new_id)) {
-            wp_send_json_error(array('message' => $new_id->get_error_message()), 500);
-        }
-
-        // Copy meta data
-        $gallery = new PFG_Gallery($gallery_id);
-        $settings = $gallery->get_settings();
-        $images = $gallery->get_images();
-
-        $new_gallery = new PFG_Gallery($new_id);
-        foreach ($settings as $key => $value) {
-            $new_gallery->set_setting($key, $value);
-        }
-        $new_gallery->save();
-
-        update_post_meta($new_id, '_pfg_images', $images);
-
-        wp_send_json_success(array(
-            'message' => __('Gallery duplicated successfully.', 'portfolio-filter-gallery'),
-            'new_id' => $new_id,
-            'edit_link' => get_edit_post_link($new_id, 'raw'),
         ));
     }
 
@@ -1008,34 +937,15 @@ class PFG_Ajax_Handler
      */
     public function save_images_chunk()
     {
-        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (empty($nonce) || !wp_verify_nonce($nonce, 'pfg_admin_action')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'portfolio-filter-gallery')), 403);
-        }
-
-        if (!current_user_can('edit_posts')) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
-        }
+        PFG_Security::verify_ajax_nonce('admin_action');
 
         $gallery_id = isset($_POST['gallery_id']) ? absint(wp_unslash($_POST['gallery_id'])) : 0;
+        $this->verify_gallery_access($gallery_id);
+
         $chunk_index = isset($_POST['chunk_index']) ? absint(wp_unslash($_POST['chunk_index'])) : 0;
         $total_chunks = isset($_POST['total_chunks']) ? absint(wp_unslash($_POST['total_chunks'])) : 1;
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON string: wp_unslash applied here, individual fields sanitized after json_decode below.
         $images_json = isset($_POST['images']) ? wp_unslash($_POST['images']) : '[]';
-
-        if (!$gallery_id) {
-            wp_send_json_error(array('message' => __('Invalid gallery ID.', 'portfolio-filter-gallery')), 400);
-        }
-
-        // Verify gallery exists and user can edit it
-        $gallery_post = get_post($gallery_id);
-        if (!$gallery_post || $gallery_post->post_type !== 'awl_filter_gallery') {
-            wp_send_json_error(array('message' => __('Gallery not found.', 'portfolio-filter-gallery')), 404);
-        }
-
-        if (!current_user_can('edit_post', $gallery_id)) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
-        }
 
         // Decode images from JSON
         $chunk_images = json_decode($images_json, true);
@@ -1068,6 +978,7 @@ class PFG_Ajax_Handler
             $sanitized_images[] = array(
                 'id' => absint($image['id']),
                 'title' => isset($image['title']) ? sanitize_text_field($image['title']) : '',
+                'alt' => isset($image['alt']) ? sanitize_text_field($image['alt']) : '',
                 'description' => isset($image['description']) ? sanitize_textarea_field($image['description']) : '',
                 'link' => $link,
                 'type' => $type,
@@ -1124,22 +1035,13 @@ class PFG_Ajax_Handler
      */
     public function get_admin_images_page()
     {
-        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (empty($nonce) || !wp_verify_nonce($nonce, 'pfg_admin_action')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'portfolio-filter-gallery')), 403);
-        }
-
-        if (!current_user_can('edit_posts')) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
-        }
+        PFG_Security::verify_ajax_nonce('admin_action');
 
         $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
+        $this->verify_gallery_access($gallery_id);
+
         $page = max(1, PFG_Security::get_post('page', 1, 'int'));
         $per_page = PFG_Security::get_post('per_page', 50, 'int');
-
-        if (!$gallery_id) {
-            wp_send_json_error(array('message' => __('Gallery ID is required.', 'portfolio-filter-gallery')));
-        }
 
         // Get gallery images
         $gallery = new PFG_Gallery($gallery_id);
@@ -1294,12 +1196,12 @@ class PFG_Ajax_Handler
      */
     public function get_thumbnails()
     {
-        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
-        if (empty($nonce) || !wp_verify_nonce($nonce, 'pfg_admin_action')) {
-            wp_send_json_error(array('message' => __('Security check failed.', 'portfolio-filter-gallery')), 403);
-        }
+        PFG_Security::verify_ajax_nonce('admin_action');
 
-        if (!current_user_can('edit_posts')) {
+        $gallery_id = PFG_Security::get_post('gallery_id', 0, 'int');
+        if ($gallery_id) {
+            $this->verify_gallery_access($gallery_id);
+        } elseif (!current_user_can('edit_posts')) {
             wp_send_json_error(array('message' => __('Permission denied.', 'portfolio-filter-gallery')), 403);
         }
 

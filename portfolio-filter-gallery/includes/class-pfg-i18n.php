@@ -22,7 +22,10 @@ class PFG_i18n {
      * Load the plugin text domain for translation.
      */
     public function load_plugin_textdomain() {
-        // Since WordPress 4.6, translations are automatically loaded for plugins
-        // hosted on WordPress.org. Manual loading is no longer needed.
+        load_plugin_textdomain(
+            'portfolio-filter-gallery',
+            false,
+            dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages'
+        );
     }
 }

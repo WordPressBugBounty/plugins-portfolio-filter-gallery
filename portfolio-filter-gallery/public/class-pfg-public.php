@@ -48,63 +48,74 @@ class PFG_Public {
     }
 
     /**
+     * Check if current page contains a gallery.
+     *
+     * @return bool
+     */
+    private function page_has_gallery() {
+        if ( ! empty( self::$galleries_on_page ) ) {
+            return true;
+        }
+
+        global $post;
+        if ( is_a( $post, 'WP_Post' ) && ! empty( $post->post_content ) ) {
+            if ( has_shortcode( $post->post_content, 'pfg_gallery' ) ||
+                 has_shortcode( $post->post_content, 'PFG_Gallery' ) ||
+                 has_shortcode( $post->post_content, 'pfg-gallery' ) ||
+                 ( function_exists( 'has_block' ) && ( has_block( 'pfg/gallery', $post ) || has_block( 'portfolio-filter-gallery/gallery', $post ) ) ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Register the stylesheets for the public-facing side.
      */
     public function enqueue_styles() {
-        // Only enqueue if a gallery is on the page
-        if ( empty( self::$galleries_on_page ) ) {
-            return;
-        }
-
-        // Core gallery styles
-        wp_enqueue_style(
-            'pfg-core',
+        // Register core styles so they are always available
+        wp_register_style(
+            'pfg-gallery',
             PFG_PLUGIN_URL . 'public/css/pfg-gallery.css',
             array(),
             $this->version
         );
+        wp_register_style(
+            'pfg-hover',
+            PFG_PLUGIN_URL . 'public/css/pfg-hover.css',
+            array(),
+            $this->version
+        );
+        wp_register_style(
+            'pfg-lightbox',
+            PFG_PLUGIN_URL . 'public/css/pfg-lightbox.css',
+            array(),
+            $this->version
+        );
+        wp_register_style(
+            'ld-lightbox',
+            PFG_PLUGIN_URL . 'public/lightbox/ld-lightbox/css/lightbox.css',
+            array(),
+            $this->version
+        );
 
-        // Check if any gallery needs specific features
-        $needs_hover    = false;
-        
+        // Only enqueue in header if a gallery is detected on the page
+        if ( ! $this->page_has_gallery() ) {
+            return;
+        }
+
+        // Enqueue core styles
+        wp_enqueue_style( 'pfg-gallery' );
+        wp_enqueue_style( 'pfg-hover' );
+
         $global_settings = get_option( 'pfg_global_settings', array() );
         $active_lightbox = isset( $global_settings['lightbox'] ) ? $global_settings['lightbox'] : 'built-in';
 
-        foreach ( self::$galleries_on_page as $gallery_id ) {
-            $gallery  = new PFG_Gallery( $gallery_id );
-            $settings = $gallery->get_settings();
-
-            if ( ! empty( $settings['hover_effect'] ) && $settings['hover_effect'] !== 'none' ) {
-                $needs_hover = true;
-                break;
-            }
-        }
-
-        // Conditionally load hover effect styles
-        if ( $needs_hover ) {
-            wp_enqueue_style(
-                'pfg-hover',
-                PFG_PLUGIN_URL . 'public/css/pfg-hover.css',
-                array(),
-                $this->version
-            );
-        }
-
-        // Conditionally load lightbox styles
         if ( $active_lightbox === 'built-in' ) {
-            wp_enqueue_style(
-                'pfg-lightbox',
-                PFG_PLUGIN_URL . 'public/css/pfg-lightbox.css',
-                array(),
-                $this->version
-            );
+            wp_enqueue_style( 'pfg-lightbox' );
         } elseif ( $active_lightbox === 'ld-lightbox' ) {
-            wp_enqueue_style(
-                'ld-lightbox',
-                PFG_PLUGIN_URL . 'public/lightbox/ld-lightbox/css/lightbox.css',
-                array(),
-                $this->version
-            );
+            wp_enqueue_style( 'ld-lightbox' );
         }
     }
 
@@ -121,37 +132,26 @@ class PFG_Public {
             true
         );
 
-        // Only ENQUEUE if a gallery is on the page
-        if ( empty( self::$galleries_on_page ) ) {
-            return;
-        }
-
-        // Enqueue the already-registered script
-        wp_enqueue_script( 'pfg-gallery' );
-
         $global_settings = get_option( 'pfg_global_settings', array() );
         $active_lightbox = isset( $global_settings['lightbox'] ) ? $global_settings['lightbox'] : 'built-in';
 
-        // Load appropriate lightbox script
-        if ( $active_lightbox === 'built-in' ) {
-            wp_enqueue_script(
-                'pfg-lightbox',
-                PFG_PLUGIN_URL . 'public/js/pfg-lightbox.js',
-                array(),
-                $this->version,
-                true
-            );
-        } elseif ( $active_lightbox === 'ld-lightbox' ) {
-            wp_enqueue_script(
-                'ld-lightbox',
-                PFG_PLUGIN_URL . 'public/lightbox/ld-lightbox/js/lightbox.js',
-                array( 'jquery' ),
-                $this->version,
-                true
-            );
-        }
+        wp_register_script(
+            'pfg-lightbox',
+            PFG_PLUGIN_URL . 'public/js/pfg-lightbox.js',
+            array(),
+            $this->version,
+            true
+        );
 
-        // Load masonry script
+        wp_register_script(
+            'ld-lightbox',
+            PFG_PLUGIN_URL . 'public/lightbox/ld-lightbox/js/lightbox.js',
+            array( 'jquery' ),
+            $this->version,
+            true
+        );
+
+        // Localize script data
         wp_localize_script(
             'pfg-gallery',
             'pfgData',
@@ -170,6 +170,21 @@ class PFG_Public {
                 'lightboxLibrary' => $active_lightbox,
             )
         );
+
+        // Only ENQUEUE if a gallery is on the page
+        if ( ! $this->page_has_gallery() ) {
+            return;
+        }
+
+        // Enqueue the already-registered script
+        wp_enqueue_script( 'pfg-gallery' );
+
+        // Load appropriate lightbox script
+        if ( $active_lightbox === 'built-in' ) {
+            wp_enqueue_script( 'pfg-lightbox' );
+        } elseif ( $active_lightbox === 'ld-lightbox' ) {
+            wp_enqueue_script( 'ld-lightbox' );
+        }
     }
 
     /**
@@ -215,7 +230,7 @@ class PFG_Public {
      * Add preload hints for critical assets.
      */
     public function add_preload_hints() {
-        if ( empty( self::$galleries_on_page ) ) {
+        if ( ! $this->page_has_gallery() ) {
             return;
         }
 

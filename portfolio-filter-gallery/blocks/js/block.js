@@ -2,7 +2,7 @@
  * Portfolio Filter Gallery - Gutenberg Block
  * 
  * @package Portfolio_Filter_Gallery
- * @version 2.2.0
+ * @version 2.2.1
  */
 
 (function() {

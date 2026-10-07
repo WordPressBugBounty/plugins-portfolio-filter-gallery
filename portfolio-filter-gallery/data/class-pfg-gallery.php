@@ -214,13 +214,15 @@ class PFG_Gallery {
             if ( ! empty( $legacy ) ) {
                 $settings = $this->transform_legacy_settings( $legacy );
                 
-                // Auto-save migrated settings so they persist
-                update_post_meta( $this->id, '_pfg_settings', $settings );
-                
-                // Also migrate images if present
-                if ( isset( $legacy['image-ids'] ) ) {
-                    $images = $this->transform_legacy_images( $legacy );
-                    update_post_meta( $this->id, '_pfg_images', $images );
+                // Auto-save migrated settings only in admin context to prevent write operations on frontend GET requests
+                if ( is_admin() ) {
+                    update_post_meta( $this->id, '_pfg_settings', $settings );
+                    
+                    // Also migrate images if present
+                    if ( isset( $legacy['image-ids'] ) ) {
+                        $images = $this->transform_legacy_images( $legacy );
+                        update_post_meta( $this->id, '_pfg_images', $images );
+                    }
                 }
             }
         }

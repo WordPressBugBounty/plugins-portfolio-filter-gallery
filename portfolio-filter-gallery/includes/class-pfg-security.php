@@ -36,13 +36,26 @@ class PFG_Security {
      * Verify AJAX nonce.
      *
      * @param string $action The nonce action (without prefix).
+    /**
+     * Verify AJAX nonce.
+     *
+     * @param string $action The nonce action (without prefix).
      * @param string $nonce_key The key in $_POST or $_REQUEST. Default 'security'.
      * @return bool True if valid, sends JSON error and exits if not.
      */
     public static function verify_ajax_nonce( $action, $nonce_key = 'security' ) {
-        $nonce = isset( $_POST[ $nonce_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $nonce_key ] ) ) : '';
+        $nonce = '';
+        if ( isset( $_POST[ $nonce_key ] ) ) {
+            $nonce = sanitize_text_field( wp_unslash( $_POST[ $nonce_key ] ) );
+        } elseif ( isset( $_POST['nonce'] ) ) {
+            $nonce = sanitize_text_field( wp_unslash( $_POST['nonce'] ) );
+        } elseif ( isset( $_REQUEST[ $nonce_key ] ) ) {
+            $nonce = sanitize_text_field( wp_unslash( $_REQUEST[ $nonce_key ] ) );
+        } elseif ( isset( $_REQUEST['nonce'] ) ) {
+            $nonce = sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) );
+        }
         
-        if ( ! wp_verify_nonce( $nonce, self::NONCE_PREFIX . $action ) ) {
+        if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, self::NONCE_PREFIX . $action ) ) {
             wp_send_json_error(
                 array(
                     'message' => __( 'Security check failed. Please refresh the page and try again.', 'portfolio-filter-gallery' ),
@@ -81,6 +94,25 @@ class PFG_Security {
      */
     public static function can_delete_galleries() {
         return current_user_can( 'delete_posts' );
+    }
+
+    /**
+     * Check if current user can manage site-wide filters.
+     * Filters are site-wide settings and require administrator capability.
+     *
+     * @return bool
+     */
+    public static function can_manage_filters() {
+        return current_user_can( 'manage_options' );
+    }
+
+    /**
+     * Check if current user can upload media files.
+     *
+     * @return bool
+     */
+    public static function can_upload_files() {
+        return current_user_can( 'upload_files' );
     }
 
     /**

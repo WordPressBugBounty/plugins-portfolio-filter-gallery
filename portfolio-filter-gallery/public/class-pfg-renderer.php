@@ -747,15 +747,30 @@ class PFG_Renderer {
 
         // Check if should be hidden by active filter
         $hidden_class = '';
-        if ( $active_filter !== null ) {
+        if ( $active_filter !== null && $active_filter !== '' ) {
             $should_show = false;
             
-            // Media library images have filter IDs that need lookup
-            foreach ( $image['filters'] as $filter_id ) {
-                $filter = $this->get_filter_by_id( $filter_id );
-                if ( $filter && $filter['slug'] === $active_filter ) {
-                    $should_show = true;
-                    break;
+            if ( ! empty( $image['filters'] ) && is_array( $image['filters'] ) ) {
+                foreach ( $image['filters'] as $filter_value ) {
+                    // Direct match on slug
+                    if ( (string) $filter_value === (string) $active_filter ) {
+                        $should_show = true;
+                        break;
+                    }
+
+                    // Lookup by ID
+                    $filter = $this->get_filter_by_id( $filter_value );
+                    if ( $filter && isset( $filter['slug'] ) && $filter['slug'] === $active_filter ) {
+                        $should_show = true;
+                        break;
+                    }
+
+                    // Lookup by Slug
+                    $filter = $this->get_filter_by_slug( $filter_value );
+                    if ( $filter && isset( $filter['slug'] ) && $filter['slug'] === $active_filter ) {
+                        $should_show = true;
+                        break;
+                    }
                 }
             }
             
@@ -891,12 +906,8 @@ class PFG_Renderer {
             // Lightbox button
             echo '<a href="' . esc_url( $full_src ) . '" class="pfg-action-btn pfg-action-view" data-lightbox="pfg-' . esc_attr( $this->gallery_id ) . '"';
             $show_lb_title = ! isset( $this->settings['show_lightbox_title'] ) || $this->settings['show_lightbox_title'];
-            $show_lb_desc = ! empty( $this->settings['show_lightbox_description'] );
             if ( $show_lb_title && ! empty( $image['title'] ) ) {
                 echo ' data-title="' . esc_attr( $image['title'] ) . '"';
-            }
-            if ( $show_lb_desc && ! empty( $image['description'] ) ) {
-                echo ' data-description="' . esc_attr( nl2br( $image['description'] ) ) . '"';
             }
             echo ' title="' . esc_attr__( 'View Image', 'portfolio-filter-gallery' ) . '">';
             echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>';
@@ -932,13 +943,8 @@ class PFG_Renderer {
                     $link_attrs['data-lightbox'] = 'pfg-' . $this->gallery_id;
                     
                     $show_lb_title = ! isset( $this->settings['show_lightbox_title'] ) || $this->settings['show_lightbox_title'];
-                    $show_lb_desc = ! empty( $this->settings['show_lightbox_description'] );
-                    
                     if ( $show_lb_title && ! empty( $image['title'] ) ) {
                         $link_attrs['data-title'] = esc_attr( $image['title'] );
-                    }
-                    if ( $show_lb_desc && ! empty( $image['description'] ) ) {
-                        $link_attrs['data-description'] = esc_attr( nl2br( $image['description'] ) );
                     }
                 } else {
                     $link_attrs['target'] = esc_attr( $link_target );
@@ -997,15 +1003,11 @@ class PFG_Renderer {
 
 
         // Card caption below image (when title_position is 'below')
-        if ( $title_position === 'below' && ( $this->settings['show_title'] || $this->settings['show_description'] || $show_categories ) ) {
+        if ( $title_position === 'below' && ( $this->settings['show_title'] || $show_categories ) ) {
             echo '<div class="pfg-item-caption">';
             
             if ( $this->settings['show_title'] && ! empty( $image['title'] ) ) {
                 echo '<h3 class="pfg-item-title">' . esc_html( $image['title'] ) . '</h3>';
-            }
-            
-            if ( ! empty( $this->settings['show_description'] ) && ! empty( $image['description'] ) ) {
-                echo '<p class="pfg-item-description">' . esc_html( $image['description'] ) . '</p>';
             }
             
             if ( $show_categories ) {
